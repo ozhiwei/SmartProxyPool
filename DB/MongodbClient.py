@@ -47,8 +47,8 @@ class MongodbClient(object):
     def delete(self, value):
         self.db[self.name].remove({'proxy': value})
 
-    def getAll(self):
-        return {p['proxy']: p['num'] for p in self.db[self.name].find()}
+    def getAll(self, query={}):
+        return {p['proxy']: p['num'] for p in self.db[self.name].find(query)}
 
     def clean(self):
         self.client.drop_database('proxy')

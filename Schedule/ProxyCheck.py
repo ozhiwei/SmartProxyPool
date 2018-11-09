@@ -38,19 +38,12 @@ class ProxyCheck(ProxyManager, Thread):
             proxy = self.queue.get()
             count = self.item_dict[proxy]
             if validUsefulProxy(proxy):
-                # 验证通过计数器减1
                 if count and int(count) > 0:
                     self.db.put(proxy, num=int(count) - 1)
-                else:
-                    pass
                 self.log.info('ProxyCheck: {} validation pass'.format(proxy))
             else:
                 self.log.info('ProxyCheck: {} validation fail'.format(proxy))
-                if count and int(count) + 1 >= FAIL_COUNT:
-                    self.log.info('ProxyCheck: {} fail too many, delete!'.format(proxy))
-                    self.db.delete(proxy)
-                else:
-                    self.db.put(proxy, num=int(count) + 1)
+                self.db.update(proxy, 1)
             self.queue.task_done()
 
 

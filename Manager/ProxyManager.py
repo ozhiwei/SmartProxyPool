@@ -57,19 +57,28 @@ class ProxyManager(object):
                 self.log.error("{func}: fetch proxy fail".format(func=proxyGetter))
                 continue
 
-    def get(self):
+    def get(self, level=1):
         """
         return a useful proxy
         :return:
         """
+        item = None
+        item_list = []
         self.db.changeTable(self.useful_proxy_queue)
-        item_dict = self.db.getAll()
+
+        query = {"num": {"$lte": level}}
+        item_dict = self.db.getAll(query)
         if item_dict:
             if EnvUtil.PY3:
-                return random.choice(list(item_dict.keys()))
+                item_list = list(item_dict.keys())
             else:
-                return random.choice(item_dict.keys())
-        return None
+                item_list = item_dict.keys()
+
+        if item_list:
+            item = random.choice(item_list)
+
+        self.log.info('Get Random Proxy {item} of {total}'.format(item=item, total=len(item_list)))
+        return item
         # return self.db.pop()
 
     def delete(self, proxy):

@@ -97,8 +97,8 @@ class DbClient(object):
     def pop(self, **kwargs):
         return self.client.pop(**kwargs)
 
-    def getAll(self):
-        return self.client.getAll()
+    def getAll(self, query={}):
+        return self.client.getAll(query)
 
     def changeTable(self, name):
         self.client.changeTable(name)

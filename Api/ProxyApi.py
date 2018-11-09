@@ -51,8 +51,9 @@ def index():
 
 
 @app.route('/get/')
-def get():
-    proxy = ProxyManager().get()
+@app.route('/get/<int:level>/')
+def get(level=1):
+    proxy = ProxyManager().get(level)
     return proxy if proxy else 'no proxy!'
 
 
