@@ -71,12 +71,12 @@ class DbClient(object):
             __type = "MongodbClient"
         else:
             pass
-        assert __type, 'type error, Not support DB type: {}'.format(self.config.db_type)
-        self.client = getattr(__import__(__type), __type)(name=self.config.db_name,
-                                                          host=self.config.db_host,
-                                                          port=self.config.db_port,
-                                                          username=self.config.db_username,
-                                                          password=self.config.db_password)
+        assert __type, 'type error, Not support DB type: {}'.format(config.db_type)
+        self.client = getattr(__import__(__type), __type)(name=config.db_name,
+                                                          host=config.db_host,
+                                                          port=config.db_port,
+                                                          username=config.db_username,
+                                                          password=config.db_password)
 
     def get(self, key, **kwargs):
         return self.client.get(key, **kwargs)

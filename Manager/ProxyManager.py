@@ -18,9 +18,9 @@ import random
 from Util import EnvUtil
 from DB.DbClient import DbClient
 from Util.GetConfig import config
-from Util.LogHandler import LogHandler
 from Util.utilFunction import verifyProxyFormat
 from ProxyGetter.getFreeProxy import GetFreeProxy
+from Log.LogManager import log
 
 
 class ProxyManager(object):
@@ -31,7 +31,6 @@ class ProxyManager(object):
     def __init__(self):
         self.db = DbClient()
         self.raw_proxy_queue = 'raw_proxy'
-        self.log = LogHandler('proxy_manager')
         self.useful_proxy_queue = 'useful_proxy'
 
     def refresh(self):
@@ -43,17 +42,28 @@ class ProxyManager(object):
         for proxyGetter in config.proxy_getter_functions:
             # fetch
             try:
-                self.log.info("{func}: fetch proxy start".format(func=proxyGetter))
+                log.info("Fetch Proxy Start, func:{func}".format(func=proxyGetter))
+
+                total = 0
+                succ = 0
+                fail = 0
                 for proxy in getattr(GetFreeProxy, proxyGetter.strip())():
                     # 挨个存储 proxy，优化raw 队列的 push 速度，进而加快 check proxy 的速度
                     proxy = proxy.strip()
                     if proxy and verifyProxyFormat(proxy):
-                        self.log.info('{func}: fetch proxy {proxy}'.format(func=proxyGetter, proxy=proxy))
+                        log.debug('{func}: fetch proxy {proxy}'.format(func=proxyGetter, proxy=proxy))
                         self.db.put(proxy)
+                        succ = succ + 1
                     else:
-                        self.log.error('{func}: fetch proxy {proxy} error'.format(func=proxyGetter, proxy=proxy))
+                        fail = fail + 1
+                        log.error('{func}: fetch proxy {proxy} error'.format(func=proxyGetter, proxy=proxy))
+
+                    total = total + 1
+                
+                log.info("fetch proxy end, func:{func}, total:{total}, succ:{succ} fail:{fail}".format(func=proxyGetter, total=total, succ=succ, fail=fail))
+
             except Exception as e:
-                self.log.error("{func}: fetch proxy fail".format(func=proxyGetter))
+                log.error("{func}: fetch proxy fail".format(func=proxyGetter))
                 continue
 
     def get(self, level=1):
@@ -76,7 +86,7 @@ class ProxyManager(object):
         if item_list:
             item = random.choice(item_list)
 
-        self.log.info('Get Random Proxy {item} of {total}'.format(item=item, total=len(item_list)))
+        log.debug('Get Random Proxy {item} of {total}'.format(item=item, total=len(item_list)))
         return item
         # return self.db.pop()
 

@@ -62,6 +62,14 @@ class GetConfig(object):
         return username
 
     @LazyProperty
+    def log_level(self):
+        try:
+            log_level = self.config_file.get('LOG', 'level')
+        except Exception:
+            log_level = None
+        return log_level
+
+    @LazyProperty
     def proxy_getter_functions(self):
         return self.config_file.options('ProxyGetter')
 
