@@ -12,8 +12,6 @@
 """
 __author__ = 'JHao'
 
-
-
 import sys
 sys.path.append('.')
 sys.path.append('..')
@@ -31,11 +29,12 @@ def showTime():
     content = "{newline}{symbol} ProxyPool Start, date:{date} {symbol}{newline}".format(newline="\n", symbol="-"*50, date=date)
     print(content)
 
-def main():
+def main(test=False):
     showTime()
     LogManager.Init()
 
     p_list = list()
+
     p1 = Process(target=ProxyApiRun, name='ProxyApiRun')
     p_list.append(p1)
     p2 = Process(target=ValidRun, name='ValidRun')
@@ -46,9 +45,13 @@ def main():
     for p in p_list:
         p.daemon = True
         p.start()
-    for p in p_list:
-        p.join()
 
+    if test:
+        time.sleep(5)
+        sys.exit(0)
+    else:
+        for p in p_list:
+            p.join()
 
 if __name__ == '__main__':
     main()

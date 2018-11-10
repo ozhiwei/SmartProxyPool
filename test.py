@@ -12,4 +12,6 @@
 """
 __author__ = 'JHao'
 
-from Schedule import ProxyRefreshSchedule
+from Run.main import main
+
+main(test=True)
