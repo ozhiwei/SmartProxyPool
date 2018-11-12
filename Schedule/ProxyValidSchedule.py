@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
--------------------------------------------------
-   File Name：     ProxyValidSchedule.py
-   Description :  验证useful_proxy_queue中的代理,将不可用的移出
-   Author :       JHao
-   date：          2017/3/31
--------------------------------------------------
-   Change Activity:
-                   2017/3/31: 验证useful_proxy_queue中的代理
--------------------------------------------------
-"""
-__author__ = 'JHao'
 
 import sys
 import time

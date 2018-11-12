@@ -1,34 +1,23 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
-"""
--------------------------------------------------
-   File Name：     ProxyRefreshSchedule.py
-   Description :  代理定时刷新
-   Author :       JHao
-   date：          2016/12/4
--------------------------------------------------
-   Change Activity:
-                   2016/12/4: 代理定时刷新
-                   2017/03/06: 使用LogHandler添加日志
-                   2017/04/26: raw_proxy_queue验证通过但useful_proxy_queue中已经存在的代理不在放入
--------------------------------------------------
-"""
 
 import sys
 import time
-import logging
 import threading
-# 使用后台调度，不使用阻塞式~
+
 from apscheduler.schedulers.background import BackgroundScheduler as Sch
+
+try:
+    from Queue import Queue  # py3
+except:
+    from queue import Queue  # py2
 
 from Util.utilFunction import validUsefulProxy
 from Manager.ProxyManager import ProxyManager
+from Util.EnvUtil import PY3
 from Log.LogManager import log
 
 __author__ = 'JHao'
-
-logging.basicConfig()
-
 
 class ProxyRefreshSchedule(ProxyManager):
     """
@@ -38,13 +27,14 @@ class ProxyRefreshSchedule(ProxyManager):
     def __init__(self):
         ProxyManager.__init__(self)
 
+        self.remaining_proxies = self.getAll()
+
+        self.queue = Queue()
+        items = self.getAllRawProxy()
+        for proxy in items.keys():
+            self.queue.put(proxy) 
+
     def validProxy(self):
-        """
-        验证raw_proxy_queue中的代理, 将可用的代理放入useful_proxy_queue
-        :return:
-        """
-        self.db.changeTable(self.raw_proxy_queue)
-        raw_proxy_item = self.db.pop()
 
         thread_id = threading.currentThread().ident
         log.info("thread_id:{thread_id}, Start ValidProxy `raw_proxy_queue`".format(thread_id=thread_id))
@@ -52,26 +42,25 @@ class ProxyRefreshSchedule(ProxyManager):
         total = 0
         succ = 0
         fail = 0
-        # 计算剩余代理，用来减少重复计算
-        remaining_proxies = self.getAll()
-        while raw_proxy_item:
-            raw_proxy = raw_proxy_item.get('proxy')
-            if isinstance(raw_proxy, bytes):
-                # 兼容Py3
-                raw_proxy = raw_proxy.decode('utf8')
 
-            if (raw_proxy not in remaining_proxies) and validUsefulProxy(raw_proxy):
-                self.db.changeTable(self.useful_proxy_queue)
-                self.db.put(raw_proxy)
-                log.debug('ProxyRefreshSchedule: %s validation pass' % raw_proxy)
+        while self.queue.qsize():
+            proxy = self.queue.get()
+            if (proxy not in self.remaining_proxies) and validUsefulProxy(proxy):
+                self.saveUsefulProxy(proxy)
+                self.deleteRawProxy(proxy)
+                self.remaining_proxies.append(proxy)
+
                 succ = succ + 1
+                # self.tickRawProxyVaildSucc(proxy)
+                log.debug('ProxyRefreshSchedule: %s validation pass' % proxy)
             else:
-                log.debug('ProxyRefreshSchedule: %s validation fail' % raw_proxy)
+                self.tickRawProxyVaildFail(proxy)
                 fail = fail + 1
+                log.debug('ProxyRefreshSchedule: %s validation fail' % proxy)
+
+            self.queue.task_done()
+            self.tickRawProxyVaildTotal(proxy)
             total = total + 1
-            self.db.changeTable(self.raw_proxy_queue)
-            raw_proxy_item = self.db.pop()
-            remaining_proxies = self.getAll()
 
         log.info('thread_id:{thread_id}, ValidProxy Complete `raw_proxy_queue`, total:{total}, succ:{succ}, fail:{fail}'.format(thread_id=thread_id, total=total, succ=succ, fail=fail))
 
@@ -80,33 +69,31 @@ def refreshPool():
     pp.validProxy()
 
 
-def batch_refresh(process_num=30):
-    # 检验新代理
+def batch_refresh(process_num=10):
+    pp = ProxyRefreshSchedule()
+
     pl = []
     for num in range(process_num):
-        proc = threading.Thread(target=refreshPool, args=())
+        proc = threading.Thread(target=pp.validProxy, args=())
         pl.append(proc)
 
     for num in range(process_num):
         pl[num].daemon = True
         pl[num].start()
 
-    for num in range(process_num):
-        pl[num].join()
-
-
 def fetch_all():
     p = ProxyRefreshSchedule()
-    # 获取新代理
     p.refresh()
 
 
 def run():
     sch = Sch()
     sch.add_job(fetch_all, 'interval', minutes=5)  # 每5分钟抓取一次
-    sch.add_job(batch_refresh, "interval", minutes=1)  # 每分钟检查一次
+    sch.add_job(batch_refresh, "interval", minutes=5)  # 每分钟检查一次
     sch.start()
+
     fetch_all()
+    batch_refresh()
 
     while True:
         time.sleep(1)

@@ -25,30 +25,37 @@ class MongodbClient(object):
     def changeTable(self, name):
         self.name = name
 
-    def get(self, proxy):
-        data = self.db[self.name].find_one({'proxy': proxy})
-        return data['num'] if data != None else None
+    def get(self, query):
+        data = self.db[self.name].find_one(query)
+        return data
 
-    def put(self, proxy, num=1):
-        if self.db[self.name].find_one({'proxy': proxy}):
+    def put(self, query, data):
+        if self.db[self.name].find_one(query):
             return None
         else:
-            self.db[self.name].insert({'proxy': proxy, 'num': num})
+            self.db[self.name].insert(data)
 
-    def pop(self):
-        data = list(self.db[self.name].aggregate([{'$sample': {'size': 1}}]))
-        if data:
-            data = data[0]
-            value = data['proxy']
-            self.delete(value)
-            return {'proxy': value, 'value': data['num']}
-        return None
+    # unuseful function
+    # def pop(self):
+    #     data = list(self.db[self.name].aggregate([{'$sample': {'size': 1}}]))
+    #     if data:
+    #         data = data[0]
+    #         value = data['proxy']
+    #         self.delete(value)
+    #         return {'proxy': value, 'value': data['num']}
+    #     return None
 
-    def delete(self, value):
-        self.db[self.name].remove({'proxy': value})
+    def aggregate(self, operation_list):
+        data = list(self.db[self.name].aggregate(operation_list))
+        return data
 
-    def getAll(self, query={}):
-        return {p['proxy']: p['num'] for p in self.db[self.name].find(query)}
+    def delete(self, query):
+        self.db[self.name].remove(query)
+
+    def getAll(self):
+        data = self.db[self.name].find()
+        result = { item['proxy']: item for item in data }
+        return result
 
     def clean(self):
         self.client.drop_database('proxy')
@@ -56,11 +63,16 @@ class MongodbClient(object):
     def delete_all(self):
         self.db[self.name].remove()
 
-    def update(self, key, value):
-        self.db[self.name].update({'proxy': key}, {'$inc': {'num': value}})
+    def update(self, query, data):
+        self.db[self.name].update(query, data)
 
-    def exists(self, key):
-        return True if self.db[self.name].find_one({'proxy': key}) != None else False
+    def exists(self, query):
+        result = False
+        data = self.get(query)
+        if data:
+            result = True
+
+        return result
 
     def getNumber(self):
         return self.db[self.name].count()
@@ -71,4 +83,4 @@ if __name__ == "__main__":
     # db.put('127.0.0.1:1')
     # db2 = MongodbClient('second', 'localhost', 27017)
     # db2.put('127.0.0.1:2')
-    print(db.pop())
+    # print(db.pop())

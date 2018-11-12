@@ -77,38 +77,188 @@ class DbClient(object):
                                                           port=config.db_port,
                                                           username=config.db_username,
                                                           password=config.db_password)
+    # unuseful function
+    # def get(self, key, **kwargs):
+    #     query = {"proxy": key}
+    #     data = self.client.get(query)
+    #     return data
 
-    def get(self, key, **kwargs):
-        return self.client.get(key, **kwargs)
+    # unuseful function
+    # def put(self, key, **kwargs):
+    #     return self.client.put(key, **kwargs)
 
-    def put(self, key, **kwargs):
-        return self.client.put(key, **kwargs)
+    # unuseful function
+    # def update(self, query, data):
+    #     return self.client.update(query, data)
 
-    def update(self, key, value, **kwargs):
-        return self.client.update(key, value, **kwargs)
+    # unuseful function
+    # def delete(self, key):
+    #     return self.client.delete(key, **kwargs)
 
-    def delete(self, key, **kwargs):
-        return self.client.delete(key, **kwargs)
+    # unuseful function
+    # def exists(self, key, **kwargs):
+    #     return self.client.exists(key, **kwargs)
 
-    def exists(self, key, **kwargs):
-        return self.client.exists(key, **kwargs)
+    # unuseful function
+    # def pop(self, **kwargs):
+    #     return self.client.pop(**kwargs)
 
-    def pop(self, **kwargs):
-        return self.client.pop(**kwargs)
-
-    def getAll(self, query={}):
-        return self.client.getAll(query)
+    def getAll(self):
+        return self.client.getAll()
 
     def changeTable(self, name):
         self.client.changeTable(name)
 
-    def getNumber(self):
-        return self.client.getNumber()
+    # unuseful function
+    # def getNumber(self):
+    #     return self.client.getNumber()
 
+    def getAllUsefulProxy(self):
+        table_name = "useful_proxy"
+        self.changeTable(table_name)
+
+        result = self.client.getAll()
+        return result
+
+    def getAllRawProxy(self):
+        table_name = "raw_proxy"
+        self.changeTable(table_name)
+
+        result = self.client.getAll()
+        return result
+
+    def checkRawProxyExists(self, proxy):
+        query = {"proxy": proxy}
+        self.client.exists(query)
+
+    # TODO: refine function
+    def getSampleUsefulProxy(self, usable_rate):
+        result = None
+        table_name = "useful_proxy"
+        self.client.changeTable(table_name)
+        operation_list = 	[
+            {
+                "$match": {"total": { "$ne": 0}}
+            },
+            {
+                "$project": { "proxy": 1, "usable_rate": { "$divide": ["$succ", "$total"] } }
+            },
+            {
+                "$project": { "proxy": 1, "usable_rate": { "$multiply": ["$usable_rate", 100] } }
+            },
+            { 
+                "$match": { "usable_rate": { "$gte": usable_rate}}
+            },	
+            {
+                "$sample": { "size": 1}
+            },
+        ]
+        data = self.client.aggregate(operation_list)
+        if data:
+            result = data[0]
+
+        return result
+
+    # TODO: refine function
+    def getSampleRawProxy(self):
+        result = None
+        table_name = "raw_proxy"
+        self.client.changeTable(table_name)
+        operation_list = 	[
+            {
+                "$sample": { "size": 1}
+            },
+        ]
+        data = self.client.aggregate(operation_list)
+        if data:
+            result = data[0]
+
+        return result
+
+    def getProxyNum(self, table_name):
+        self.client.changeTable(table_name)
+        num = self.client.find().count()
+
+        return num
+
+    def saveRawProxy(self, proxy):
+        table_name = 'raw_proxy'
+        self.client.changeTable(table_name)
+        query = {"proxy": proxy}
+        data = {"proxy": proxy, "succ": 0, "fail": 0, "total": 0}
+        self.client.put(query, data)
+
+    def saveUsefulProxy(self, proxy):
+        table_name = 'useful_proxy'
+        self.client.changeTable(table_name)
+        query = {"proxy": proxy, "succ": 0, "fail": 0, "total": 0}
+        data = query
+        self.client.put(query, data)
+
+    def deleteUsefulProxy(self, proxy):
+        table_name = 'useful_proxy'
+        self.client.changeTable(table_name)
+        query = {"proxy": proxy}
+        self.client.delete(query)
+
+    def deleteRawProxy(self, proxy):
+        table_name = 'raw_proxy'
+        self.client.changeTable(table_name)
+        query = {"proxy": proxy}
+        self.client.delete(query)
+
+    def tickUsefulProxyVaildSucc(self, proxy):
+        table_name = 'useful_proxy'
+        self.client.changeTable(table_name)
+
+        query = {"proxy": proxy}
+        data = {'$inc': {'succ': 1}}
+        self.client.update(query, data)
+
+    def tickUsefulProxyVaildFail(self, proxy):
+        table_name = 'useful_proxy'
+        self.client.changeTable(table_name)
+
+        query = {"proxy": proxy}
+        data = {'$inc': {'fail': 1}}
+        self.client.update(query, data)
+
+    def tickUsefulProxyVaildTotal(self, proxy):
+        table_name = 'useful_proxy'
+        self.client.changeTable(table_name)
+
+        query = {"proxy": proxy}
+        data = {'$inc': {'total': 1}}
+        self.client.update(query, data)
+
+    def tickRawProxyVaildSucc(self, proxy):
+        table_name = 'raw_proxy'
+        self.client.changeTable(table_name)
+
+        query = {"proxy": proxy}
+        data = {'$inc': {'succ': 1}}
+        self.client.update(query, data)
+
+    def tickRawProxyVaildFail(self, proxy):
+        table_name = 'raw_proxy'
+        self.client.changeTable(table_name)
+
+        query = {"proxy": proxy}
+        data = {'$inc': {'fail': 1}}
+        self.client.update(query, data)
+
+    def tickRawProxyVaildTotal(self, proxy):
+        table_name = 'raw_proxy'
+        self.client.changeTable(table_name)
+
+        query = {"proxy": proxy}
+        data = {'$inc': {'total': 1}}
+        self.client.update(query, data)
 
 if __name__ == "__main__":
-    account = DbClient()
-    print(account.get())
-    account.changeTable('use')
-    account.put('ac')
-    print(account.get())
+    # account = DbClient()
+    # print(account.get())
+    # account.changeTable('use')
+    # account.put('ac')
+    # print(account.get())
+    pass

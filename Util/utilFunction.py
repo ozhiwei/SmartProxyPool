@@ -13,6 +13,7 @@
 """
 import requests
 import time
+import re
 from lxml import etree
 
 from Util.WebRequest import WebRequest
@@ -94,11 +95,19 @@ def validUsefulProxy(proxy):
         proxy = proxy.decode('utf8')
     proxies = {"http": "http://{proxy}".format(proxy=proxy)}
     try:
-        # 超过20秒的代理就不要了
+        result = False
         r = requests.get('http://httpbin.org/ip', proxies=proxies, timeout=10, verify=False)
-        if r.status_code == 200:
-            # logger.info('%s is ok' % proxy)
-            return True
+
+        content = r.content
+        if isinstance(content, bytes):
+            content = content.decode('utf8')
+
+        status_right = r.status_code == 200
+        content_right = re.search("\"origin\"", content) != None
+        if status_right and content_right:
+            result = True
+
+        return result
     except Exception as e:
-        # logger.error(str(e))
+        # print(str(e))
         return False

@@ -6,15 +6,17 @@
 
 本项目fork于 `jhao104/proxy_pool`, 致敬!
 
-`jhao104/proxy_pool` 的目标是`通用代理池的框架`.
+`jhao104/ProxyPool` 的目标是`通用代理池的框架`, 会做很多兼容性的开发.
 
-而我们的目标是构建一个`高质量`, `高灵活`的开放代理池服务.
+而我们的目标是构建一个`高质量`, `高灵活`的开放代理池服务, 会做很多体验上的开发.
 
 讲的太抽象了, 简单点来说.
 
 `jhao104/proxy_pool` 是提供给开发人员的定制化使用, 面向的是开发人员!
 
-`1again/proxy_pool`  是提供给一般人员的标准化使用, 面向的是人民群众! 
+`1again/ProxyPool`  是提供给一般人员的标准化使用, 面向的是人民群众! 
+
+`ProxyPool` 另外我觉得首字母大写会庄重严肃很多!
 
 # 安装/部署
 
@@ -62,13 +64,30 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 proxy_pool
 
 ## Http Api
 
-| api | method | Description | arg|
-| ----| ---- | ---- | ----|
-| / | GET | api介绍 | None |
-| /get | GET | 随机获取一个代理 | None|
-| /get_all | GET | 获取所有代理 |None|
-| /get_status | GET | 查看代理数量 |None|
-| /delete | GET | 删除代理  |proxy=host:ip|
+Api:            /
+Method:         GET
+Description:    api介绍
+Arg:            None
+
+Api:            /get
+Method:         GET
+Description:    随机获取一个代理
+Arg:            usable_rate=number
+
+Api:            /get_all
+Method:         GET
+Description:    获取所有代理
+Arg:            None
+
+Api:            /get_status
+Method:         GET
+Description:    查看代理状态
+Arg:            None
+
+Api:            /delete
+Method:         GET
+Description:    删除代理
+Arg:            proxy=host:ip
 
 ## 扩展代理
 
@@ -110,7 +129,6 @@ freeProxyFirst  = 0  # 如果要取消某个方法，将其删除或赋为0即�
 freeProxyCustom  = 1  # 确保名字和你添加方法名字一致
 
 ```
-
 
 `ProxyRefreshSchedule`会每隔一段时间抓取一次代理，下次抓取时会自动识别调用你定义的方法。
 

@@ -51,9 +51,9 @@ def index():
 
 
 @app.route('/get/')
-@app.route('/get/<int:level>/')
-def get(level=1):
-    proxy = ProxyManager().get(level)
+def get():
+    usable_rate = request.args.get('usable_rate', 0)
+    proxy = ProxyManager().getSampleUsefulProxy(usable_rate=usable_rate)
     return proxy if proxy else 'no proxy!'
 
 
@@ -74,13 +74,13 @@ def getAll():
 @app.route('/delete/', methods=['GET'])
 def delete():
     proxy = request.args.get('proxy')
-    ProxyManager().delete(proxy)
+    ProxyManager().deleteUsefulProxy(proxy)
     return 'success'
 
 
 @app.route('/get_status/')
 def getStatus():
-    status = ProxyManager().getNumber()
+    status = ProxyManager().getProxyNumber()
     return status
 
 

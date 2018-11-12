@@ -19,9 +19,6 @@ from Util.utilFunction import validUsefulProxy
 from Manager.ProxyManager import ProxyManager
 from Log.LogManager import log
 
-FAIL_COUNT = 1  # 校验失败次数， 超过次数删除代理
-
-
 class ProxyCheck(ProxyManager, threading.Thread):
     def __init__(self, queue, item_dict):
         ProxyManager.__init__(self)
@@ -39,19 +36,18 @@ class ProxyCheck(ProxyManager, threading.Thread):
         fail = 0
         while self.queue.qsize():
             proxy = self.queue.get()
-            count = self.item_dict[proxy]
             if validUsefulProxy(proxy):
-                if count and int(count) > 0:
-                    self.db.put(proxy, num=int(count) - 1)
-                log.debug("ProxyCheck: {proxy} validation pass".format(proxy=proxy))
+                self.tickUsefulProxyVaildSucc(proxy)
                 succ = succ + 1
+                log.debug("ProxyCheck: {proxy} validation pass".format(proxy=proxy))
             else:
-                log.debug("ProxyCheck: {proxy} validation fail".format(proxy=proxy))
-                self.db.update(proxy, 1)
+                self.tickUsefulProxyVaildSucc(proxy)
                 fail = fail + 1
+                log.debug("ProxyCheck: {proxy} validation fail".format(proxy=proxy))
 
             self.queue.task_done()
-            total = total + 1            
+            total = total + 1
+            self.tickUsefulProxyVaildTotal(proxy)
         
         log.info('thread_id:{thread_id} proxy check end, total:{total}, succ:{succ}, fail:{fail}'.format(thread_id=thread_id, total=total, succ=succ, fail=fail))
 
