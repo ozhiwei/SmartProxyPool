@@ -188,11 +188,10 @@ class DbClient(object):
         data = {"proxy": proxy, "succ": 0, "fail": 0, "total": 0}
         self.client.put(query, data)
 
-    def saveUsefulProxy(self, proxy):
+    def saveUsefulProxy(self, proxy, data):
         table_name = 'useful_proxy'
         self.client.changeTable(table_name)
-        query = {"proxy": proxy, "succ": 0, "fail": 0, "total": 0}
-        data = query
+        query = {"proxy": proxy}
         self.client.put(query, data)
 
     def deleteUsefulProxy(self, proxy):

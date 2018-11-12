@@ -41,7 +41,7 @@ class ProxyCheck(ProxyManager, threading.Thread):
                 succ = succ + 1
                 log.debug("ProxyCheck: {proxy} validation pass".format(proxy=proxy))
             else:
-                self.tickUsefulProxyVaildSucc(proxy)
+                self.tickUsefulProxyVaildFail(proxy)
                 fail = fail + 1
                 log.debug("ProxyCheck: {proxy} validation fail".format(proxy=proxy))
 

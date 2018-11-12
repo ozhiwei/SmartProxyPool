@@ -1,17 +1,4 @@
 # coding: utf-8
-"""
--------------------------------------------------
-   File Name：    MongodbClient.py
-   Description :  封装mongodb操作
-   Author :       JHao netAir
-   date：          2017/3/3
--------------------------------------------------
-   Change Activity:
-                   2017/3/3:
-                   2017/9/26:完成对mongodb的支持
--------------------------------------------------
-"""
-__author__ = 'Maps netAir'
 
 from pymongo import MongoClient
 

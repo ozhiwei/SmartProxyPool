@@ -84,7 +84,8 @@ def tcpConnect(proxy):
     return True if result == 0 else False
 
 
-# noinspection PyPep8Naming
+# TODO: 逻辑应该有问题, 但不确定
+# http是可用的才会保存https, 会不会有只开通https的代理呢?
 def validUsefulProxy(proxy):
     """
     检验代理是否可用
@@ -93,21 +94,50 @@ def validUsefulProxy(proxy):
     """
     if isinstance(proxy, bytes):
         proxy = proxy.decode('utf8')
-    proxies = {"http": "http://{proxy}".format(proxy=proxy)}
+    proxies = {
+        "http": proxy,
+        "https": proxy,
+    }
+    http_url = "http://httpbin.org/ip"
+    https_url = "https://httpbin.org/ip"
+
+    http_result = False
+    https_result = False
+
+    # http valid
     try:
-        result = False
-        r = requests.get('http://httpbin.org/ip', proxies=proxies, timeout=10, verify=False)
+        r = requests.get(http_url, proxies=proxies, timeout=10, verify=False)
 
         content = r.content
         if isinstance(content, bytes):
             content = content.decode('utf8')
 
-        status_right = r.status_code == 200
-        content_right = re.search("\"origin\"", content) != None
-        if status_right and content_right:
-            result = True
+        status_result = r.status_code == 200
+        content_result = re.search("\"origin\"", content) != None
+        if status_result and content_result:
+            http_result = True
 
-        return result
     except Exception as e:
         # print(str(e))
-        return False
+        http_result = False
+
+    if http_result:
+
+        # https vaild
+        try:
+            r = requests.get(https_url, proxies=proxies, timeout=10, verify=False)
+
+            content = r.content
+            if isinstance(content, bytes):
+                content = content.decode('utf8')
+
+            status_right = r.status_code == 200
+            content_right = re.search("\"origin\"", content) != None
+            if status_right and content_right:
+                https_result = True
+
+        except Exception as e:
+            # print(str(e))
+            https_result = False
+
+    return (http_result, https_result)

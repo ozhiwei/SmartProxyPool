@@ -17,8 +17,6 @@ import sys
 from werkzeug.wrappers import Response
 from flask import Flask, jsonify, request
 
-sys.path.append('../')
-
 from Util.GetConfig import config
 from Manager.ProxyManager import ProxyManager
 
@@ -52,9 +50,13 @@ def index():
 
 @app.route('/get/')
 def get():
+    result = "no proxy"
     usable_rate = request.args.get('usable_rate', 0)
     proxy = ProxyManager().getSampleUsefulProxy(usable_rate=usable_rate)
-    return proxy if proxy else 'no proxy!'
+    if proxy:
+        result = proxy
+
+    return result
 
 
 @app.route('/refresh/')
@@ -80,8 +82,8 @@ def delete():
 
 @app.route('/get_status/')
 def getStatus():
-    status = ProxyManager().getProxyNumber()
-    return status
+    result = ProxyManager().getProxyNumber()
+    return result
 
 
 def run():

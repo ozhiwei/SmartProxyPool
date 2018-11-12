@@ -45,18 +45,25 @@ class ProxyRefreshSchedule(ProxyManager):
 
         while self.queue.qsize():
             proxy = self.queue.get()
-            if (proxy not in self.remaining_proxies) and validUsefulProxy(proxy):
-                self.saveUsefulProxy(proxy)
-                self.deleteRawProxy(proxy)
-                self.remaining_proxies.append(proxy)
+            if proxy not in self.remaining_proxies:
+                (http_result, https_result) = validUsefulProxy(proxy)
+                if http_result:
+                    self.saveUsefulProxy(proxy, https_result)
+                    self.deleteRawProxy(proxy)
+                    self.remaining_proxies.append(proxy)
 
-                succ = succ + 1
+                    succ = succ + 1
+                else:
+                    self.tickRawProxyVaildFail(proxy)
+
+                    fail = fail + 1
+                    log.debug('ProxyRefreshSchedule: %s validation fail' % proxy)
                 # self.tickRawProxyVaildSucc(proxy)
                 log.debug('ProxyRefreshSchedule: %s validation pass' % proxy)
             else:
-                self.tickRawProxyVaildFail(proxy)
-                fail = fail + 1
-                log.debug('ProxyRefreshSchedule: %s validation fail' % proxy)
+                self.deleteRawProxy(proxy)
+
+                log.debug('ProxyRefreshSchedule: %s repetition, skip!' % proxy)
 
             self.queue.task_done()
             self.tickRawProxyVaildTotal(proxy)

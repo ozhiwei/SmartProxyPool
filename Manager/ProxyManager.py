@@ -118,7 +118,13 @@ class ProxyManager(object):
         return result
 
     def getSampleUsefulProxy(self, **kwargs):
-        result = self.db.getSampleUsefulProxy(**kwargs)
+        item = self.db.getSampleUsefulProxy(**kwargs)
+        result = None
+        if item:
+            result = item["proxy"]
+
+        log.debug("getSampleUsefulProxy, item:{item}".format(item=str(item)))
+
         return result
 
     def deleteRawProxy(self, proxy):
@@ -127,8 +133,11 @@ class ProxyManager(object):
     def saveRawProxy(self, proxy):
         self.db.saveRawProxy(proxy)
 
-    def saveUsefulProxy(self, proxy):
-        self.db.saveUsefulProxy(proxy)
+    # TODO: 逻辑应该有问题, 但不确定
+    # http是可用的才会保存https, 会不会有只开通https的代理呢?
+    def saveUsefulProxy(self, proxy, https=False):
+        data = {"proxy": proxy, "succ": 0, "fail": 0, "total": 0, "https": https}
+        self.db.saveUsefulProxy(proxy, data)
 
     def deleteUsefulProxy(self, proxy):
         self.db.deleteUsefulProxy(proxy)
