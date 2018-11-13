@@ -36,7 +36,8 @@ class ProxyCheck(ProxyManager, threading.Thread):
         fail = 0
         while self.queue.qsize():
             proxy = self.queue.get()
-            if validUsefulProxy(proxy):
+            (http_result, _) = validUsefulProxy(proxy)
+            if http_result:
                 self.tickUsefulProxyVaildSucc(proxy)
                 succ = succ + 1
                 log.debug("ProxyCheck: {proxy} validation pass".format(proxy=proxy))
