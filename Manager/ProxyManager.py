@@ -123,6 +123,10 @@ class ProxyManager(object):
         if item:
             result = item["proxy"]
 
+            token = kwargs.get("token", None)
+            if token:
+                self.db.addProxyUsedToken(result, token)
+
         log.debug("getSampleUsefulProxy, item:{item}".format(item=str(item)))
 
         return result

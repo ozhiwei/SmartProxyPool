@@ -51,9 +51,12 @@ def get():
     result = "no proxy"
     usable_rate = request.args.get('usable_rate', 0)
     https = request.args.get('https', False)
+    token = request.args.get('token', None)
+
     options = {
-        "usable_rate": usable_rate,
+        "usable_rate": usable_rate / 100,
         "https": bool(https),
+        "token": token,
     }
     proxy = ProxyManager().getSampleUsefulProxy(**options)
     if proxy:

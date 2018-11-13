@@ -76,6 +76,15 @@ Description:    随机获取一个代理
 Arg:            可选参数
     usable_rate=number      过滤可用率为number的代理, default:0
     https=1                 过滤支持https的代理, default:0
+    token=string            自定义的字符串, 用来识别请求者, 避免获取到重复的代理, default:None
+
+token字段详解:
+token字段是用来开启`高质量`代理的方式.
+因为没有token就没办法识别请求者.
+也就没办法知道哪些代理是请求者使用过的.
+
+* 目前需要自行填写, 建议使用16位数的随机数字+大小写字母.
+* 请注意, 如果太简单可能会导致和其他人的token相同, 最终极大的降低能使用代理的数量.
 
 Api:            /get_all
 Method:         GET

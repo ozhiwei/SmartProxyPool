@@ -132,33 +132,50 @@ class DbClient(object):
         self.client.exists(query)
 
     # TODO: refine function
-    def getSampleUsefulProxy(self, usable_rate=0, https=False):
+    def getSampleUsefulProxy(self, usable_rate=0, https=False, token=None):
         result = None
         table_name = "useful_proxy"
         self.client.changeTable(table_name)
         operation_list = 	[
             {
-                "$match": {"total": { "$ne": 0},  "https": { "$eq": https }}
+                "$match": {"total": { "$ne": 0},  "https": { "$eq": https }, "used_token_list": { "$nin": [token] } },
             },
             {
                 "$project": { "proxy": 1, "usable_rate": { "$divide": ["$succ", "$total"] } }
             },
-            {
-                "$project": { "proxy": 1, "usable_rate": { "$multiply": ["$usable_rate", 100] } }
-            },
             { 
-                "$match": { "usable_rate": { "$gte": 0 } }
-            },
-            {
-                "$sample": { "size": 1}
+                "$match": { "usable_rate": { "$gte": usable_rate } }
             },
         ]
+
+        if token:
+            operation_list.extend(
+                [
+                    { 
+                        "$sort": { "usable_rate": -1 }
+                    },
+                    {
+                        "$limit": 1
+                    }
+                ]
+            )
+        else:
+            operation_list.append(            
+                {
+                    "$sample": { "size": 1}
+                }
+            )
 
         data = self.client.aggregate(operation_list)
         if data:
             result = data[0]
 
         return result
+
+    def addProxyUsedToken(self, proxy, token):
+        query = {"proxy": proxy}
+        update = { "$push": { "used_token_list": token } }
+        self.client.update(query, update)
 
     # TODO: refine function
     def getSampleRawProxy(self):
