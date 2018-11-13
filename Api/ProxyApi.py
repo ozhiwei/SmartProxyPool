@@ -36,9 +36,7 @@ app.response_class = JsonResponse
 
 api_list = {
     'get': u'get an usable proxy',
-    # 'refresh': u'refresh proxy pool',
     'get_all': u'get all proxy from proxy pool',
-    'delete?proxy=127.0.0.1:8080': u'delete an unable proxy',
     'get_status': u'proxy statistics'
 }
 
@@ -52,33 +50,21 @@ def index():
 def get():
     result = "no proxy"
     usable_rate = request.args.get('usable_rate', 0)
-    proxy = ProxyManager().getSampleUsefulProxy(usable_rate=usable_rate)
+    https = request.args.get('https', False)
+    options = {
+        "usable_rate": usable_rate,
+        "https": bool(https),
+    }
+    proxy = ProxyManager().getSampleUsefulProxy(**options)
     if proxy:
         result = proxy
 
     return result
 
-
-@app.route('/refresh/')
-def refresh():
-    # TODO refresh会有守护程序定时执行，由api直接调用性能较差，暂不使用
-    # ProxyManager().refresh()
-    pass
-    return 'success'
-
-
 @app.route('/get_all/')
 def getAll():
     proxies = ProxyManager().getAll()
     return proxies
-
-
-@app.route('/delete/', methods=['GET'])
-def delete():
-    proxy = request.args.get('proxy')
-    ProxyManager().deleteUsefulProxy(proxy)
-    return 'success'
-
 
 @app.route('/get_status/')
 def getStatus():

@@ -1,12 +1,12 @@
 
-高质量, 高灵活的开放代理池服务
+高质量, 高灵活的开放代理池服务 [ProxyPool Demo](http://proxy.1again.cc:5010/)
 ---
 
 # 目标
 
 本项目fork于 `jhao104/proxy_pool`, 致敬!
 
-`jhao104/ProxyPool` 的目标是`通用代理池的框架`, 会做很多兼容性的开发.
+`jhao104/proxy_pool` 的目标是`通用代理池的框架`, 会做很多兼容性的开发.
 
 而我们的目标是构建一个`高质量`, `高灵活`的开放代理池服务, 会做很多体验上的开发.
 
@@ -64,6 +64,7 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 proxy_pool
 
 ## Http Api
 
+```
 Api:            /
 Method:         GET
 Description:    api介绍
@@ -72,7 +73,9 @@ Arg:            None
 Api:            /get
 Method:         GET
 Description:    随机获取一个代理
-Arg:            usable_rate=number
+Arg:            可选参数
+    usable_rate=number      过滤可用率为number的代理, default:0
+    https=1                 过滤支持https的代理, default:0
 
 Api:            /get_all
 Method:         GET
@@ -83,15 +86,13 @@ Api:            /get_status
 Method:         GET
 Description:    查看代理状态
 Arg:            None
-
-Api:            /delete
-Method:         GET
-Description:    删除代理
-Arg:            proxy=host:ip
+```
 
 ## 扩展代理
 
-项目默认包含几个免费的代理获取方法，但是免费的毕竟质量不好，所以如果直接运行可能拿到的代理质量不理想。所以，提供了代理获取的扩展方法。
+项目默认包含几个免费的代理获取方法
+
+如果遇到好的免费代理渠道, 可以自行添加其他代理获取的方法.
 
 添加一个新的代理获取方法如下:
 
