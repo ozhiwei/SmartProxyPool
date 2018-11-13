@@ -8,5 +8,5 @@ services:
     image: "proxy_pool"
   proxy_pool_db:
     ports:
-     - "6379:6379"
-    image: "redis"
+     - "27017:27017"
+    image: "mongo"
