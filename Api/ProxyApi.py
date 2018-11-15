@@ -1,78 +1,52 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
-"""
--------------------------------------------------
-   File Name：     ProxyApi.py
-   Description :
-   Author :       JHao
-   date：          2016/12/4
--------------------------------------------------
-   Change Activity:
-                   2016/12/4:
--------------------------------------------------
-"""
-__author__ = 'JHao'
 
+# base import
 import sys
-from werkzeug.wrappers import Response
-from flask import Flask, jsonify, request
+sys.path.append(".")
 
+# framework import
+from flask import Flask
+from flask_restful import reqparse, abort, Api, Resource
+
+# project import
 from Util.GetConfig import config
-from Manager.ProxyManager import ProxyManager
+from Manager.ProxyManager import proxy_manager
 
 app = Flask(__name__)
+api = Api(app)
 
+parser = reqparse.RequestParser()
+parser.add_argument('https', type=bool, default=0, choices=[0,1], location='args')
+parser.add_argument('token', type=str, location='args')
 
-class JsonResponse(Response):
-    @classmethod
-    def force_type(cls, response, environ=None):
-        if isinstance(response, (dict, list)):
-            response = jsonify(response)
+class Proxy(Resource):
+    def get(self):
+        args = parser.parse_args()
 
-        return super(JsonResponse, cls).force_type(response, environ)
+        result = {}
 
+        options = {
+            "https": bool(args.get('https')),
+            "token": args.get('token'),
+        }
 
-app.response_class = JsonResponse
+        if options.get("token", None):
+            result["result"] = proxy_manager.getQualityProxy(**options)
+        else:
+            result["result"] = proxy_manager.getSampleProxy(**options)
 
-api_list = {
-    'get': u'get an usable proxy',
-    'get_all': u'get all proxy from proxy pool',
-    'get_status': u'proxy statistics'
-}
+        return result
 
+class Proxys(Resource):
+    def get(self):
+        result = {}
+        result["result"] = proxy_manager.getAll()
 
-@app.route('/')
-def index():
-    return api_list
+        return result
 
-
-@app.route('/get/')
-def get():
-    result = "no proxy"
-    usable_rate = request.args.get('usable_rate', 0)
-    https = request.args.get('https', False)
-    token = request.args.get('token', None)
-
-    options = {
-        "usable_rate": usable_rate / 100,
-        "https": bool(https),
-        "token": token,
-    }
-    proxy = ProxyManager().getSampleUsefulProxy(**options)
-    if proxy:
-        result = proxy
-
-    return result
-
-@app.route('/get_all/')
-def getAll():
-    proxies = ProxyManager().getAll()
-    return proxies
-
-@app.route('/get_status/')
-def getStatus():
-    result = ProxyManager().getProxyNumber()
-    return result
+api.add_resource(Proxys, '/v1/proxys/')
+api.add_resource(Proxy, '/v1/proxy/')
 
 
 def run():

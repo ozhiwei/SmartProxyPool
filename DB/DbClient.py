@@ -131,12 +131,11 @@ class DbClient(object):
         query = {"proxy": proxy}
         self.client.exists(query)
 
-    # TODO: refine function
-    def getSampleUsefulProxy(self, usable_rate=0, https=False, token=None):
+    def getQualityProxy(self, https=False, token=None):
         result = None
         table_name = "useful_proxy"
         self.client.changeTable(table_name)
-        operation_list = 	[
+        operation_list = [
             {
                 "$match": {"total": { "$ne": 0},  "https": { "$eq": https }, "used_token_list": { "$nin": [token] } },
             },
@@ -144,27 +143,32 @@ class DbClient(object):
                 "$project": { "proxy": 1, "usable_rate": { "$divide": ["$succ", "$total"] } }
             },
             { 
-                "$match": { "usable_rate": { "$gte": usable_rate } }
+                "$sort": { "usable_rate": -1 }
             },
+            {
+                "$limit": 1
+            }
         ]
 
-        if token:
-            operation_list.extend(
-                [
-                    { 
-                        "$sort": { "usable_rate": -1 }
-                    },
-                    {
-                        "$limit": 1
-                    }
-                ]
-            )
-        else:
-            operation_list.append(            
-                {
-                    "$sample": { "size": 1}
-                }
-            )
+        data = self.client.aggregate(operation_list)
+        if data:
+            result = data[0]
+
+        return result
+
+    # TODO: refine function
+    def getSampleUsefulProxy(self, **kwargs):
+        result = None
+        table_name = "useful_proxy"
+        self.client.changeTable(table_name)
+        operation_list = 	[
+            {
+                "$match": {"https": { "$eq": kwargs.get("https", None) }},
+            },
+            {
+                "$sample": { "size": 1}
+            }
+        ]
 
         data = self.client.aggregate(operation_list)
         if data:

@@ -117,6 +117,32 @@ class ProxyManager(object):
         result = self.db.getSampleRawProxy()
         return result
 
+    def getQualityProxy(self, **kwargs):
+        item = self.db.getQualityProxy(**kwargs)
+        result = None
+
+        if item:
+            result = item["proxy"]
+
+        token = kwargs.get("token", None)
+        if token:
+            self.db.addProxyUsedToken(result, token)
+
+        log.debug("getQualityProxy, item:{item}".format(item=str(item)))
+
+        return result
+
+    def getSampleProxy(self, **kwargs):
+        item = self.db.getSampleUsefulProxy(**kwargs)
+        result = None
+        if item:
+            result = item["proxy"]
+
+        log.debug("getSampleUsefulProxy, item:{item}".format(item=str(item)))
+
+        return result
+
+    # 准备删除
     def getSampleUsefulProxy(self, **kwargs):
         item = self.db.getSampleUsefulProxy(**kwargs)
         result = None
@@ -178,7 +204,7 @@ class ProxyManager(object):
         num = self.db.getProxyNum(self.useful_proxy_name)
         return num
 
+proxy_manager = ProxyManager()
 
 if __name__ == '__main__':
-    pp = ProxyManager()
-    pp.refresh()
+    proxy_manager.refresh()
