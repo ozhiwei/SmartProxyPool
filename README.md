@@ -1,5 +1,5 @@
 
-高质量, 高灵活的开放代理池服务 [ProxyPool Demo](http://proxy.1again.cc:5010/)
+高质量, 高灵活的开放代理池服务 [ProxyPool Demo](http://proxy.1again.cc:5010/v1/proxy/)
 ---
 
 # 目标
@@ -65,12 +65,7 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 proxy_pool
 ## Http Api
 
 ```
-Api:            /
-Method:         GET
-Description:    api介绍
-Arg:            None
-
-Api:            /get
+Api:            /v1/proxy/
 Method:         GET
 Description:    随机获取一个代理
 Arg:            可选参数
@@ -86,14 +81,9 @@ token字段是用来开启`高质量`代理的方式.
 * 目前需要自行填写, 建议使用16位数的随机数字+大小写字母.
 * 请注意, 如果太简单可能会导致和其他人的token相同, 最终极大的降低能使用代理的数量.
 
-Api:            /get_all
+Api:            /v1/proxys/
 Method:         GET
 Description:    获取所有代理
-Arg:            None
-
-Api:            /get_status
-Method:         GET
-Description:    查看代理状态
 Arg:            None
 ```
 
@@ -144,6 +134,6 @@ freeProxyCustom  = 1  # 确保名字和你添加方法名字一致
 
 # 问题反馈
 
-任何问题欢迎在[Issues](https://github.com/1again/proxy_pool/issues)中反馈.
+任何问题欢迎在[Issues](https://github.com/1again/ProxyPool/issues)中反馈.
 
 我们的目标是, 没有蛀牙!
