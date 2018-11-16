@@ -9,8 +9,8 @@ from multiprocessing import Process
 
 from Log import LogManager
 from Api.ProxyApi import run as ProxyApiRun
-from Schedule.ProxyValidSchedule import run as ValidRun
-from Schedule.ProxyRefreshSchedule import run as RefreshRun
+from Schedule.ProxyVerifySchedule import run as VerifyRun
+from Schedule.ProxyFetchSchedule import run as FetchRun
 
 def showTime():
     date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -21,16 +21,14 @@ def main(test=False):
     showTime()
     LogManager.Init()
 
-    p_list = list()
+    process_hash = {
+        "ProxyApiRun": ProxyApiRun,
+        "VerifyRun": VerifyRun,
+        "FetchRun": FetchRun,
+    }
 
-    p1 = Process(target=ProxyApiRun, name='ProxyApiRun')
-    p_list.append(p1)
-    p2 = Process(target=ValidRun, name='ValidRun')
-    p_list.append(p2)
-    p3 = Process(target=RefreshRun, name='RefreshRun')
-    p_list.append(p3)
-
-    for p in p_list:
+    for name in process_hash.keys():
+        p = Process(target=process_hash[name], name=name)
         p.daemon = True
         p.start()
 
@@ -38,8 +36,8 @@ def main(test=False):
         time.sleep(5)
         sys.exit(0)
     else:
-        for p in p_list:
-            p.join()
+        while 1:
+            pass
 
 if __name__ == '__main__':
     main()

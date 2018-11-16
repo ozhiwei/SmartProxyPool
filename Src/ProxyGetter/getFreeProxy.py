@@ -1,25 +1,9 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
-"""
--------------------------------------------------
-   File Name：     GetFreeProxy.py
-   Description :  抓取免费代理
-   Author :       JHao
-   date：          2016/11/25
--------------------------------------------------
-   Change Activity:
-                   2016/11/25:
--------------------------------------------------
-"""
+
 import re
 import sys
 import requests
-
-try:
-    from importlib import reload  # py3 实际不会实用，只是为了不显示语法错误
-except:
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
 from Util.WebRequest import WebRequest
 from Util.utilFunction import getHtmlTree
@@ -28,35 +12,13 @@ from Util.utilFunction import verifyProxyFormat
 # for debug to disable insecureWarning
 requests.packages.urllib3.disable_warnings()
 
-"""
-    66ip.cn
-    data5u.com
-    xicidaili.com
-    goubanjia.com
-    xdaili.cn
-    kuaidaili.com
-    cn-proxy.com
-    proxy-list.org
-    www.mimiip.com to do
-"""
-
-
 class GetFreeProxy(object):
-    """
-    proxy getter
-    """
 
     def __init__(self):
         pass
 
     @staticmethod
     def freeProxyFirst(page=10):
-        """
-        无忧代理 http://www.data5u.com/
-        几乎没有能用的
-        :param page: 页数
-        :return:
-        """
         url_list = [
             'http://www.data5u.com/',
             'http://www.data5u.com/free/gngn/index.shtml',
@@ -73,12 +35,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxySecond(area=33, page=1):
-        """
-        代理66 http://www.66ip.cn/
-        :param area: 抓取代理页数，page=1北京代理页，page=2上海代理页......
-        :param page: 翻页
-        :return:
-        """
         area = 33 if area > 33 else area
         for area_index in range(1, area + 1):
             for i in range(1, page + 1):
@@ -93,11 +49,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyThird(days=1):
-        """
-        ip181 http://www.ip181.com/  不能用了
-        :param days:
-        :return:
-        """
         url = 'http://www.ip181.com/'
         html_tree = getHtmlTree(url)
         try:
@@ -109,10 +60,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyFourth(page_count=2):
-        """
-        西刺代理 http://www.xicidaili.com
-        :return:
-        """
         url_list = [
             'http://www.xicidaili.com/nn/',  # 高匿
             'http://www.xicidaili.com/nt/',  # 透明
@@ -130,10 +77,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyFifth():
-        """
-        guobanjia http://www.goubanjia.com/
-        :return:
-        """
         url = "http://www.goubanjia.com/"
         tree = getHtmlTree(url)
         proxy_list = tree.xpath('//td[@class="ip"]')
@@ -155,10 +98,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxySixth():
-        """
-        讯代理 http://www.xdaili.cn/
-        :return:
-        """
         url = 'http://www.xdaili.cn/ipagent/freeip/getFreeIps?page=1&rows=10'
         request = WebRequest()
         try:
@@ -170,9 +109,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxySeventh():
-        """
-        快代理 https://www.kuaidaili.com
-        """
         url_list = [
             'https://www.kuaidaili.com/free/inha/{page}/',
             'https://www.kuaidaili.com/free/intr/{page}/'
@@ -187,9 +123,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyEight():
-        """
-        秘密代理 http://www.mimiip.com
-        """
         url_gngao = ['http://www.mimiip.com/gngao/%s' % n for n in range(1, 10)]  # 国内高匿
         url_gnpu = ['http://www.mimiip.com/gnpu/%s' % n for n in range(1, 10)]  # 国内普匿
         url_gntou = ['http://www.mimiip.com/gntou/%s' % n for n in range(1, 10)]  # 国内透明
@@ -204,10 +137,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyNinth():
-        """
-        码农代理 https://proxy.coderbusy.com/
-        :return:
-        """
         urls = ['https://proxy.coderbusy.com/classical/country/cn.aspx?page=1']
         request = WebRequest()
         for url in urls:
@@ -218,10 +147,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyTen():
-        """
-        云代理 http://www.ip3366.net/free/
-        :return:
-        """
         urls = ['http://www.ip3366.net/free/']
         request = WebRequest()
         for url in urls:
@@ -232,10 +157,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyEleven():
-        """
-        IP海 http://www.iphai.com/free/ng
-        :return:
-        """
         urls = [
             'http://www.iphai.com/free/ng',
             'http://www.iphai.com/free/np',
@@ -252,12 +173,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyTwelve(page_count=8):
-        """
-        guobanjia http://ip.jiangxianli.com/?page=
-        免费代理库
-        超多量
-        :return:
-        """
         for i in range(1, page_count + 1):
             url = 'http://ip.jiangxianli.com/?page={}'.format(i)
             html_tree = getHtmlTree(url)
@@ -269,10 +184,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyWallFirst():
-        """
-        墙外网站 cn-proxy
-        :return:
-        """
         urls = ['http://cn-proxy.com/', 'http://cn-proxy.com/archives/218']
         request = WebRequest()
         for url in urls:
@@ -283,10 +194,6 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyWallSecond():
-        """
-        https://proxy-list.org/english/index.php
-        :return:
-        """
         urls = ['https://proxy-list.org/english/index.php?p=%s' % n for n in range(1, 10)]
         request = WebRequest()
         import base64
@@ -308,9 +215,4 @@ class GetFreeProxy(object):
 
 
 if __name__ == '__main__':
-    from CheckProxy import CheckProxy
-
-    CheckProxy.checkGetProxyFunc(GetFreeProxy.freeProxyFifth)
-    CheckProxy.checkGetProxyFunc(GetFreeProxy.freeProxySecond)
-
-    CheckProxy.checkAllGetProxyFunc()
+    pass

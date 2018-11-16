@@ -20,33 +20,6 @@ class ProxyManager(object):
         self.raw_proxy_queue = 'raw_proxy'
         self.useful_proxy_queue = 'useful_proxy'
 
-    def refresh(self):
-        proxy_getter_functions = config.cf.options("ProxyGetter")
-        for proxyGetter in proxy_getter_functions:
-            try:
-                log.info("Fetch Proxy Start, func:{func}".format(func=proxyGetter))
-
-                total = 0
-                succ = 0
-                fail = 0
-                for proxy in getattr(GetFreeProxy, proxyGetter.strip())():
-                    proxy = proxy.strip()
-                    if proxy and verifyProxyFormat(proxy) and not self.checkRawProxyExists(proxy):
-                        self.saveRawProxy(proxy)
-                        succ = succ + 1
-                        log.debug('{func}: fetch proxy {proxy}'.format(func=proxyGetter, proxy=proxy))
-                    else:
-                        fail = fail + 1
-                        log.error('{func}: fetch proxy {proxy} error'.format(func=proxyGetter, proxy=proxy))
-
-                    total = total + 1
-                
-                log.info("fetch proxy end, func:{func}, total:{total}, succ:{succ} fail:{fail}".format(func=proxyGetter, total=total, succ=succ, fail=fail))
-
-            except Exception as e:
-                log.error("func_name:{func_name} fetch proxy fail, error:{error}".format(func_name=proxyGetter, error=e))
-                continue
-
     def get(self):
         item = None
         item_list = []

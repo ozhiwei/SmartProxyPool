@@ -1,9 +1,9 @@
 [BASE]
 verify_raw_proxy_thread = 10
 verify_useful_proxy_thread = 10
+fetch_new_proxy_thread = 5
 
 fetch_new_proxy_interval = 30
-
 verify_raw_proxy_interval = 30
 verify_useful_proxy_interval = 30
 
