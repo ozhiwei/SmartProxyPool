@@ -23,13 +23,9 @@
 ## 生产环境 Docker/docker-compose
 
 ```shell
-# In WORKDIR proxy_pool
-
+# In WORKDIR ProxyPool
 # Install Docker
 curl -sSL https://get.docker.com | sh
-
-# Build proxy_pool image
-docker build -t proxy_pool .
 
 # Install docker-compose
 pip install docker-compose
@@ -41,19 +37,15 @@ docker-compose -f Docker/docker-compose.yml up -d
 ## 开发环境 Docker
 
 ```shell
-# In WORKDIR proxy_pool
-
+# In WORKDIR ProxyPool
 # Install Docker
 curl -sSL https://get.docker.com | sh
-
-# Build proxy_pool image
-docker build -t proxy_pool .
 
 # Start proxy_pool container
 # I think you are great developer
 # So you should how to create a mongodb with Docker or Other, Right?
 # !!! Remember modify your database in Config.ini file
-docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 proxy_pool
+docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
 ```
 
 # 使用

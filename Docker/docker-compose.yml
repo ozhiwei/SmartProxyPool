@@ -5,7 +5,7 @@ services:
      - ..:/usr/src/app
     ports:
      - "5010:5010"
-    image: "proxy_pool"
+    image: "1again/proxy_pool"
   proxy_pool_db:
     ports:
      - "27017:27017"
