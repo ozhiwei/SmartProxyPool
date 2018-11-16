@@ -3,6 +3,7 @@ werkzeug==0.11.15
 Flask==0.12.3
 requests==2.20.0
 lxml==3.7.2
+flask_restful
 
 pymongo
 redis
