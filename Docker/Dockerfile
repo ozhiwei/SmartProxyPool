@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5010
 
 WORKDIR /usr/src/app/
-CMD [ "python", "Run/main.py" ]
+CMD [ "python", "Src/Run/main.py" ]

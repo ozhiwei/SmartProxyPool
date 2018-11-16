@@ -3,6 +3,7 @@
 
 import sys, os
 sys.path.append(".")
+sys.path.append("Src")
 
 from Util.utilClass import ConfigParse
 
@@ -30,12 +31,14 @@ class ProxyObject(object):
         return None
 
 class ProxyConfig(object):
+    config_dir = "../../Config/"
 
     def __init__(self):
         super(ProxyConfig, self).__init__()
 
-        pwd = os.path.split(os.path.realpath(__file__))[0]
-        config_dir = os.path.split(pwd)[0]
+        pwd = os.path.dirname(os.path.realpath(__file__))
+        relative_path = "{pwd}/{config_dir}".format(pwd=pwd, config_dir=self.config_dir)
+        config_dir = os.path.realpath(relative_path)
 
         config_path = os.path.join(config_dir, 'Config.ini.default')
         config = ConfigParse()

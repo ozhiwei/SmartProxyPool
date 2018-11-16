@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('.')
-sys.path.append('..')
+sys.path.append('Src')
 
 import time
 from multiprocessing import Process
