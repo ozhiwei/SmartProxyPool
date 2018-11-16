@@ -1,19 +1,5 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
-"""
--------------------------------------------------
-   File Name：     utilClass.py  
-   Description :  tool class
-   Author :       JHao
-   date：          2016/12/3
--------------------------------------------------
-   Change Activity:
-                   2016/12/3: Class LazyProperty
-                   2016/12/4: rewrite ConfigParser
--------------------------------------------------
-"""
-__author__ = 'JHao'
-
 
 class LazyProperty(object):
     """

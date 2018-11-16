@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
--------------------------------------------------
-   File Name：     ProxyCheck
-   Description :   多线程验证useful_proxy
-   Author :        J_hao
-   date：          2017/9/26
--------------------------------------------------
-   Change Activity:
-                   2017/9/26: 多线程验证useful_proxy
--------------------------------------------------
-"""
-__author__ = 'J_hao'
 
 import sys
 import threading

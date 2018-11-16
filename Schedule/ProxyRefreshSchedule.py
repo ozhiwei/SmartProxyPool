@@ -17,12 +17,7 @@ from Manager.ProxyManager import ProxyManager
 from Util.EnvUtil import PY3
 from Log.LogManager import log
 
-__author__ = 'JHao'
-
 class ProxyRefreshSchedule(ProxyManager):
-    """
-    代理定时刷新
-    """
 
     def __init__(self):
         ProxyManager.__init__(self)

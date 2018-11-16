@@ -1,17 +1,5 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
-"""
--------------------------------------------------
-   File Name：     ProxyManager.py
-   Description :
-   Author :       JHao
-   date：          2016/12/3
--------------------------------------------------
-   Change Activity:
-                   2016/12/3:
--------------------------------------------------
-"""
-__author__ = 'JHao'
 
 import random
 
@@ -24,9 +12,6 @@ from Log.LogManager import log
 
 
 class ProxyManager(object):
-    """
-    ProxyManager
-    """
     raw_proxy_name = "raw_proxy"
     useful_proxy_name = "useful_proxy"
 
@@ -37,10 +22,6 @@ class ProxyManager(object):
         self.useful_proxy_queue = 'useful_proxy'
 
     def refresh(self):
-        """
-        fetch proxy into Db by ProxyGetter
-        :return:
-        """
         for proxyGetter in config.proxy_getter_functions:
             try:
                 log.info("Fetch Proxy Start, func:{func}".format(func=proxyGetter))
@@ -49,7 +30,6 @@ class ProxyManager(object):
                 succ = 0
                 fail = 0
                 for proxy in getattr(GetFreeProxy, proxyGetter.strip())():
-                    # 挨个存储 proxy，优化raw 队列的 push 速度，进而加快 check proxy 的速度
                     proxy = proxy.strip()
                     if proxy and verifyProxyFormat(proxy) and not self.checkRawProxyExists(proxy):
                         self.saveRawProxy(proxy)
@@ -68,10 +48,6 @@ class ProxyManager(object):
                 continue
 
     def get(self):
-        """
-        return a useful proxy
-        :return:
-        """
         item = None
         item_list = []
         self.db.changeTable(self.useful_proxy_queue)
@@ -88,13 +64,8 @@ class ProxyManager(object):
 
         log.debug('Get Random Proxy {item} of {total}'.format(item=item, total=len(item_list)))
         return item
-        # return self.db.pop()
 
     def getAll(self):
-        """
-        get all proxy from pool as list
-        :return:
-        """
         self.db.changeTable(self.useful_proxy_queue)
         item_dict = self.db.getAll()
         if EnvUtil.PY3:

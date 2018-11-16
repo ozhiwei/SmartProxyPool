@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
--------------------------------------------------
-   File Name：     testGetFreeProxy
-   Description :   test model ProxyGetter/getFreeProxy
-   Author :        J_hao
-   date：          2017/7/31
--------------------------------------------------
-   Change Activity:
-                   2017/7/31:function testGetFreeProxy
--------------------------------------------------
-"""
-__author__ = 'J_hao'
 
 import re
 import sys

@@ -1,17 +1,5 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
-"""
--------------------------------------------------
-   File Name：     GetConfig.py
-   Description :  fetch config from config.ini
-   Author :       JHao
-   date：          2016/12/3
--------------------------------------------------
-   Change Activity:
-                   2016/12/3: get db property func
--------------------------------------------------
-"""
-__author__ = 'JHao'
 
 import os
 from Util.utilClass import ConfigParse

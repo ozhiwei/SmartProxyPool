@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
--------------------------------------------------
-   File Name：     CheckProxy
-   Description :   used for check getFreeProxy.py
-   Author :        JHao
-   date：          2018/7/10
--------------------------------------------------
-   Change Activity:
-                   2018/7/10: CheckProxy
--------------------------------------------------
-"""
-__author__ = 'JHao'
 
 import sys
 from getFreeProxy import GetFreeProxy

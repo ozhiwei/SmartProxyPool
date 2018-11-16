@@ -1,17 +1,5 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
-"""
--------------------------------------------------
-   File Name：    DbClient.py
-   Description :  DB工厂类
-   Author :       JHao
-   date：          2016/12/2
--------------------------------------------------
-   Change Activity:
-                   2016/12/2:
--------------------------------------------------
-"""
-__author__ = 'JHao'
 
 import os
 import sys
@@ -23,45 +11,13 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
 class DbClient(object):
-    """
-    DbClient DB工厂类 提供get/put/pop/delete/getAll/changeTable方法
-
-    目前存放代理的table/collection/hash有两种：
-        raw_proxy： 存放原始的代理；
-        useful_proxy_queue： 存放检验后的代理；
-
-    抽象方法定义：
-        get(proxy): 返回proxy的信息；
-        put(proxy): 存入一个代理；
-        pop(): 弹出一个代理
-        exists(proxy)： 判断代理是否存在
-        getNumber(raw_proxy): 返回代理总数（一个计数器）；
-        update(proxy, num): 修改代理属性计数器的值;
-        delete(proxy): 删除指定代理；
-        getAll(): 返回所有代理；
-        changeTable(name): 切换 table or collection or hash;
-
-
-        所有方法需要相应类去具体实现：
-            SSDB：SsdbClient.py
-            REDIS:RedisClient.py
-
-    """
 
     __metaclass__ = Singleton
 
     def __init__(self):
-        """
-        init
-        :return:
-        """
         self.__initDbClient()
 
     def __initDbClient(self):
-        """
-        init DB Client
-        :return:
-        """
         __type = None
         if "SSDB" == config.db_type:
             __type = "SsdbClient"
@@ -277,9 +233,4 @@ class DbClient(object):
         self.client.update(query, data)
 
 if __name__ == "__main__":
-    # account = DbClient()
-    # print(account.get())
-    # account.changeTable('use')
-    # account.put('ac')
-    # print(account.get())
     pass

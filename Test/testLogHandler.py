@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
--------------------------------------------------
-   File Name：     testLogHandler
-   Description :
-   Author :        J_hao
-   date：          2017/8/2
--------------------------------------------------
-   Change Activity:
-                   2017/8/2:
--------------------------------------------------
-"""
-__author__ = 'J_hao'
 
 from Util.LogHandler import LogHandler
 
