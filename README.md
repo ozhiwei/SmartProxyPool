@@ -18,6 +18,22 @@
 
 `ProxyPool` 另外我觉得首字母大写会庄重严肃很多!
 
+# 目前
+
+目前还在重构阶段, 所以不是很推荐使用!
+
+可以先Star, 养肥了再杀!
+
+目前不支持windows, 大概率以后也不会支持!
+
+# 使用场景
+
+1. 主要还是用于爬虫.
+
+2. 公司需要有个内部代理池服务, 用来干一些丧尽天良的坏事.
+
+3. 个人需要用来干一些见不得人的事.
+
 # 安装/部署
 
 ## 生产环境 Docker/docker-compose
@@ -54,7 +70,7 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
 
 　　也可以通过api访问http://server_ip:5010 查看。
 
-## Http Api
+## RESTFUL API
 
 ```
 Api:            /v1/proxy/
@@ -129,3 +145,11 @@ freeProxyCustom  = 1  # 确保名字和你添加方法名字一致
 任何问题欢迎在[Issues](https://github.com/1again/ProxyPool/issues)中反馈.
 
 我们的目标是, 没有蛀牙!
+
+# Contribute
+
+我只想说, 我对代码的质量要求很高(以我目前水平的质量)
+
+所以PR前, 请先想想, 你自己是否可以接受PR的代码质量.
+
+微笑脸.jpg
