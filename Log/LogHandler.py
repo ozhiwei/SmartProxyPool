@@ -5,7 +5,7 @@ import os
 import logging
 
 from logging.handlers import TimedRotatingFileHandler
-from Util.GetConfig import GetConfig
+from Config.ConfigManager import config
 
 LOG_LEVEL = {
     "CRITICAL": 50,
@@ -30,12 +30,11 @@ class LogHandler(logging.Logger):
     """
 
     def __init__(self, level=None, stream=True, file=True):
-        config = GetConfig()
         self.name = "ProxyPool"
         if level:
             self.level = level
         else:
-            self.level = LOG_LEVEL.get(config.log_level, LOG_LEVEL["INFO"])
+            self.level = LOG_LEVEL.get(config.LOG.level, LOG_LEVEL["INFO"])
 
         logging.Logger.__init__(self, self.name, level=self.level)
         if stream:

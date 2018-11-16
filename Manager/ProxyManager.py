@@ -5,11 +5,10 @@ import random
 
 from Util import EnvUtil
 from DB.DbClient import DbClient
-from Util.GetConfig import config
+from Config.ConfigManager import config
 from Util.utilFunction import verifyProxyFormat
 from ProxyGetter.getFreeProxy import GetFreeProxy
 from Log.LogManager import log
-
 
 class ProxyManager(object):
     raw_proxy_name = "raw_proxy"
@@ -22,7 +21,8 @@ class ProxyManager(object):
         self.useful_proxy_queue = 'useful_proxy'
 
     def refresh(self):
-        for proxyGetter in config.proxy_getter_functions:
+        proxy_getter_functions = config.cf.options("ProxyGetter")
+        for proxyGetter in proxy_getter_functions:
             try:
                 log.info("Fetch Proxy Start, func:{func}".format(func=proxyGetter))
 
@@ -44,7 +44,7 @@ class ProxyManager(object):
                 log.info("fetch proxy end, func:{func}, total:{total}, succ:{succ} fail:{fail}".format(func=proxyGetter, total=total, succ=succ, fail=fail))
 
             except Exception as e:
-                log.error("func_name:{func} fetch proxy fail, error:{error}".format(func=proxyGetter, error=e))
+                log.error("func_name:{func_name} fetch proxy fail, error:{error}".format(func_name=proxyGetter, error=e))
                 continue
 
     def get(self):

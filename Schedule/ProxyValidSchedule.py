@@ -11,6 +11,7 @@ except:
 from Schedule.ProxyCheck import ProxyCheck
 from Manager.ProxyManager import ProxyManager
 from Log.LogManager import log
+from Config.ConfigManager import config
 
 
 class ProxyValidSchedule(ProxyManager, object):
@@ -19,7 +20,7 @@ class ProxyValidSchedule(ProxyManager, object):
         self.queue = Queue()
         self.proxy_item = dict()
 
-    def __validProxy(self, threads=10):
+    def __validProxy(self, threads=config.BASE.verify_useful_proxy_thread):
         """
         验证useful_proxy代理
         :param threads: 线程数
@@ -44,7 +45,7 @@ class ProxyValidSchedule(ProxyManager, object):
                 self.__validProxy()
             else:
                 log.info('Valid Complete, Sleep 5 Min!')
-                time.sleep(60 * 5)
+                time.sleep(60 * config.BASE.verify_useful_proxy_interval)
                 self.putQueue()
 
     def putQueue(self):

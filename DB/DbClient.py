@@ -4,7 +4,7 @@
 import os
 import sys
 
-from Util.GetConfig import config
+from Config.ConfigManager import config
 from Util.utilClass import Singleton
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -18,21 +18,28 @@ class DbClient(object):
         self.__initDbClient()
 
     def __initDbClient(self):
+        db_type = config.DB.type
+        db_name = config.DB.name
+        db_host = config.DB.host
+        db_port = config.DB.port
+        db_username = config.DB.username
+        db_password = config.DB.password
+
         __type = None
-        if "SSDB" == config.db_type:
+        if "SSDB" == db_type:
             __type = "SsdbClient"
-        elif "REDIS" == config.db_type:
+        elif "REDIS" == db_type:
             __type = "RedisClient"
-        elif "MONGODB" == config.db_type:
+        elif "MONGODB" == db_type:
             __type = "MongodbClient"
         else:
             pass
-        assert __type, 'type error, Not support DB type: {}'.format(config.db_type)
-        self.client = getattr(__import__(__type), __type)(name=config.db_name,
-                                                          host=config.db_host,
-                                                          port=config.db_port,
-                                                          username=config.db_username,
-                                                          password=config.db_password)
+        assert __type, 'type error, Not support DB type: {}'.format(db_type)
+        self.client = getattr(__import__(__type), __type)(name=db_name,
+                                                          host=db_host,
+                                                          port=db_port,
+                                                          username=db_username,
+                                                          password=db_password)
     # unuseful function
     # def get(self, key, **kwargs):
     #     query = {"proxy": key}

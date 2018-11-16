@@ -16,6 +16,7 @@ from Util.utilFunction import validUsefulProxy
 from Manager.ProxyManager import ProxyManager
 from Util.EnvUtil import PY3
 from Log.LogManager import log
+from Config.ConfigManager import config
 
 class ProxyRefreshSchedule(ProxyManager):
 
@@ -30,7 +31,6 @@ class ProxyRefreshSchedule(ProxyManager):
             self.queue.put(proxy) 
 
     def validProxy(self):
-
         thread_id = threading.currentThread().ident
         log.info("thread_id:{thread_id}, Start ValidProxy `raw_proxy_queue`".format(thread_id=thread_id))
 
@@ -71,7 +71,7 @@ def refreshPool():
     pp.validProxy()
 
 
-def batch_refresh(process_num=10):
+def verify_raw_proxy(process_num=config.BASE.verify_raw_proxy_thread):
     pp = ProxyRefreshSchedule()
 
     pl = []
@@ -83,19 +83,19 @@ def batch_refresh(process_num=10):
         pl[num].daemon = True
         pl[num].start()
 
-def fetch_all():
+def fetch_new_proxy():
     p = ProxyRefreshSchedule()
     p.refresh()
 
 
 def run():
     sch = Sch()
-    sch.add_job(fetch_all, 'interval', minutes=5)  # 每5分钟抓取一次
-    sch.add_job(batch_refresh, "interval", minutes=5)  # 每分钟检查一次
+    sch.add_job(fetch_new_proxy, 'interval', minutes=config.BASE.fetch_new_proxy_interval)  # 每5分钟抓取一次
+    sch.add_job(verify_raw_proxy, "interval", minutes=config.BASE.verify_raw_proxy_interval)  # 每分钟检查一次
     sch.start()
 
-    fetch_all()
-    batch_refresh()
+    fetch_new_proxy()
+    verify_raw_proxy()
 
     while True:
         time.sleep(1)

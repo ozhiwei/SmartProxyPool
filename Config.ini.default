@@ -1,3 +1,12 @@
+[BASE]
+verify_raw_proxy_thread = 10
+verify_useful_proxy_thread = 10
+
+fetch_new_proxy_interval = 30
+
+verify_raw_proxy_interval = 30
+verify_useful_proxy_interval = 30
+
 [DB]
 ;Configure the database information
 type = MONGODB
@@ -8,7 +17,7 @@ name = proxy
 ;password = your_password
 
 ;[LOG]
-;level = DEBUG
+;level = INFO
 
 [ProxyGetter]
 ;register the proxy getter function
@@ -31,6 +40,6 @@ freeProxyWallThird = 1
 
 [API]
 ; API config http://127.0.0.1:5010
-ip = 0.0.0.0
-port = 5010
+bind_ip = 0.0.0.0
+bind_port = 5010
 processes = 10

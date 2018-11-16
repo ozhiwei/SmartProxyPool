@@ -10,7 +10,7 @@ from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
 
 # project import
-from Util.GetConfig import config
+from Config.ConfigManager import config
 from Manager.ProxyManager import proxy_manager
 
 app = Flask(__name__)
@@ -51,9 +51,9 @@ api.add_resource(Proxy, '/v1/proxy/')
 
 def run():
     if sys.platform.startswith("win"):
-        app.run(host=config.host_ip, port=config.host_port)
+        app.run(host=config.API.bind_ip, port=config.API.bind_port)
     else:
-        app.run(host=config.host_ip, port=config.host_port, threaded=False, processes=config.processes)
+        app.run(host=config.API.bind_ip, port=config.API.bind_port, threaded=False, processes=config.API.processes)
 
 
 if __name__ == '__main__':
