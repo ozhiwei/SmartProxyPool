@@ -11,6 +11,7 @@ from Log import LogManager
 from Api.ProxyApi import run as ProxyApiRun
 from Schedule.ProxyVerifySchedule import run as VerifyRun
 from Schedule.ProxyFetchSchedule import run as FetchRun
+from Schedule.ProxyCleanSchedule import run as ProxyCleanRun
 
 def showTime():
     date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -25,6 +26,7 @@ def main(test=False):
         "ProxyApiRun": ProxyApiRun,
         "VerifyRun": VerifyRun,
         "FetchRun": FetchRun,
+        "ProxyClean": ProxyCleanRun
     }
 
     for name in process_hash.keys():

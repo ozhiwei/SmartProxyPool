@@ -45,6 +45,14 @@ class ProxyManager(object):
             return list(item_dict.keys()) if item_dict else list()
         return item_dict.keys() if item_dict else list()
 
+    def cleanUsefulProxy(self, **kwargs):
+        result = self.db.cleanUsefulProxy(**kwargs)
+        return result
+
+    def cleanRawProxy(self, **kwargs):
+        result = self.db.cleanRawProxy(**kwargs)
+        return result
+
     def getAllUsefulProxy(self):
         result = self.db.getAllUsefulProxy()
         return result

@@ -72,6 +72,48 @@ class DbClient(object):
     def changeTable(self, name):
         self.client.changeTable(name)
 
+    def cleanProxy(self, **kwargs):
+        operation_list = [
+            {
+                "$match": {"total": { "$gte": kwargs.get("total") }},
+            },
+            {
+                "$project": { "proxy": 1, "disable_rate": { "$divide": ["$fail", "$total"] } }
+            },
+            {
+                "$match": { "disable_rate": { "$gte": kwargs.get("disable_rate")}}
+            }
+        ]
+
+        items = self.client.aggregate(operation_list)
+        result = len(items)
+        for item in items:
+            query = {
+                "_id": item["_id"]
+            }
+            self.client.delete(query)
+
+        return result
+
+
+    def cleanUsefulProxy(self, **kwargs):
+        table_name = "useful_proxy"
+        self.changeTable(table_name)
+
+        result = self.cleanProxy(**kwargs)
+
+        return result
+
+
+    def cleanRawProxy(self, **kwargs):
+        table_name = "raw_proxy"
+        self.changeTable(table_name)
+
+        result = self.cleanProxy(**kwargs)
+
+        return result
+
+
     # unuseful function
     # def getNumber(self):
     #     return self.client.getNumber()
