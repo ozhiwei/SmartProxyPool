@@ -22,6 +22,8 @@
 
 目前还在重构阶段, 所以不是很推荐使用!
 
+可以直接到 [ProxyPool Demo](http://proxy.1again.cc:5010/v1/proxy/) 上使用!
+
 可以先Star, 养肥了再杀!
 
 目前不支持windows, 大概率以后也不会支持!
@@ -77,14 +79,13 @@ Api:            /v1/proxy/
 Method:         GET
 Description:    随机获取一个代理
 Arg:            可选参数
-    usable_rate=number      过滤可用率为number的代理, default:0
     https=1                 过滤支持https的代理, default:0
     token=string            自定义的字符串, 用来识别请求者, 避免获取到重复的代理, default:None
 
 token字段详解:
 token字段是用来开启`高质量`代理的方式.
-因为没有token就没办法识别请求者.
-也就没办法知道哪些代理是请求者使用过的.
+所谓的`高质量`, 就是成功率最高代理.
+token是为了识别请求者, 从而筛选出未使用过的`高质量`代理
 
 * 目前需要自行填写, 建议使用16位数的随机数字+大小写字母.
 * 请注意, 如果太简单可能会导致和其他人的token相同, 最终极大的降低能使用代理的数量.

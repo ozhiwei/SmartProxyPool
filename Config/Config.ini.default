@@ -1,11 +1,21 @@
 [BASE]
-verify_raw_proxy_thread = 10
-verify_useful_proxy_thread = 10
+verify_raw_proxy_thread = 5
+verify_useful_proxy_thread = 5
 fetch_new_proxy_thread = 5
 
 fetch_new_proxy_interval = 30
-verify_raw_proxy_interval = 30
-verify_useful_proxy_interval = 30
+verify_raw_proxy_interval = 1
+verify_useful_proxy_interval = 5
+
+useful_proxy_clean_total = 20
+useful_proxy_clean_disable_rate = 40
+
+raw_proxy_clean_total = 10
+raw_proxy_clean_disable_rate = 20
+
+clean_raw_proxy_interval = 30
+clean_useful_proxy_interval = 30
+
 
 [DB]
 ;Configure the database information
