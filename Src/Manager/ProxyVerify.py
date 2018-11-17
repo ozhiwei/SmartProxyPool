@@ -110,20 +110,27 @@ class ProxyVerifyRaw(ProxyVerify):
             if isinstance(raw_proxy, bytes):
                 raw_proxy = raw_proxy.decode('utf8')
 
-            if (raw_proxy not in self.useful_proxys) and self.verifyProxy(raw_proxy):
-                self.proxy_manager.saveUsefulProxy(raw_proxy)
-                self.proxy_manager.deleteRawProxy(raw_proxy)
-                self.useful_proxys[raw_proxy] = True
+            if raw_proxy not in self.useful_proxys:
+                (http_result, https_result) =  self.verifyProxy(raw_proxy)
+                if http_result:
+                    self.proxy_manager.saveUsefulProxy(raw_proxy, https_result)
+                    self.proxy_manager.deleteRawProxy(raw_proxy)
+                    self.useful_proxys[raw_proxy] = True
 
-                succ = succ + 1
-                log.debug("raw_proxy:{raw_proxy} verify succ".format(raw_proxy=raw_proxy))
+                    succ = succ + 1
+                    log.debug("raw_proxy:{raw_proxy} verify succ".format(raw_proxy=raw_proxy))
+                else:
+                    self.proxy_manager.tickRawProxyVaildFail(raw_proxy)
+
+                    fail = fail + 1
+                    log.debug("raw_proxy:{raw_proxy} verify fail".format(raw_proxy=raw_proxy))
             else:
-                self.proxy_manager.tickRawProxyVaildFail(raw_proxy)
-
-                fail = fail + 1
-                log.debug("raw_proxy:{raw_proxy} verify fail".format(raw_proxy=raw_proxy))
+                self.proxy_manager.deleteRawProxy(raw_proxy)
+                log.debug("raw_proxy:{raw_proxy} verify repetition".format(raw_proxy=raw_proxy))
 
             self.queue.task_done()
+
+            self.proxy_manager.tickRawProxyVaildTotal(raw_proxy)
             total = total + 1
 
         end_time = time.time()

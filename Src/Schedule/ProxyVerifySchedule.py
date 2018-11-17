@@ -37,6 +37,7 @@ def verify_useful_proxy():
 def run():
     sch = Sch()
     sch.add_job(verify_raw_proxy, "interval", minutes=config.BASE.verify_raw_proxy_interval)
+    sch.add_job(verify_useful_proxy, "interval", minutes=config.BASE.verify_useful_proxy_interval)
     sch.start()
 
     verify_raw_proxy()
