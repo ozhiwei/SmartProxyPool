@@ -1,11 +1,11 @@
 [BASE]
-verify_raw_proxy_thread = 5
-verify_useful_proxy_thread = 5
-fetch_new_proxy_thread = 5
+verify_raw_proxy_thread = 2
+verify_useful_proxy_thread = 2
+fetch_new_proxy_thread = 2
 
-fetch_new_proxy_interval = 30
-verify_raw_proxy_interval = 1
-verify_useful_proxy_interval = 5
+fetch_new_proxy_interval = 1
+verify_raw_proxy_interval = 30
+verify_useful_proxy_interval = 30
 
 useful_proxy_clean_total = 20
 useful_proxy_clean_disable_rate = 40
@@ -16,6 +16,7 @@ raw_proxy_clean_disable_rate = 20
 clean_raw_proxy_interval = 30
 clean_useful_proxy_interval = 30
 
+max_raw_proxy_number = 700
 
 [DB]
 ;Configure the database information
@@ -52,4 +53,4 @@ freeProxyWallThird = 1
 ; API config http://127.0.0.1:5010
 bind_ip = 0.0.0.0
 bind_port = 5010
-processes = 10
+processes = 1

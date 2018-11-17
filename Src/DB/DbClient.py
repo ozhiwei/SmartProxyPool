@@ -204,9 +204,9 @@ class DbClient(object):
 
     def getProxyNum(self, table_name):
         self.client.changeTable(table_name)
-        num = self.client.find().count()
+        number = self.client.getNumber()
 
-        return num
+        return number
 
     def saveRawProxy(self, proxy):
         table_name = 'raw_proxy'
