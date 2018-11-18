@@ -118,7 +118,7 @@ class ProxyManager(object):
     # TODO: 逻辑应该有问题, 但不确定
     # http是可用的才会保存https, 会不会有只开通https的代理呢?
     def saveUsefulProxy(self, proxy, https=False):
-        data = {"proxy": proxy, "succ": 0, "fail": 0, "total": 0, "https": https}
+        data = {"proxy": proxy, "succ": 1, "fail": 0, "total": 1, "https": https}
         self.db.saveUsefulProxy(proxy, data)
 
     def deleteUsefulProxy(self, proxy):

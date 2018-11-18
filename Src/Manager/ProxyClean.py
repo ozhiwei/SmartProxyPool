@@ -15,8 +15,8 @@ try:
 except:
     from queue import Queue  # py2
 
-# 这样的实现多线程有问题, 后期无法扩展到独立的机器上.
-# must call classmethod initQueue before
+# 这样的实现多线程有问题, 后期无法扩展到独立的进程.
+# must call classmethod initQueue before when thread start
 class ProxyClean(threading.Thread):
     def __init__(self, **kwargs):
         super(ProxyClean, self).__init__(**kwargs)
@@ -25,20 +25,18 @@ class ProxyClean(threading.Thread):
 class ProxyCleanUseful(ProxyClean):
 
     def run(self):
-        total = config.BASE.useful_proxy_clean_total / 100
-        disable_rate = config.BASE.useful_proxy_clean_disable_rate / 100
-        result = self.proxy_manager.cleanUsefulProxy(total=total, disable_rate=disable_rate)
+        hold_number = config.BASE.hold_useful_proxy_number
+        clean_number = self.proxy_manager.cleanUsefulProxy(hold_number=hold_number)
 
-        log.info("clean useful_proxy, number:{number}".format(number=result))
+        log.info("clean useful_proxy, clean_number:{clean_number}, hold_number:{hold_number}".format(clean_number=clean_number, hold_number=hold_number))
 
 class ProxyCleanRaw(ProxyClean):
 
     def run(self):
-        total = config.BASE.raw_proxy_clean_total / 100
-        disable_rate = config.BASE.raw_proxy_clean_disable_rate / 100
-        result = self.proxy_manager.cleanRawProxy(total=total, disable_rate=disable_rate)
+        hold_number = config.BASE.hold_raw_proxy_number
+        clean_number = self.proxy_manager.cleanRawProxy(hold_number=hold_number)
 
-        log.info("clean raw_proxy, number:{number}".format(number=result))
+        log.info("clean raw_proxy, clean_number:{clean_number}, hold_number:{hold_number}".format(clean_number=clean_number, hold_number=hold_number))
 
 if __name__ == "__main__":
     t1 = ProxyCleanUseful()

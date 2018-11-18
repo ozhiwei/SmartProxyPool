@@ -66,10 +66,14 @@ class ProxyFetch(threading.Thread):
 if __name__ == "__main__":
     ProxyFetch.initQueue()
 
+    t_list = []
     for _ in range(10):
         t = ProxyFetch()
+        t_list.append(t)
+
+    for t in t_list:
         t.daemon = True
         t.start()
 
-    while 1:
-        pass
+    for t in t_list:
+        t.join()

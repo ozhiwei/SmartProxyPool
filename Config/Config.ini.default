@@ -3,54 +3,52 @@ verify_raw_proxy_thread = 2
 verify_useful_proxy_thread = 2
 fetch_new_proxy_thread = 2
 
-fetch_new_proxy_interval = 1
+fetch_new_proxy_interval = 5
 verify_raw_proxy_interval = 30
 verify_useful_proxy_interval = 30
-
-useful_proxy_clean_total = 20
-useful_proxy_clean_disable_rate = 40
-
-raw_proxy_clean_total = 10
-raw_proxy_clean_disable_rate = 20
 
 clean_raw_proxy_interval = 30
 clean_useful_proxy_interval = 30
 
-max_raw_proxy_number = 700
+; clean proxy when number is positive
+; disable clean proxy when number is -1
+hold_raw_proxy_number = -1
+hold_useful_proxy_number = -1
 
 [DB]
-;Configure the database information
+; Configure the database information
 type = MONGODB
 host = proxy_pool_db
 port = 27017
 name = proxy
-;username = your_username (Only Mongodb)
-;password = your_password
+; username = your_username
+; password = your_password
 
-;[LOG]
-;level = INFO
+; [LOG]
+; level = INFO
 
 [ProxyGetter]
-;register the proxy getter function
-freeProxyFirst = 1
-freeProxySecond = 1
-;freeProxyThird  = 1
-freeProxyFourth = 1
-freeProxyFifth = 1
-freeProxySixth = 1
-freeProxySeventh = 1
-freeProxyEight = 1
-freeProxyNinth = 1
-freeProxyTen = 1
-freeProxyEleven = 1
-freeProxyTwelve = 1
-;foreign website, outside the wall
-freeProxyWallFirst = 1
-freeProxyWallSecond = 1
-freeProxyWallThird = 1
+; register the proxy getter function
+; freeProxyFirst = 1
+; freeProxySecond = 1
+; freeProxyThird  = 1
+; freeProxyFourth = 1
+; freeProxyFifth = 1
+; freeProxySixth = 1
+; freeProxySeventh = 1
+; freeProxyEight = 1
+; freeProxyNinth = 1
+; freeProxyTen = 1
+; freeProxyEleven = 1
+; freeProxyTwelve = 1
+
+; foreign website, outside the wall
+; freeProxyWallFirst = 1
+; freeProxyWallSecond = 1
+; freeProxyWallThird = 1
 
 [API]
-; API config http://127.0.0.1:5010
+;  API config
 bind_ip = 0.0.0.0
 bind_port = 5010
 processes = 1

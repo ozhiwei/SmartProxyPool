@@ -15,7 +15,6 @@ try:
 except:
     from queue import Queue  # py2
 
-from Manager.ProxyManager import ProxyManager
 from Log.LogManager import log
 from Config.ConfigManager import config
 

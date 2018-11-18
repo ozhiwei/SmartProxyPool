@@ -61,9 +61,9 @@ class MongodbClient(object):
 
         return result
 
-    def getNumber(self):
-        return self.db[self.name].count()
-
+    def getCount(self, query={}):
+        result = self.db[self.name].count(query)
+        return result
 
 if __name__ == "__main__":
     db = MongodbClient('first', 'localhost', 27017)

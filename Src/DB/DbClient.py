@@ -73,25 +73,37 @@ class DbClient(object):
         self.client.changeTable(name)
 
     def cleanProxy(self, **kwargs):
-        operation_list = [
-            {
-                "$match": {"total": { "$gte": kwargs.get("total") }},
-            },
-            {
-                "$project": { "proxy": 1, "disable_rate": { "$divide": ["$fail", "$total"] } }
-            },
-            {
-                "$match": { "disable_rate": { "$gte": kwargs.get("disable_rate")}}
-            }
-        ]
+        result = 0
+        hold_number =  kwargs.get("hold_number")
 
-        items = self.client.aggregate(operation_list)
-        result = len(items)
-        for item in items:
-            query = {
-                "_id": item["_id"]
-            }
-            self.client.delete(query)
+        query = {"total": {"$ne": 0}}
+        total_number = self.client.getCount(query)
+        clean_number = total_number - hold_number
+
+        if clean_number > 0 and hold_number != -1:
+            operation_list = [
+                {
+                    "$match": query,
+                },
+                {
+                    "$project": { "total": 1, "disable_rate": { "$divide": ["$fail", "$total"] } },
+                },
+                {
+                    "$sort": { "disable_rate": -1, "total": -1 },
+                },
+                {
+                    "$limit": clean_number,
+                },
+            ]
+
+
+            items = self.client.aggregate(operation_list)
+            result = len(items)
+            for item in items:
+                query = {
+                    "_id": item["_id"]
+                }
+                self.client.delete(query)
 
         return result
 
@@ -112,11 +124,6 @@ class DbClient(object):
         result = self.cleanProxy(**kwargs)
 
         return result
-
-
-    # unuseful function
-    # def getNumber(self):
-    #     return self.client.getNumber()
 
     def getAllUsefulProxy(self):
         table_name = "useful_proxy"
@@ -204,7 +211,7 @@ class DbClient(object):
 
     def getProxyNum(self, table_name):
         self.client.changeTable(table_name)
-        number = self.client.getNumber()
+        number = self.client.getCount()
 
         return number
 

@@ -104,6 +104,7 @@ class ProxyVerifyRaw(ProxyVerify):
         total = 0
         succ = 0
         fail = 0
+        skip = 0
 
         while self.queue.qsize():
             raw_proxy = self.queue.get()
@@ -126,6 +127,8 @@ class ProxyVerifyRaw(ProxyVerify):
                     log.debug("raw_proxy:{raw_proxy} verify fail".format(raw_proxy=raw_proxy))
             else:
                 self.proxy_manager.deleteRawProxy(raw_proxy)
+
+                skip = skip + 1
                 log.debug("raw_proxy:{raw_proxy} verify repetition".format(raw_proxy=raw_proxy))
 
             self.queue.task_done()
@@ -135,7 +138,7 @@ class ProxyVerifyRaw(ProxyVerify):
 
         end_time = time.time()
         elapsed_time = int(end_time - start_time)
-        log.info("thread_id:{thread_id}, raw_proxy verify  proxy finish, total:{total}, succ:{succ}, fail:{fail}, elapsed_time:{elapsed_time}s".format(thread_id=thread_id, total=total, succ=succ, fail=fail, elapsed_time=elapsed_time))
+        log.info("thread_id:{thread_id}, raw_proxy verify  proxy finish, total:{total}, succ:{succ}, fail:{fail}, skip:{skip}, elapsed_time:{elapsed_time}s".format(thread_id=thread_id, total=total, succ=succ, fail=fail, skip=skip, elapsed_time=elapsed_time))
 
 # 这样的实现多线程有问题, 后期无法扩展到独立的机器上.
 # must call classmethod initQueue before
@@ -181,17 +184,20 @@ class ProxyVerifyUseful(ProxyVerify):
         log.info('thread_id:{thread_id} useful_proxy verify proxy finish, total:{total}, succ:{succ}, fail:{fail}, elapsed_time:{elapsed_time}s'.format(thread_id=thread_id, total=total, succ=succ, fail=fail, elapsed_time=elapsed_time))
 
 if __name__ == "__main__":
+    t_list = []
     ProxyVerifyRaw.initQueue()
     for _ in range(10):
-        pvr = ProxyVerifyRaw()
-        pvr.daemon = True
-        pvr.start()
+        t = ProxyVerifyRaw()
+        t_list.append(t)
 
     ProxyVerifyUseful.initQueue()
     for _ in range(10):
-        pvu = ProxyVerifyUseful()
-        pvu.daemon = True
-        pvu.start()
+        t = ProxyVerifyUseful()
+        t_list.append(t)
 
-    while 1:
-        pass
+    for t in t_list:
+        t.daemon = True
+        t.start()
+
+    for t in t_list:
+        t.join()
