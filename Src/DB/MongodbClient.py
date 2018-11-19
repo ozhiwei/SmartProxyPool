@@ -40,8 +40,7 @@ class MongodbClient(object):
         self.db[self.name].remove(query)
 
     def getAll(self):
-        data = self.db[self.name].find()
-        result = { item['proxy']: item for item in data }
+        result = self.db[self.name].find()
         return result
 
     def clean(self):
@@ -52,6 +51,9 @@ class MongodbClient(object):
 
     def update(self, query, data):
         self.db[self.name].update(query, data)
+
+    def upsert(self, query, data):
+        self.db[self.name].update(query, data, upsert=True)
 
     def exists(self, query):
         result = False

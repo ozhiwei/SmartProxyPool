@@ -18,13 +18,32 @@
 
 `ProxyPool` 另外我觉得首字母大写会庄重严肃很多!
 
+# 功能/特点
+
+我们的目标是`高质量`, `高灵活`.
+
+所有功能都是围绕这两点开发的:
+
+1. 所有代理都有计数, 验证成功的次数 / 总计验证的次数 == 代理可用率
+
+2. 通过token参数, 可以获取到`不重复`, `高可用率`的代理
+
+3. 获取代理时可以根据是否支持`https`, 透明还是匿名(普匿)`type`, 代理的所在的区域`region`进行过滤
+
+4. 可以通过配置文件(`Config.ini`)控制`获取新代理的间隔`, `验证代理的间隔`, `清除代理的间隔`
+
+5. 在清理代理时会根据`代理可用率`进行排序, 清理低可用率的代理, 这个数量可以在配置文件(`Config.ini`)中设置
+
+6. 实在编不下去了, 你行你来!
+
+
 # 目前
 
-目前还在重构阶段, 所以不是很推荐使用!
+目前还在重构阶段, 所以不保证安全稳定哦!
 
-可以直接到 [ProxyPool Demo](http://proxy.1again.cc:5010/v1/proxy/) 上使用!
+先体验一下 [ProxyPool Demo](http://proxy.1again.cc:5010/v1/proxy/)
 
-可以先Star, 养肥了再杀!
+然后Star一下, 养肥了再杀!
 
 目前不支持windows, 大概率以后也不会支持!
 
@@ -68,32 +87,62 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
 
 # 使用
 
-　　启动过几分钟后就能看到抓取到的代理IP, 你可以直接到数据库中查看
+启动过几分钟后就能看到抓取到的代理IP, 你可以直接到数据库中查看
 
-　　也可以通过api访问http://server_ip:5010 查看。
+也可以通过api访问http://server_ip:5010 查看。
 
 ## RESTFUL API
 
-```
-Api:            /v1/proxy/
-Method:         GET
-Description:    随机获取一个代理
-Arg:            可选参数
-    https=1                 过滤支持https的代理, default:0
-    token=string            自定义的字符串, 用来识别请求者, 避免获取到重复的代理, default:None
+```python
 
-token字段详解:
-token字段是用来开启`高质量`代理的方式.
-所谓的`高质量`, 就是成功率最高代理.
-token是为了识别请求者, 从而筛选出未使用过的`高质量`代理
+API_LIST = {
+    "/v1/proxy/": {
+        "args": {
+            "https": {
+                "value": [1],
+                "desc": "need https proxy? 1 == true",
+                "required": False,
+            },
+            "token": {
+                "value": "random string + random number",
+                "desc": "Avoid Get Repetition Proxy",
+                "required": False,
+            },
+            "region": {
+                "value": "region name like 中国 or 广州 or 江苏",
+                "desc": "Get Region Proxy",
+                "required": False,
+            },
+            "type": {
+                "value": [1,2],
+                "desc": "clear proxy 1 or (common) anonymous 2",
+                "required": False,
+            }
+        },
+        "desc": "Get A Random Proxy"
+    },
+    "/v1/proxies/": {
+        "args": {
+            "https": {
+                "value": [1],
+                "desc": "need https proxy? 1 == true",
+                "required": False,
+            },
+            "region": {
+                "value": "region name like 中国 or 广州 or 江苏",
+                "desc": "Get Region Proxy",
+                "required": False,
+            },
+            "type": {
+                "value": [1,2],
+                "desc": "clear proxy 1 or (common) anonymous 2",
+                "required": False,
+            }
+        },
+        "desc": "Get All Proxy",
+    }
+}
 
-* 目前需要自行填写, 建议使用16位数的随机数字+大小写字母.
-* 请注意, 如果太简单可能会导致和其他人的token相同, 最终极大的降低能使用代理的数量.
-
-Api:            /v1/proxys/
-Method:         GET
-Description:    获取所有代理
-Arg:            None
 ```
 
 ## 扩展代理

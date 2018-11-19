@@ -18,7 +18,9 @@ app = Flask(__name__)
 api = Api(app)
 
 parser = reqparse.RequestParser()
-parser.add_argument('https', type=bool, default=0, choices=[0,1], location='args')
+parser.add_argument('https', type=int, choices=[1], location='args')
+parser.add_argument('type', type=int, choices=[1,2], location='args')
+parser.add_argument('region', type=str, location='args')
 parser.add_argument('token', type=str, location='args')
 
 
@@ -37,17 +39,46 @@ API_LIST = {
     "/v1/proxy/": {
         "args": {
             "https": {
-                "value": [0,1],
-                "desc": "need https proxy? 1 true and 0 false"
+                "value": [1],
+                "desc": "need https proxy? 1 == true",
+                "required": False,
             },
             "token": {
                 "value": "random string + random number",
                 "desc": "Avoid Get Repetition Proxy",
+                "required": False,
             },
+            "region": {
+                "value": "region name like 中国 or 广州 or 江苏",
+                "desc": "Get Region Proxy",
+                "required": False,
+            },
+            "type": {
+                "value": [1,2],
+                "desc": "clear proxy 1 or (common) anonymous 2",
+                "required": False,
+            }
         },
         "desc": "Get A Random Proxy"
     },
-    "/v1/proxys/": {
+    "/v1/proxies/": {
+        "args": {
+            "https": {
+                "value": [1],
+                "desc": "need https proxy? 1 == true",
+                "required": False,
+            },
+            "region": {
+                "value": "region name like 中国 or 广州 or 江苏",
+                "desc": "Get Region Proxy",
+                "required": False,
+            },
+            "type": {
+                "value": [1,2],
+                "desc": "clear proxy 1 or (common) anonymous 2",
+                "required": False,
+            }
+        },
         "desc": "Get All Proxy",
     }
 }
@@ -61,29 +92,45 @@ class ApiList(Resource):
 class Proxy(Resource):
     def get(self):
         args = parser.parse_args()
-
-        result = {}
+        result = {
+            "result": "null"
+        }
+        data = {}
 
         options = {
             "https": bool(args.get('https')),
             "token": args.get('token'),
+            "proxy_type": args.get('type'),
+            "proxy_region": args.get('region'),
         }
 
         if options.get("token", None):
-            result["result"] = proxy_manager.getQualityProxy(**options)
+            data = proxy_manager.getQualityProxy(**options)
         else:
-            result["result"] = proxy_manager.getSampleProxy(**options)
+            data = proxy_manager.getSampleProxy(**options)
+
+        if data:
+            result["result"] = data["proxy"]
 
         return result
 
-class Proxys(Resource):
+class proxies(Resource):
     def get(self):
+        args = parser.parse_args()
         result = {}
-        result["result"] = proxy_manager.getAll()
+
+        options = {
+            "https": bool(args.get('https')),
+            "proxy_type": args.get('type'),
+            "proxy_region": args.get('region'),
+        }
+
+        data = proxy_manager.getAllUsefulProxy(**options)
+        result["result"] = [ item["proxy"] for item in data ]
 
         return result
 
-api.add_resource(Proxys, '/v1/proxys/')
+api.add_resource(proxies, '/v1/proxies/')
 api.add_resource(Proxy, '/v1/proxy/')
 api.add_resource(ApiList, '/v1/')
 

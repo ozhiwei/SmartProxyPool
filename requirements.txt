@@ -5,6 +5,7 @@ requests==2.20.0
 lxml==3.7.2
 flask_restful
 
+ipip-datx
 pymongo
 redis
 

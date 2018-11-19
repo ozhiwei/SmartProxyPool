@@ -3,6 +3,8 @@
 
 import random
 
+import datx
+
 from Util import EnvUtil
 from DB.DbClient import DbClient
 from Config.ConfigManager import config
@@ -19,6 +21,7 @@ class ProxyManager(object):
         self.db = DbClient()
         self.raw_proxy_queue = 'raw_proxy'
         self.useful_proxy_queue = 'useful_proxy'
+        self.datx = datx.City("Data/17monipdb.datx")
 
     def get(self):
         item = None
@@ -53,8 +56,12 @@ class ProxyManager(object):
         result = self.db.cleanRawProxy(**kwargs)
         return result
 
-    def getAllUsefulProxy(self):
-        result = self.db.getAllUsefulProxy()
+    def getAllUsefulProxy(self, **kwargs):
+        result = self.db.getAllUsefulProxy(**kwargs)
+        return result
+
+    def getAllProxy(self, **kwargs):
+        result = self.db.getAllProxy(**kwargs)
         return result
 
     def getAllRawProxy(self):
@@ -65,47 +72,33 @@ class ProxyManager(object):
         result = self.db.checkRawProxyExists(proxy)
         return result
 
+    def checkUsefulProxyExists(self, proxy):
+        result = self.db.checkUsefulProxyExists(proxy)
+        return result
+
     def getSampleRawProxy(self):
         result = self.db.getSampleRawProxy()
         return result
 
     def getQualityProxy(self, **kwargs):
-        item = self.db.getQualityProxy(**kwargs)
-        result = None
+        result = self.db.getQualityProxy(**kwargs)
 
-        if item:
-            result = item["proxy"]
+        if result:
+            proxy = result["proxy"]
 
-        token = kwargs.get("token", None)
-        if token:
-            self.db.addProxyUsedToken(result, token)
-
-        log.debug("getQualityProxy, item:{item}".format(item=str(item)))
+            token = kwargs.get("token", None)
+            if proxy and token:
+                self.db.addTokenToProxy(proxy, token)
 
         return result
 
     def getSampleProxy(self, **kwargs):
-        item = self.db.getSampleUsefulProxy(**kwargs)
-        result = None
-        if item:
-            result = item["proxy"]
-
-        log.debug("getSampleUsefulProxy, item:{item}".format(item=str(item)))
+        result = self.db.getSampleUsefulProxy(**kwargs)
 
         return result
 
-    # 准备删除
     def getSampleUsefulProxy(self, **kwargs):
-        item = self.db.getSampleUsefulProxy(**kwargs)
-        result = None
-        if item:
-            result = item["proxy"]
-
-            token = kwargs.get("token", None)
-            if token:
-                self.db.addProxyUsedToken(result, token)
-
-        log.debug("getSampleUsefulProxy, item:{item}".format(item=str(item)))
+        result = self.db.getSampleUsefulProxy(**kwargs)
 
         return result
 
@@ -115,11 +108,27 @@ class ProxyManager(object):
     def saveRawProxy(self, proxy):
         self.db.saveRawProxy(proxy)
 
+    def getProxyRegion(self, ip):
+        data = self.datx.find(ip)
+        result = data[:3]
+        return result
+
     # TODO: 逻辑应该有问题, 但不确定
     # http是可用的才会保存https, 会不会有只开通https的代理呢?
-    def saveUsefulProxy(self, proxy, https=False):
-        data = {"proxy": proxy, "succ": 1, "fail": 0, "total": 1, "https": https}
-        self.db.saveUsefulProxy(proxy, data)
+    def saveUsefulProxy(self, proxy):
+        region_list = self.getProxyRegion(proxy.ip)
+
+        data = {
+            "proxy": proxy.address, 
+            "succ": 1,
+            "fail": 0,
+            "total": 1,
+            "https": proxy.https,
+            "proxy_type": proxy.type,
+            "region_list": region_list,
+        }
+
+        self.db.saveUsefulProxy(proxy.address, data)
 
     def deleteUsefulProxy(self, proxy):
         self.db.deleteUsefulProxy(proxy)

@@ -44,7 +44,10 @@ class ProxyFetch(threading.Thread):
                 fail = 0
                 for proxy in getattr(GetFreeProxy, func_name.strip())():
                     proxy = proxy.strip()
-                    if proxy and verifyProxyFormat(proxy) and not self.proxy_manager.checkRawProxyExists(proxy):
+                    if proxy and verifyProxyFormat(proxy) and \
+                    not self.proxy_manager.checkRawProxyExists(proxy) and \
+                    not self.proxy_manager.checkUsefulProxyExists(proxy):
+
                         self.proxy_manager.saveRawProxy(proxy)
                         succ = succ + 1
                         log.debug('{func_name}: fetch proxy {proxy} succ'.format(func_name=func_name, proxy=proxy))

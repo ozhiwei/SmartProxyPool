@@ -18,6 +18,16 @@ try:
 except:
     from queue import Queue  # py2
 
+
+PROXY_TYPE = {
+    "CLEAR": 1,
+    "COMMON_ANONYMOUS": 2,
+    "HIGH_ANONYMOUS": 3,
+}
+
+class ProxyResult(object):
+    pass
+
 class ProxyVerify(threading.Thread):
     def __init__(self, **kwargs):
         super(ProxyVerify, self).__init__(**kwargs)
@@ -26,8 +36,16 @@ class ProxyVerify(threading.Thread):
     # TODO: 逻辑应该有问题, 但不确定
     # http是可用的才会保存https, 会不会有只开通https的代理呢?
     def verifyProxy(self, proxy):
+        result = ProxyResult()
+
         if isinstance(proxy, bytes):
             proxy = proxy.decode('utf8')
+
+        data = proxy.split(':')
+        result.ip = data[0]
+        result.port = data[1]
+        result.address = proxy
+        
 
         proxies = {
             "http": proxy,
@@ -36,46 +54,49 @@ class ProxyVerify(threading.Thread):
         http_url = "http://httpbin.org/ip"
         https_url = "https://httpbin.org/ip"
 
-        http_result = False
-        https_result = False
+        result.http = False
+        result.https = False
 
         # http verify
         try:
             r = requests.get(http_url, proxies=proxies, timeout=10, verify=False)
-
-            content = r.content
-            if isinstance(content, bytes):
-                content = content.decode('utf8')
+            data = r.json()
+            ip_string = data["origin"]
+            ip_list = ip_string.split(", ")
 
             status_result = r.status_code == 200
-            content_result = re.search("\"origin\"", content) != None
+            content_result = result.ip in ip_list
             if status_result and content_result:
-                http_result = True
+                result.http = True
+
+            if len(ip_list) > 1:
+                result.type = PROXY_TYPE["CLEAR"]
+            else:
+                result.type = PROXY_TYPE["COMMON_ANONYMOUS"]
 
         except Exception as e:
             log.debug("proxy:{proxy} http verify proxy fail, error:{error}".format(proxy=proxy, error=e))
-            http_result = False
+            result.http = False
 
-        if http_result:
+        if result.http:
 
             # https verify
             try:
                 r = requests.get(https_url, proxies=proxies, timeout=10, verify=False)
-
-                content = r.content
-                if isinstance(content, bytes):
-                    content = content.decode('utf8')
+                data = r.json()
+                ip_string = data["origin"]
+                ip_list = ip_string.split(", ")
 
                 status_right = r.status_code == 200
-                content_right = re.search("\"origin\"", content) != None
+                content_right = result.ip in ip_list
                 if status_right and content_right:
-                    https_result = True
+                    result.https = True
 
             except Exception as e:
                 log.debug("proxy:{proxy} https verify proxy fail, error:{error}".format(proxy=proxy, error=e))
-                https_result = False
+                result.https = False
 
-        return (http_result, https_result)
+        return result
 
 # 这样的实现多线程有问题, 后期无法扩展到独立的机器上.
 # must call classmethod initQueue before
@@ -89,11 +110,11 @@ class ProxyVerifyRaw(ProxyVerify):
     @classmethod
     def initQueue(cls):
         proxy_manager = ProxyManager()
-        proxys = proxy_manager.getAllRawProxy()
-        for proxy in proxys:
+        proxies = proxy_manager.getAllRawProxy()
+        for proxy in proxies:
             cls.queue.put(proxy)
 
-        cls.useful_proxys = proxy_manager.getAllUsefulProxy()
+        cls.useful_proxys = proxy_manager.getAllProxy()
 
     def run(self):
 
@@ -107,14 +128,15 @@ class ProxyVerifyRaw(ProxyVerify):
         skip = 0
 
         while self.queue.qsize():
-            raw_proxy = self.queue.get()
+            raw_proxy_item = self.queue.get()
+            raw_proxy = raw_proxy_item.get("proxy")
             if isinstance(raw_proxy, bytes):
                 raw_proxy = raw_proxy.decode('utf8')
 
             if raw_proxy not in self.useful_proxys:
-                (http_result, https_result) =  self.verifyProxy(raw_proxy)
-                if http_result:
-                    self.proxy_manager.saveUsefulProxy(raw_proxy, https_result)
+                proxy = self.verifyProxy(raw_proxy)
+                if proxy.http:
+                    self.proxy_manager.saveUsefulProxy(proxy)
                     self.proxy_manager.deleteRawProxy(raw_proxy)
                     self.useful_proxys[raw_proxy] = True
 
@@ -151,8 +173,8 @@ class ProxyVerifyUseful(ProxyVerify):
     @classmethod
     def initQueue(cls):
         proxy_manager = ProxyManager()
-        proxys = proxy_manager.getAllUsefulProxy()
-        for proxy in proxys:
+        proxies = proxy_manager.getAllProxy()
+        for proxy in proxies:
             cls.queue.put(proxy)
 
     def run(self):
@@ -165,8 +187,10 @@ class ProxyVerifyUseful(ProxyVerify):
         succ = 0
         fail = 0
         while self.queue.qsize():
-            proxy = self.queue.get()
-            if self.verifyProxy(proxy):
+            proxy_item = self.queue.get()
+            proxy = proxy_item.get("proxy")
+            result = self.verifyProxy(proxy)
+            if result.http:
                 self.proxy_manager.tickUsefulProxyVaildSucc(proxy)
                 succ = succ + 1
                 log.debug("useful_proxy:{proxy} verify succ".format(proxy=proxy))
