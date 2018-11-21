@@ -98,14 +98,14 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
 API_LIST = {
     "/v1/proxy/": {
         "args": {
-            "https": {
-                "value": [1],
-                "desc": "need https proxy? 1 == true",
-                "required": False,
-            },
             "token": {
                 "value": "random string + random number",
                 "desc": "Avoid Get Repetition Proxy",
+                "required": False,
+            },
+            "https": {
+                "value": [1],
+                "desc": "need https proxy? 1 == true",
                 "required": False,
             },
             "region": {
@@ -140,6 +140,10 @@ API_LIST = {
             }
         },
         "desc": "Get All Proxy",
+    },
+    "/v1/proxies/stat/": {
+        "args": {},
+        "desc": "Statistics All Vaild Proxies",
     }
 }
 

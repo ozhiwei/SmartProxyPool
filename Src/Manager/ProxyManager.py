@@ -23,30 +23,30 @@ class ProxyManager(object):
         self.useful_proxy_queue = 'useful_proxy'
         self.datx = datx.City("Data/17monipdb.datx")
 
-    def get(self):
-        item = None
-        item_list = []
-        self.db.changeTable(self.useful_proxy_queue)
+    # def get(self):
+    #     item = None
+    #     item_list = []
+    #     self.db.changeTable(self.useful_proxy_queue)
 
-        item_dict = self.db.getAll()
-        if item_dict:
-            if EnvUtil.PY3:
-                item_list = list(item_dict.keys())
-            else:
-                item_list = item_dict.keys()
+    #     item_dict = self.db.getAll()
+    #     if item_dict:
+    #         if EnvUtil.PY3:
+    #             item_list = list(item_dict.keys())
+    #         else:
+    #             item_list = item_dict.keys()
 
-        if item_list:
-            item = random.choice(item_list)
+    #     if item_list:
+    #         item = random.choice(item_list)
 
-        log.debug('Get Random Proxy {item} of {total}'.format(item=item, total=len(item_list)))
-        return item
+    #     log.debug('Get Random Proxy {item} of {total}'.format(item=item, total=len(item_list)))
+    #     return item
 
-    def getAll(self):
-        self.db.changeTable(self.useful_proxy_queue)
-        item_dict = self.db.getAll()
-        if EnvUtil.PY3:
-            return list(item_dict.keys()) if item_dict else list()
-        return item_dict.keys() if item_dict else list()
+    # def getAll(self):
+    #     self.db.changeTable(self.useful_proxy_queue)
+    #     item_dict = self.db.getAll()
+    #     if EnvUtil.PY3:
+    #         return list(item_dict.keys()) if item_dict else list()
+    #     return item_dict.keys() if item_dict else list()
 
     def cleanUsefulProxy(self, **kwargs):
         result = self.db.cleanUsefulProxy(**kwargs)
@@ -56,12 +56,16 @@ class ProxyManager(object):
         result = self.db.cleanRawProxy(**kwargs)
         return result
 
-    def getAllUsefulProxy(self, **kwargs):
-        result = self.db.getAllUsefulProxy(**kwargs)
+    def getUsefulProxyStat(self, **kwargs):
+        result = self.db.getUsefulProxyStat(**kwargs)
         return result
 
-    def getAllProxy(self, **kwargs):
-        result = self.db.getAllProxy(**kwargs)
+    def getAllValidUsefulProxy(self, **kwargs):
+        result = self.db.getAllValidUsefulProxy(**kwargs)
+        return result
+
+    def getAllUsefulProxy(self, **kwargs):
+        result = self.db.getAllUsefulProxy(**kwargs)
         return result
 
     def getAllRawProxy(self):
@@ -106,11 +110,18 @@ class ProxyManager(object):
         self.db.deleteRawProxy(proxy)
 
     def saveRawProxy(self, proxy):
-        self.db.saveRawProxy(proxy)
+        data = {
+            "proxy": proxy,
+            "fail": 0, 
+            "total": 0,
+        }
+        self.db.saveRawProxy(proxy, data)
 
     def getProxyRegion(self, ip):
         data = self.datx.find(ip)
-        result = data[:3]
+        region_list = data[:3]
+        result = [ item for item in region_list if item  ]
+
         return result
 
     # TODO: 逻辑应该有问题, 但不确定

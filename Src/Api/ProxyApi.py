@@ -15,6 +15,7 @@ from Config.ConfigManager import config
 from Manager.ProxyManager import proxy_manager
 
 app = Flask(__name__)
+app.config.update(RESTFUL_JSON=dict(ensure_ascii=False))
 api = Api(app)
 
 parser = reqparse.RequestParser()
@@ -26,26 +27,26 @@ parser.add_argument('token', type=str, location='args')
 
 @app.errorhandler(404)
 def miss(e):
-    data = {
-        "result": "not found",
-        "status_code": 404,
-        "github": "https://github.com/1again/ProxyPool",
-        "href": ["/v1/"],
-    }
+    data = [
+        {"result": "not found"},
+        {"status_code": 404},
+        {"github": "https://github.com/1again/ProxyPool"},
+        {"api_list": API_LIST},
+    ]
     result = jsonify(data)
     return result, 404
 
 API_LIST = {
     "/v1/proxy/": {
         "args": {
-            "https": {
-                "value": [1],
-                "desc": "need https proxy? 1 == true",
-                "required": False,
-            },
             "token": {
                 "value": "random string + random number",
                 "desc": "Avoid Get Repetition Proxy",
+                "required": False,
+            },
+            "https": {
+                "value": [1],
+                "desc": "need https proxy? 1 == true",
                 "required": False,
             },
             "region": {
@@ -80,6 +81,10 @@ API_LIST = {
             }
         },
         "desc": "Get All Proxy",
+    },
+    "/v1/proxies/stat/": {
+        "args": {},
+        "desc": "Statistics All Vaild Proxies",
     }
 }
 
@@ -93,7 +98,7 @@ class Proxy(Resource):
     def get(self):
         args = parser.parse_args()
         result = {
-            "result": "null"
+            "data": {}
         }
         data = {}
 
@@ -108,16 +113,32 @@ class Proxy(Resource):
             data = proxy_manager.getQualityProxy(**options)
         else:
             data = proxy_manager.getSampleProxy(**options)
-
+        
         if data:
-            result["result"] = data["proxy"]
+            del data["_id"]
+
+        if "used_token_list" in data:
+            del data["used_token_list"]
+
+        result["data"] = data
 
         return result
 
-class proxies(Resource):
+class ProxyCounter(dict):
+     def __missing__(self, key):
+        result = 0
+        if key in ["region_list", "https", "proxy_type", "last_status", "available_rate"]:
+            result = ProxyCounter()
+            self[key] = result
+
+        return result
+
+class Proxies(Resource):
     def get(self):
         args = parser.parse_args()
-        result = {}
+        result = {
+            "data": []
+        }
 
         options = {
             "https": bool(args.get('https')),
@@ -126,20 +147,51 @@ class proxies(Resource):
         }
 
         data = proxy_manager.getAllUsefulProxy(**options)
-        result["result"] = [ item["proxy"] for item in data ]
+        
+        for item in data:
+            del item["_id"]
+
+        result["data"] = data
 
         return result
 
-api.add_resource(proxies, '/v1/proxies/')
+def stat(data):
+    result = ProxyCounter()
+
+    for item in data:
+        for k, v in item.items():
+            if k == "region_list":
+                for region in v:
+                    result[k][region] = result[k][region] + 1
+            elif k == "https":
+                result[k][v] = result[k][v] + 1
+            elif k == "proxy_type":
+                result[k][v] = result[k][v] + 1
+            elif k == "last_status":
+                result[k][v] = result[k][v] + 1
+            elif k == "available_rate":
+                v = int(v * 10) * 10
+                result[k][v] = result[k][v] + 1
+
+    return result
+
+class ProxiesStat(Resource):
+    def get(self):
+        result = {}
+
+        data = proxy_manager.getUsefulProxyStat()
+        result["data"] = stat(data)
+
+        return result
+
+api.add_resource(ProxiesStat, '/v1/proxies/stat/')
+api.add_resource(Proxies, '/v1/proxies/')
 api.add_resource(Proxy, '/v1/proxy/')
 api.add_resource(ApiList, '/v1/')
 
 
 def run():
-    if sys.platform.startswith("win"):
-        app.run(host=config.API.bind_ip, port=config.API.bind_port)
-    else:
-        app.run(host=config.API.bind_ip, port=config.API.bind_port, threaded=False, processes=config.API.processes)
+    app.run(host=config.API.bind_ip, port=config.API.bind_port, threaded=False, processes=config.API.processes)
 
 
 if __name__ == '__main__':

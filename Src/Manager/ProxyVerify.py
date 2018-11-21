@@ -20,6 +20,7 @@ except:
 
 
 PROXY_TYPE = {
+    "UNKNOWN": 0,
     "CLEAR": 1,
     "COMMON_ANONYMOUS": 2,
     "HIGH_ANONYMOUS": 3,
@@ -102,7 +103,7 @@ class ProxyVerify(threading.Thread):
 # must call classmethod initQueue before
 class ProxyVerifyRaw(ProxyVerify):
     queue = Queue()
-    useful_proxys = {}
+    useful_proxies = {}
 
     def __init__(self, **kwargs):
         super(ProxyVerifyRaw, self).__init__(**kwargs)
@@ -110,11 +111,13 @@ class ProxyVerifyRaw(ProxyVerify):
     @classmethod
     def initQueue(cls):
         proxy_manager = ProxyManager()
-        proxies = proxy_manager.getAllRawProxy()
-        for proxy in proxies:
-            cls.queue.put(proxy)
+        items = proxy_manager.getAllRawProxy()
+        for item in items:
+            cls.queue.put(item)
 
-        cls.useful_proxys = proxy_manager.getAllProxy()
+        items = proxy_manager.getAllUsefulProxy()
+        data = { item["proxy"]: 1 for item in items }
+        cls.useful_proxies = data
 
     def run(self):
 
@@ -133,12 +136,12 @@ class ProxyVerifyRaw(ProxyVerify):
             if isinstance(raw_proxy, bytes):
                 raw_proxy = raw_proxy.decode('utf8')
 
-            if raw_proxy not in self.useful_proxys:
+            if raw_proxy not in self.useful_proxies:
                 proxy = self.verifyProxy(raw_proxy)
                 if proxy.http:
                     self.proxy_manager.saveUsefulProxy(proxy)
                     self.proxy_manager.deleteRawProxy(raw_proxy)
-                    self.useful_proxys[raw_proxy] = True
+                    self.useful_proxies[raw_proxy] = True
 
                     succ = succ + 1
                     log.debug("raw_proxy:{raw_proxy} verify succ".format(raw_proxy=raw_proxy))
@@ -173,7 +176,7 @@ class ProxyVerifyUseful(ProxyVerify):
     @classmethod
     def initQueue(cls):
         proxy_manager = ProxyManager()
-        proxies = proxy_manager.getAllProxy()
+        proxies = proxy_manager.getAllUsefulProxy()
         for proxy in proxies:
             cls.queue.put(proxy)
 

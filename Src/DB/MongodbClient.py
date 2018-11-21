@@ -40,7 +40,11 @@ class MongodbClient(object):
         self.db[self.name].remove(query)
 
     def getAll(self):
-        result = self.db[self.name].find()
+        result = []
+        items = self.db[self.name].find()
+        for item in items:
+            result.append(item)
+
         return result
 
     def clean(self):

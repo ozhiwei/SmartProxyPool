@@ -71,7 +71,6 @@ class DbClient(object):
 
         return result
 
-
     def cleanUsefulProxy(self, **kwargs):
         table_name = "useful_proxy"
         self.changeTable(table_name)
@@ -79,7 +78,6 @@ class DbClient(object):
         result = self.cleanProxy(**kwargs)
 
         return result
-
 
     def cleanRawProxy(self, **kwargs):
         table_name = "raw_proxy"
@@ -89,7 +87,7 @@ class DbClient(object):
 
         return result
 
-    def getAllUsefulProxy(self, **kwargs):
+    def getAllValidUsefulProxy(self, **kwargs):
         table_name = "useful_proxy"
         self.changeTable(table_name)
 
@@ -113,14 +111,52 @@ class DbClient(object):
         if proxy_region:
             operation_list[0]["$match"]["region_list"] = { "$in": [proxy_region] }
 
+        log.debug("getAllValidUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
+        result = self.client.aggregate(operation_list)
+
+        return result
+
+    def getUsefulProxyStat(self, **kwargs):
+        table_name = "useful_proxy"
+        self.changeTable(table_name)
+
+        result = []
+        operation_list = [
+            {
+                "$match": { "total": { "$ne": 0 } },
+            }
+        ]
+
+        opertaion = {
+            "$project": {
+                "https": 1,
+                "proxy_type": 1,
+                "region_list": 1,
+                "last_status": 1,
+                "available_rate": { "$divide": ["$succ", "$total"] }
+            }
+        }
+        operation_list.append(opertaion)
+
         log.debug("getAllUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
         result = self.client.aggregate(operation_list)
 
         return result
 
-    def getAllProxy(self, **kwargs):
+    # def getAllProxy(self, **kwargs):
+    #     table_name = "raw_proxy"
+    #     self.changeTable(table_name)
+
+    #     result = self.client.getAll()
+    #     return result
+
+    def getAllUsefulProxy(self, **kwargs):
+        table_name = "useful_proxy"
+        self.changeTable(table_name)
+
         result = self.client.getAll()
         return result
+
 
     def getAllRawProxy(self):
         table_name = "raw_proxy"
@@ -137,7 +173,6 @@ class DbClient(object):
     def checkRawProxyExists(self, proxy):
         result = self.checkProxyExists(proxy)
         return result
-
 
     def checkUsefulProxyExists(self, proxy):
         result = self.checkProxyExists(proxy)
@@ -160,10 +195,10 @@ class DbClient(object):
                 },
             },
             {
-                "$project": { "proxy": 1, "usable_rate": { "$divide": ["$succ", "$total"] } }
+                "$project": { "proxy": 1, "available_rate": { "$divide": ["$succ", "$total"] } }
             },
             { 
-                "$sort": { "usable_rate": -1 }
+                "$sort": { "available_rate": -1 }
             },
             {
                 "$limit": 1
@@ -257,11 +292,11 @@ class DbClient(object):
 
         return number
 
-    def saveRawProxy(self, proxy):
+    def saveRawProxy(self, proxy, data):
         table_name = 'raw_proxy'
         self.client.changeTable(table_name)
+
         query = {"proxy": proxy}
-        data = {"proxy": proxy, "succ": 0, "fail": 0, "total": 0}
         self.client.put(query, data)
 
     def saveUsefulProxy(self, proxy, data):
