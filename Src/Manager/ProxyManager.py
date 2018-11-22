@@ -120,7 +120,10 @@ class ProxyManager(object):
     def getProxyRegion(self, ip):
         data = self.datx.find(ip)
         region_list = data[:3]
-        result = [ item for item in region_list if item  ]
+        result = []
+        for item in region_list:
+            if item and item not in result:
+                result.append(item)
 
         return result
 
