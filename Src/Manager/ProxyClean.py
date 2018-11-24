@@ -27,16 +27,18 @@ class ProxyCleanUseful(ProxyClean):
     def run(self):
         hold_number = config.BASE.hold_useful_proxy_number
         clean_number = self.proxy_manager.cleanUsefulProxy(hold_number=hold_number)
+        total_number = self.proxy_manager.getUsefulProxyNumber()
 
-        log.info("clean useful_proxy, clean_number:{clean_number}, hold_number:{hold_number}".format(clean_number=clean_number, hold_number=hold_number))
+        log.info("clean useful, total_number:{total_number}, clean_number:{clean_number}, hold_number:{hold_number}".format(total_number=total_number, clean_number=clean_number, hold_number=hold_number))
 
 class ProxyCleanRaw(ProxyClean):
 
     def run(self):
         hold_number = config.BASE.hold_raw_proxy_number
         clean_number = self.proxy_manager.cleanRawProxy(hold_number=hold_number)
+        total_number = self.proxy_manager.getRawProxyNumber()
 
-        log.info("clean raw_proxy, clean_number:{clean_number}, hold_number:{hold_number}".format(clean_number=clean_number, hold_number=hold_number))
+        log.info("clean raw_proxy, total_number:{total_number}, clean_number:{clean_number}, hold_number:{hold_number}".format(total_number=total_number, clean_number=clean_number, hold_number=hold_number))
 
 if __name__ == "__main__":
     t1 = ProxyCleanUseful()
