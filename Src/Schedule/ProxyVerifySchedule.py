@@ -5,8 +5,9 @@ import sys
 sys.path.append("Src")
 import time
 import threading
+import datetime
 
-from apscheduler.schedulers.background import BackgroundScheduler as Sch
+from apscheduler.schedulers.blocking import BlockingScheduler as Sch
 from Manager.ProxyVerify import ProxyVerifyRaw, ProxyVerifyUseful
 from Manager.ProxyFetch import ProxyFetch
 
@@ -36,15 +37,10 @@ def verify_useful_proxy():
 
 def run():
     sch = Sch()
-    sch.add_job(verify_raw_proxy, "interval", minutes=config.BASE.verify_raw_proxy_interval)
-    sch.add_job(verify_useful_proxy, "interval", minutes=config.BASE.verify_useful_proxy_interval)
+    now = datetime.datetime.now()
+    sch.add_job(verify_raw_proxy, "interval", minutes=config.BASE.verify_raw_proxy_interval, next_run_time=now)
+    sch.add_job(verify_useful_proxy, "interval", minutes=config.BASE.verify_useful_proxy_interval, next_run_time=now)
     sch.start()
-
-    verify_raw_proxy()
-    verify_useful_proxy()
-
-    while 1:
-        pass
 
 if __name__ == '__main__':
     run()

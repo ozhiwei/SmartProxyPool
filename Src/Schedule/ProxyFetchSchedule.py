@@ -5,8 +5,9 @@ import sys
 sys.path.append("Src")
 import time
 import threading
+import datetime
 
-from apscheduler.schedulers.background import BackgroundScheduler as Sch
+from apscheduler.schedulers.blocking import BlockingScheduler as Sch
 from Manager.ProxyFetch import ProxyFetch
 from Manager.ProxyManager import ProxyManager
 from Log.LogManager import log
@@ -32,13 +33,9 @@ def fetch_new_proxy():
 
 def run():
     sch = Sch()
-    sch.add_job(fetch_new_proxy, 'interval', minutes=config.BASE.fetch_new_proxy_interval)
+    now = datetime.datetime.now()
+    sch.add_job(fetch_new_proxy, 'interval', minutes=config.BASE.fetch_new_proxy_interval, next_run_time=now)
     sch.start()
-
-    fetch_new_proxy()
-
-    while 1:
-        pass
 
 if __name__ == '__main__':
     run()

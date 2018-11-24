@@ -149,7 +149,7 @@ class ProxyManager(object):
             }
         }
 
-        if proxy_item.get("https") == False:
+        if proxy_item.get("https") == False and proxy_info.https != False:
             data["$set"]["https"] = proxy_info.https
 
         self.db.updateUsefulProxy(proxy_info.address, data)

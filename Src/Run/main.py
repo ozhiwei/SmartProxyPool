@@ -29,17 +29,20 @@ def main(test=False):
         "ProxyClean": ProxyCleanRun
     }
 
+    process_list = []
     for name in process_hash.keys():
         p = Process(target=process_hash[name], name=name)
+        process_list.append(p)
+
+    for p in process_list:    
         p.daemon = True
         p.start()
 
     if test:
-        time.sleep(5)
-        sys.exit(0)
+        time.sleep(10)
     else:
-        while 1:
-            pass
+        for p in process_list:
+            p.join()
 
 if __name__ == '__main__':
     main()
