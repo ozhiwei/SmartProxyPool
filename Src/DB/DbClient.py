@@ -157,7 +157,6 @@ class DbClient(object):
         result = self.client.getAll()
         return result
 
-
     def getAllRawProxy(self):
         table_name = "raw_proxy"
         self.changeTable(table_name)
@@ -304,6 +303,12 @@ class DbClient(object):
         self.client.changeTable(table_name)
         query = {"proxy": proxy}
         self.client.put(query, data)
+
+    def updateUsefulProxy(self, proxy, data):
+        table_name = 'useful_proxy'
+        self.client.changeTable(table_name)
+        query = {"proxy": proxy}
+        self.client.update(query, data)
 
     def deleteUsefulProxy(self, proxy):
         table_name = 'useful_proxy'

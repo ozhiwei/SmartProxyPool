@@ -15,6 +15,9 @@ clean_useful_proxy_interval = 30
 hold_raw_proxy_number = -1
 hold_useful_proxy_number = -1
 
+; custom_verify_proxy_url = http://www.baidu.com/
+; regex_match_text_pattern = baidu
+
 [DB]
 ; Configure the database information
 type = MONGODB

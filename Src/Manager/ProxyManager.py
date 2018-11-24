@@ -127,22 +127,32 @@ class ProxyManager(object):
 
         return result
 
-    # TODO: 逻辑应该有问题, 但不确定
-    # http是可用的才会保存https, 会不会有只开通https的代理呢?
-    def saveUsefulProxy(self, proxy):
-        region_list = self.getProxyRegion(proxy.ip)
+    def saveUsefulProxy(self, proxy_info):
+        region_list = self.getProxyRegion(proxy_info.ip)
 
         data = {
-            "proxy": proxy.address, 
+            "proxy": proxy_info.address, 
             "succ": 1,
             "fail": 0,
             "total": 1,
-            "https": proxy.https,
-            "proxy_type": proxy.type,
+            "https": proxy_info.https,
+            "proxy_type": proxy_info.type,
             "region_list": region_list,
         }
 
-        self.db.saveUsefulProxy(proxy.address, data)
+        self.db.saveUsefulProxy(proxy_info.address, data)
+
+    def updateUsefulProxy(self, proxy_item, proxy_info):
+        data = {
+            "$set": {
+                "proxy_type": proxy_info.type,
+            }
+        }
+
+        if proxy_item.get("https") == False:
+            data["$set"]["https"] = proxy_info.https
+
+        self.db.updateUsefulProxy(proxy_info.address, data)
 
     def deleteUsefulProxy(self, proxy):
         self.db.deleteUsefulProxy(proxy)

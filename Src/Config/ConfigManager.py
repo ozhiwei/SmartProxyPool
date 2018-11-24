@@ -40,17 +40,14 @@ class ProxyConfig(object):
         relative_path = "{pwd}/{config_dir}".format(pwd=pwd, config_dir=self.config_dir)
         config_dir = os.path.realpath(relative_path)
 
-        config_path = os.path.join(config_dir, 'Config.ini.default')
+        config_path = os.path.join(config_dir, 'Config.ini')
+        if not os.path.isfile(config_path):
+            config_path = os.path.join(config_dir, 'Config.ini.default')
+
         config = ConfigParse()
         config.read(config_path)
         self.initConfig(config)
         self.cf = config
-
-        config_path = os.path.join(config_dir, 'Config.ini')
-        if os.path.isfile(config_path):
-            config.read(config_path)
-            self.initConfig(config)
-            self.cf = config
 
     def __getattr__(self, name):
         result = ProxyObject()

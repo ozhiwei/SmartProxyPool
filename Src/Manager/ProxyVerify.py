@@ -11,7 +11,7 @@ import time
 
 from Manager.ProxyManager import ProxyManager
 from Log.LogManager import log
-from Util.GetConfig import config
+from Config.ConfigManager import config
 
 try:
     from Queue import Queue  # py3
@@ -26,18 +26,18 @@ PROXY_TYPE = {
     "HIGH_ANONYMOUS": 3,
 }
 
-class ProxyResult(object):
+class ProxyInfo(object):
     pass
 
 class ProxyVerify(threading.Thread):
     def __init__(self, **kwargs):
         super(ProxyVerify, self).__init__(**kwargs)
         self.proxy_manager = ProxyManager()
-    
+
     # TODO: 逻辑应该有问题, 但不确定
-    # http是可用的才会保存https, 会不会有只开通https的代理呢?
-    def verifyProxy(self, proxy):
-        result = ProxyResult()
+    # http是可用的才会检查https, 会不会有只开通https的代理呢?
+    def getProxyInfo(self, proxy):
+        result = ProxyInfo()
 
         if isinstance(proxy, bytes):
             proxy = proxy.decode('utf8')
@@ -46,7 +46,6 @@ class ProxyVerify(threading.Thread):
         result.ip = data[0]
         result.port = data[1]
         result.address = proxy
-        
 
         proxies = {
             "http": proxy,
@@ -58,6 +57,7 @@ class ProxyVerify(threading.Thread):
         result.http = False
         result.https = False
 
+        result.type = PROXY_TYPE["UNKNOWN"]
         # http verify
         try:
             r = requests.get(http_url, proxies=proxies, timeout=10, verify=False)
@@ -66,7 +66,7 @@ class ProxyVerify(threading.Thread):
             ip_list = ip_string.split(", ")
 
             status_result = r.status_code == 200
-            content_result = result.ip in ip_list
+            content_result = "origin" in data
             if status_result and content_result:
                 result.http = True
 
@@ -85,17 +85,72 @@ class ProxyVerify(threading.Thread):
             try:
                 r = requests.get(https_url, proxies=proxies, timeout=10, verify=False)
                 data = r.json()
-                ip_string = data["origin"]
-                ip_list = ip_string.split(", ")
 
-                status_right = r.status_code == 200
-                content_right = result.ip in ip_list
-                if status_right and content_right:
+                status_result = r.status_code == 200
+                content_result = "origin" in data
+                if status_result and content_result:
                     result.https = True
 
             except Exception as e:
                 log.debug("proxy:{proxy} https verify proxy fail, error:{error}".format(proxy=proxy, error=e))
                 result.https = False
+
+        return result
+
+    def defaultVerifyProxy(self, proxy):
+        result = None
+
+        if isinstance(proxy, bytes):
+            proxy = proxy.decode('utf8')
+
+        proxies = {
+            "http": proxy,
+        }
+        http_url = "http://httpbin.org/ip"
+
+        try:
+            r = requests.get(http_url, proxies=proxies, timeout=10, verify=False)
+            data = r.json()
+
+            status_result = r.status_code == 200
+            content_result = "origin" in data
+            if status_result and content_result:
+                result = True
+
+        except Exception as e:
+            log.debug("proxy:{proxy} http verify proxy fail, error:{error}".format(proxy=proxy, error=e))
+            result = False
+
+        return result
+
+    def customVerifyProxy(self, proxy):
+        result = None
+
+        if isinstance(proxy, bytes):
+            proxy = proxy.decode('utf8')
+
+        proxies = {
+            "http": proxy,
+            "https": proxy,
+        }
+        verify_url = config.BASE.custom_verify_proxy_url
+
+        try:
+            content_result = True
+            r = requests.get(verify_url, proxies=proxies, timeout=10, verify=False)
+            pattern = config.BASE.regex_match_text_pattern
+            if pattern:
+                content = r.content.decode('utf-8')
+                search_result = re.search(pattern, content)
+                content_result = search_result != None
+
+            status_result = r.status_code == 200
+            if status_result and content_result:
+                result = True
+
+        except Exception as e:
+            log.debug("proxy:{proxy} http verify proxy fail, error:{error}".format(proxy=proxy, error=e))
+            result = False
 
         return result
 
@@ -137,9 +192,14 @@ class ProxyVerifyRaw(ProxyVerify):
                 raw_proxy = raw_proxy.decode('utf8')
 
             if raw_proxy not in self.useful_proxies:
-                proxy = self.verifyProxy(raw_proxy)
-                if proxy.http:
-                    self.proxy_manager.saveUsefulProxy(proxy)
+                if config.BASE.custom_verify_proxy_url:
+                    verify_result = self.customVerifyProxy(raw_proxy)
+                else:
+                    verify_result = self.defaultVerifyProxy(raw_proxy)                    
+                
+                if verify_result:
+                    proxy_info = self.getProxyInfo(raw_proxy)
+                    self.proxy_manager.saveUsefulProxy(proxy_info)
                     self.proxy_manager.deleteRawProxy(raw_proxy)
                     self.useful_proxies[raw_proxy] = True
 
@@ -192,8 +252,20 @@ class ProxyVerifyUseful(ProxyVerify):
         while self.queue.qsize():
             proxy_item = self.queue.get()
             proxy = proxy_item.get("proxy")
-            result = self.verifyProxy(proxy)
-            if result.http:
+
+            # 获取代理信息的http请求可能异常
+            # 所在每次校验代理时, 如果代理类型未知(proxy_type==0)
+            # 就继续获取代理信息更新.
+            if proxy_item.get("proxy_type") == 0:
+                proxy_info = self.getProxyInfo(proxy)
+                self.proxy_manager.updateUsefulProxy(proxy_item, proxy_info)
+
+            if config.BASE.custom_verify_proxy_url:
+                verify_result = self.customVerifyProxy(proxy)
+            else:
+                verify_result = self.defaultVerifyProxy(proxy)
+
+            if verify_result:
                 self.proxy_manager.tickUsefulProxyVaildSucc(proxy)
                 succ = succ + 1
                 log.debug("useful_proxy:{proxy} verify succ".format(proxy=proxy))
