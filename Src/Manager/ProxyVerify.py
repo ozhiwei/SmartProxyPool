@@ -133,12 +133,12 @@ class ProxyVerify(threading.Thread):
             "http": proxy,
             "https": proxy,
         }
-        verify_url = config.BASE.custom_verify_proxy_url
+        verify_url = config.setting.Other.custom_verify_proxy_url
 
         try:
             content_result = True
             r = requests.get(verify_url, proxies=proxies, timeout=10, verify=False)
-            pattern = config.BASE.regex_match_text_pattern
+            pattern = config.setting.Other.custom_verify_content
             if pattern:
                 content = r.content.decode('utf-8')
                 search_result = re.search(pattern, content)
@@ -192,7 +192,7 @@ class ProxyVerifyRaw(ProxyVerify):
                 raw_proxy = raw_proxy.decode('utf8')
 
             if raw_proxy not in self.useful_proxies:
-                if config.BASE.custom_verify_proxy_url:
+                if config.setting.Other.custom_verify_proxy_url:
                     verify_result = self.customVerifyProxy(raw_proxy)
                 else:
                     verify_result = self.defaultVerifyProxy(raw_proxy)                    
@@ -260,7 +260,7 @@ class ProxyVerifyUseful(ProxyVerify):
                 proxy_info = self.getProxyInfo(proxy)
                 self.proxy_manager.updateUsefulProxy(proxy_item, proxy_info)
 
-            if config.BASE.custom_verify_proxy_url:
+            if config.setting.Other.custom_verify_proxy_url:
                 verify_result = self.customVerifyProxy(proxy)
             else:
                 verify_result = self.defaultVerifyProxy(proxy)

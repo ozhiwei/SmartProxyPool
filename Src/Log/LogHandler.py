@@ -34,7 +34,7 @@ class LogHandler(logging.Logger):
         if level:
             self.level = level
         else:
-            self.level = LOG_LEVEL.get(config.LOG.level, LOG_LEVEL["INFO"])
+            self.level = LOG_LEVEL.get(config.setting.Log.level, LOG_LEVEL["INFO"])
 
         logging.Logger.__init__(self, self.name, level=self.level)
         if stream:

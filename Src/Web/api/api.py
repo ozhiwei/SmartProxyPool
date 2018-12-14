@@ -1,43 +1,10 @@
-# -*- coding: utf-8 -*-
-# !/usr/bin/env python
-
-# base import
-import sys
-sys.path.append("Src")
-
-# framework import
-import flask_restful 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, url_for, redirect, render_template, request
 from flask_restful import reqparse, abort, Api, Resource
 
-# project import
-from Config.ConfigManager import config
 from Manager.ProxyManager import proxy_manager
 
-app = Flask(__name__)
-app.config.update(RESTFUL_JSON=dict(ensure_ascii=False))
-api = Api(app)
-
-parser = reqparse.RequestParser()
-parser.add_argument('https', type=int, choices=[1], location='args')
-parser.add_argument('type', type=int, choices=[1,2], location='args')
-parser.add_argument('region', type=str, location='args')
-parser.add_argument('token', type=str, location='args')
-
-
-@app.errorhandler(404)
-def miss(e):
-    data = [
-        {"result": "not found"},
-        {"status_code": 404},
-        {"github": "https://github.com/1again/ProxyPool"},
-        {"api_list": API_LIST},
-    ]
-    result = jsonify(data)
-    return result, 404
-
 API_LIST = {
-    "/v1/proxy/": {
+    "/api/v1/proxy/": {
         "args": {
             "token": {
                 "value": "random string + random number",
@@ -62,7 +29,7 @@ API_LIST = {
         },
         "desc": "Get A Random Proxy"
     },
-    "/v1/proxies/": {
+    "/api/v1/proxies/": {
         "args": {
             "https": {
                 "value": [1],
@@ -82,7 +49,7 @@ API_LIST = {
         },
         "desc": "Get All Proxy",
     },
-    "/v1/proxies/stat/": {
+    "/api/v1/proxies/stat/": {
         "args": {},
         "desc": "Statistics All Vaild Proxies",
     }
@@ -95,18 +62,27 @@ class ApiList(Resource):
         return result
 
 class Proxy(Resource):
+    def __init__(self, **kwargs):
+        super(Proxy, self).__init__(**kwargs)
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('https', type=int, choices=[1], location='args')
+        parser.add_argument('type', type=int, choices=[1,2], location='args')
+        parser.add_argument('region', type=str, location='args')
+        parser.add_argument('token', type=str, location='args')
+        self.args = parser.parse_args()
+
     def get(self):
-        args = parser.parse_args()
         result = {
             "data": {}
         }
         data = {}
 
         options = {
-            "https": bool(args.get('https')),
-            "token": args.get('token'),
-            "proxy_type": args.get('type'),
-            "proxy_region": args.get('region'),
+            "https": bool(self.args.get('https')),
+            "token": self.args.get('token'),
+            "proxy_type": self.args.get('type'),
+            "proxy_region": self.args.get('region'),
         }
 
         if options.get("token", None):
@@ -124,26 +100,26 @@ class Proxy(Resource):
 
         return result
 
-class ProxyCounter(dict):
-     def __missing__(self, key):
-        result = 0
-        if key in ["region_list", "https", "proxy_type", "last_status", "available_rate"]:
-            result = ProxyCounter()
-            self[key] = result
-
-        return result
 
 class Proxies(Resource):
+    def __init__(self, **kwargs):
+        super(Proxies, self).__init__(**kwargs)
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('https', type=int, choices=[1], location='args')
+        parser.add_argument('type', type=int, choices=[1,2], location='args')
+        parser.add_argument('region', type=str, location='args')
+        self.args = parser.parse_args()
+
     def get(self):
-        args = parser.parse_args()
         result = {
             "data": []
         }
 
         options = {
-            "https": bool(args.get('https')),
-            "proxy_type": args.get('type'),
-            "proxy_region": args.get('region'),
+            "https": bool(self.args.get('https')),
+            "proxy_type": self.args.get('type'),
+            "proxy_region": self.args.get('region'),
         }
 
         data = proxy_manager.getAllUsefulProxy(**options)
@@ -154,6 +130,16 @@ class Proxies(Resource):
         result["data"] = data
 
         return result
+
+class ProxyCounter(dict):
+     def __missing__(self, key):
+        result = 0
+        if key in ["region_list", "https", "proxy_type", "last_status", "available_rate"]:
+            result = ProxyCounter()
+            self[key] = result
+
+        return result
+
 
 def stat(data):
     result = ProxyCounter()
@@ -184,15 +170,25 @@ class ProxiesStat(Resource):
 
         return result
 
-api.add_resource(ProxiesStat, '/v1/proxies/stat/')
-api.add_resource(Proxies, '/v1/proxies/')
-api.add_resource(Proxy, '/v1/proxy/')
-api.add_resource(ApiList, '/v1/')
+def init_api(app):
+    @app.errorhandler(404)
+    def miss(e):
+        data = [
+            {"result": "not found"},
+            {"status_code": 404},
+            {"github": "https://github.com/1again/ProxyPool"},
+            {"api_list": API_LIST},
+        ]
+        result = jsonify(data)
+        return result, 404
 
 
-def run():
-    app.run(host=config.API.bind_ip, port=config.API.bind_port, threaded=False, processes=config.API.processes)
+def init_app(app):
+    app.config.update(RESTFUL_JSON=dict(ensure_ascii=False))
+    init_api(app)
 
-
-if __name__ == '__main__':
-    run()
+    api = Api(app)
+    api.add_resource(ProxiesStat, '/api/v1/proxies/stat/')
+    api.add_resource(Proxies, '/api/v1/proxies/')
+    api.add_resource(Proxy, '/api/v1/proxy/')
+    api.add_resource(ApiList, '/api/v1/')

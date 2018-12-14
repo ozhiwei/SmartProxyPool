@@ -18,11 +18,11 @@ class DbClient(object):
         self.__initDbClient()
 
     def __initDbClient(self):
-        db_name = config.DB.name
-        db_host = config.DB.host
-        db_port = config.DB.port
-        db_username = config.DB.username
-        db_password = config.DB.password
+        db_name = config.setting.DB.name
+        db_host = config.setting.DB.host
+        db_port = config.setting.DB.port
+        db_username = config.setting.DB.username
+        db_password = config.setting.DB.password
 
         self.client = MongodbClient(name=db_name,
                                     host=db_host,

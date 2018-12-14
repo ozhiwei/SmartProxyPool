@@ -1,5 +1,7 @@
 .idea/
 *.pyc
 *.log
+.vscode/
+site-packages/
 
 Config\.ini

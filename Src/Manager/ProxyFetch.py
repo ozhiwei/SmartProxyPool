@@ -28,9 +28,9 @@ class ProxyFetch(threading.Thread):
 
     @classmethod 
     def initQueue(cls):
-        items = config.get_options("ProxyGetter")
+        items = config.GetConfigGroupList("ProxyFetch")
         for item in items:
-            cls.queue.put(item)
+            cls.queue.put(item["setting_name"])
 
     def run(self):
         while self.queue.qsize():
@@ -53,7 +53,7 @@ class ProxyFetch(threading.Thread):
                         log.debug('{func_name}: fetch proxy {proxy} succ'.format(func_name=func_name, proxy=proxy))
                     else:
                         fail = fail + 1
-                        log.error('{func_name}: fetch proxy {proxy} fail'.format(func_name=func_name, proxy=proxy))
+                        log.debug('{func_name}: fetch proxy {proxy} fail'.format(func_name=func_name, proxy=proxy))
 
                     total = total + 1
                 

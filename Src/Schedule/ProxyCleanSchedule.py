@@ -33,8 +33,8 @@ def clean_useful_proxy():
 def run():
     sch = Sch()
     now = datetime.datetime.now()
-    sch.add_job(clean_raw_proxy, "interval", minutes=config.BASE.clean_raw_proxy_interval, next_run_time=now)
-    sch.add_job(clean_useful_proxy, "interval", minutes=config.BASE.clean_useful_proxy_interval, next_run_time=now)
+    sch.add_job(clean_raw_proxy, "interval", id="clean_raw_proxy", minutes=config.setting.Interval.clean_raw_proxy_interval, next_run_time=now)
+    sch.add_job(clean_useful_proxy, "interval", id="clean_useful_proxy", minutes=config.setting.Interval.clean_useful_proxy_interval, next_run_time=now)
     sch.start()
 
 if __name__ == '__main__':

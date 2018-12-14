@@ -1,5 +1,5 @@
 
-高质量, 高灵活的开放代理池服务 [ProxyPool Demo](http://proxy.1again.cc:5010/v1/proxy/)
+高质量, 高灵活的开放代理池服务 [ProxyPool Demo](http://proxy.1again.cc:5010/api/v1/proxy/)
 ---
 
 # 目标
@@ -36,18 +36,30 @@
 
 6. 在清理代理时会根据`代理可用率`进行排序, 清理低可用率的代理, 这个数量可以在配置文件(`Config.ini`)中设置
 
-7. 实在编不下去了, 你行你来!
+7. [WEB页面的管理](http://proxy.1again.cc:5010/admin) 用户名:admin 密码:admin
+
+8. 实在编不下去了, 你行你来!
 
 
 # 目前
 
 目前还在重构阶段, 所以不保证安全稳定哦!
 
-先体验一下 [ProxyPool Demo](http://proxy.1again.cc:5010/v1/proxy/)
+先体验一下 [ProxyPool Demo](http://proxy.1again.cc:5010/api/v1/proxy/)
 
 然后Star一下, 养肥了再杀!
 
 目前不支持windows, 大概率以后也不会支持!
+
+# TODO
+
+0. `ProxyFetch`过滤插件
+
+1. `DBClient`接口重构.
+
+2. `ProxyGetter`接口重构
+
+3. `ProxyPool`重新设计
 
 # 使用场景
 
@@ -83,7 +95,9 @@ curl -sSL https://get.docker.com | sh
 # Start proxy_pool container
 # I think you are great developer
 # So you should how to create a mongodb with Docker or Other, Right?
+# 记得先创建一个mongodb数据库
 # !!! Remember modify your database in Config.ini file
+# !!! 记住修改你的数据库配置文件 Config.ini
 docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
 ```
 
@@ -98,7 +112,7 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
 ```python
 
 API_LIST = {
-    "/v1/proxy/": {
+    "/api/v1/proxy/": {
         "args": {
             "token": {
                 "value": "random string + random number",
@@ -123,7 +137,7 @@ API_LIST = {
         },
         "desc": "Get A Random Proxy"
     },
-    "/v1/proxies/": {
+    "/api/v1/proxies/": {
         "args": {
             "https": {
                 "value": [1],
@@ -143,7 +157,7 @@ API_LIST = {
         },
         "desc": "Get All Proxy",
     },
-    "/v1/proxies/stat/": {
+    "/api/v1/proxies/stat/": {
         "args": {},
         "desc": "Statistics All Vaild Proxies",
     }

@@ -22,7 +22,7 @@ from Config.ConfigManager import config
 
 def verify_raw_proxy():
     ProxyVerifyRaw.initQueue()
-    for _ in range(config.BASE.verify_raw_proxy_thread):
+    for _ in range(config.setting.Thread.verify_raw_proxy_thread):
         t = ProxyVerifyRaw()
         t.daemon = True
         t.start()
@@ -30,7 +30,7 @@ def verify_raw_proxy():
 
 def verify_useful_proxy():
     ProxyVerifyUseful.initQueue()
-    for _ in range(config.BASE.verify_useful_proxy_thread):
+    for _ in range(config.setting.Thread.verify_useful_proxy_thread):
         t = ProxyVerifyUseful()
         t.daemon = True
         t.start()
@@ -38,8 +38,8 @@ def verify_useful_proxy():
 def run():
     sch = Sch()
     now = datetime.datetime.now()
-    sch.add_job(verify_raw_proxy, "interval", minutes=config.BASE.verify_raw_proxy_interval, next_run_time=now)
-    sch.add_job(verify_useful_proxy, "interval", minutes=config.BASE.verify_useful_proxy_interval, next_run_time=now)
+    sch.add_job(verify_raw_proxy, "interval", id="verify_raw_proxy", minutes=config.setting.Interval.verify_raw_proxy_interval, next_run_time=now)
+    sch.add_job(verify_useful_proxy, "interval", id="verify_useful_proxy", minutes=config.setting.Interval.verify_useful_proxy_interval, next_run_time=now)
     sch.start()
 
 if __name__ == '__main__':
