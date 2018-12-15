@@ -51,6 +51,7 @@ def LastSuccTimeFormat(last_time):
 class ProxyView(ModelView):
     name = "ProxyPool"
 
+    column_list = ("proxy", "succ", "fail", "total", "proxy_type", "https", "last_status", "last_succ_time", "region_list")
     can_set_page_size = True
     can_create = False
     column_formatters = dict(
@@ -79,6 +80,7 @@ class SettingView(ModelView):
 
     can_set_page_size = True
     can_create = False
+    can_delete = False
     can_view_details = True
     column_searchable_list = ['setting_name']
     column_editable_list = [ "setting_value", "setting_state"]
