@@ -24,31 +24,39 @@ CUSTOM_COLUMN_FORMAT = {
     }
 }
 
-def TimeFormat(allTime):
+def ElapseTimeFormat(all_time):
     day = 24*60*60
     hour = 60*60
     min = 60
-    if allTime <60:        
-        return  "%d sec"%math.ceil(allTime)
-    elif  allTime > day:
-        days = divmod(allTime,day) 
-        return "%d days, %s"%(int(days[0]),TimeFormat(days[1]))
-    elif allTime > hour:
-        hours = divmod(allTime,hour)
-        return '%d hours, %s'%(int(hours[0]),TimeFormat(hours[1]))
+    if all_time <60:        
+        return  "%d sec"%math.ceil(all_time)
+    elif  all_time > day:
+        days = divmod(all_time,day) 
+        return "%d days, %s"%(int(days[0]),ElapseTimeFormat(days[1]))
+    elif all_time > hour:
+        hours = divmod(all_time,hour)
+        return '%d hours, %s'%(int(hours[0]),ElapseTimeFormat(hours[1]))
     else:
-        mins = divmod(allTime,min)
+        mins = divmod(all_time,min)
         return "%d mins, %d sec"%(int(mins[0]),math.ceil(mins[1]))
 
+def LastSuccTimeFormat(last_time):
+    if last_time:
+        result = ElapseTimeFormat(int(time.time() - last_time))
+    else:
+        result = 0
+
+    return result
+
 class ProxyView(ModelView):
-    name="ProxyPool"
+    name = "ProxyPool"
 
     can_set_page_size = True
     can_create = False
     column_formatters = dict(
         proxy_type=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.proxy_type)],
         https=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.https)],
-        last_succ_time=lambda v, c, m, p: TimeFormat(int(time.time() - m.last_succ_time)),
+        last_succ_time=lambda v, c, m, p: LastSuccTimeFormat(m.last_succ_time),
     )
 
     def is_accessible(self):

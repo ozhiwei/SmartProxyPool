@@ -19,7 +19,7 @@ LOG_LEVEL = {
 }
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-ROOT_PATH = os.path.join(CURRENT_PATH, os.pardir)
+ROOT_PATH = os.path.join(CURRENT_PATH, os.pardir, os.pardir)
 LOG_PATH = os.path.join(ROOT_PATH, 'logs')
 if not os.path.exists(LOG_PATH):
     os.mkdir(LOG_PATH)
@@ -89,5 +89,5 @@ class LogHandler(logging.Logger):
 
 
 if __name__ == '__main__':
-    log = LogHandler('test')
+    log = LogHandler()
     log.info('this is a test msg')
