@@ -4,46 +4,42 @@ import sys
 sys.path.append("Src")
 
 import time
-from multiprocessing import Process
+from threading import Thread
 
 from Log import LogManager
-from Web.app import run as WebRun
-from Schedule.ProxyVerifySchedule import run as VerifyRun
-from Schedule.ProxyFetchSchedule import run as FetchRun
-from Schedule.ProxyCleanSchedule import run as ProxyCleanRun
+from Web.app import run as proxy_web_run
+from Schedule.ProxyVerifySchedule import ProxyVerifySchedule
+from Schedule.ProxyFetchSchedule import ProxyFetchSchedule
+from Schedule.ProxyCleanSchedule import ProxyCleanSchedule
 
-PROCESS_HASH = {
-    "WebRun": WebRun,
-    "VerifyRun": VerifyRun,
-    "FetchRun": FetchRun,
-    "ProxyClean": ProxyCleanRun
+TASK_HASH = {
+    "ProxyVerifySchedule": ProxyVerifySchedule,
+    "ProxyFetchSchedule": ProxyFetchSchedule,
+    "ProxyCleanSchedule": ProxyCleanSchedule
 }
 
-def showTime():
+def show_time():
     date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     content = "{newline}{symbol} ProxyPool Start, date:{date} {symbol}{newline}".format(newline="\n", symbol="-"*50, date=date)
     print(content)
 
+def start_thread_list():
+    task_list = []
+    for name in TASK_HASH.keys():
+        sch = TASK_HASH[name]()
+        t = Thread(target=sch.run, name=name)
+        task_list.append(t)
+
+    for t in task_list:    
+        t.daemon = True
+        t.start()
+
 def main(test=False):
-    showTime()
+    show_time()
     LogManager.Init()
+    start_thread_list()
 
-
-
-    process_list = []
-    for name in PROCESS_HASH.keys():
-        p = Process(target=PROCESS_HASH[name], name=name)
-        process_list.append(p)
-
-    for p in process_list:    
-        p.daemon = True
-        p.start()
-
-    if test:
-        time.sleep(10)
-    else:
-        for p in process_list:
-            p.join()
+    proxy_web_run()
 
 if __name__ == '__main__':
     main()

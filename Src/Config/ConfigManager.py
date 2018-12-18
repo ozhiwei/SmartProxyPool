@@ -7,6 +7,7 @@ sys.path.append("Src")
 
 from Util.utilClass import ConfigParse
 from pymongo import MongoClient
+from Notify.NotifyManager import register_notify
 
 
 def is_number(s):
@@ -85,6 +86,7 @@ class ProxyPoolConfig(BaseConfig):
         self.db = client[self.db_name]
 
         self.InitConfigFromDB()
+        register_notify("reload_config_from_db", self.ReloadConfigFromDB)
 
     def LoadDefaultConfigToDB(self):
         if self.db[self.collection_name].count() == 0:

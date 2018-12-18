@@ -8,6 +8,8 @@ from flask import Flask, jsonify, url_for, redirect, render_template, request
 from flask_admin.contrib.mongoengine import ModelView
 from flask_admin import expose
 
+from Notify.NotifyManager import dispatch_notify
+
 # project import
 from Config.ConfigManager import config
 from Manager.ProxyManager import proxy_manager
@@ -100,6 +102,11 @@ class SettingView(ModelView):
             pass
         else:
             return redirect(url_for('security.login', next=request.url))
+
+    def after_model_change(self, form, model, is_created):
+        print("after_model_change", model.setting_group, model.setting_name, model.setting_value, is_created)
+        dispatch_notify("reload_config_from_db")
+        dispatch_notify(model.setting_name, job_id=model.setting_name)
 
 class ProxyPoolAdminIndexView(flask_admin.AdminIndexView):
 

@@ -7,7 +7,7 @@ import math
 import os
 import sys
 sys.path.append("Src/")
-# sys.path.insert(0, "Src/site-packages/")
+sys.path.insert(0, "Src/site-packages/")
 
 import logging
 from flask import Flask
