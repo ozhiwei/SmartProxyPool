@@ -34,23 +34,13 @@ class ProxyCleanSchedule(ProxySchedule):
         t = ProxyCleanRaw()
         t.daemon = True
         t.start()
+        t.join()
 
     def clean_useful_proxy(self):
         t = ProxyCleanUseful()
         t.daemon = True
         t.start()
-
-def test():
-    sch = ProxyCleanSchedule()
-    # config.setting.Interval.clean_raw_proxy_interval = 10
-    # config.setting.Interval.clean_useful_proxy_interval = 20
-    # sch.run()
-    # job1 = update_job_interval("clean_raw_proxy_interval")
-    # job2 = update_job_interval("clean_useful_proxy_interval")
-    # from Notify.NotifyManager import dispatch_notify
-    # dispatch_notify("clean_raw_proxy_interval", job_id="clean_raw_proxy_interval")
-    # dispatch_notify("clean_useful_proxy_interval", job_id="clean_useful_proxy_interval")
-    
+        t.join()
 
 if __name__ == '__main__':
     sch = ProxyCleanSchedule()

@@ -104,7 +104,6 @@ class SettingView(ModelView):
             return redirect(url_for('security.login', next=request.url))
 
     def after_model_change(self, form, model, is_created):
-        print("after_model_change", model.setting_group, model.setting_name, model.setting_value, is_created)
         dispatch_notify("reload_config_from_db")
         dispatch_notify(model.setting_name, job_id=model.setting_name)
 
