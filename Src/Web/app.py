@@ -17,6 +17,8 @@ from Config.ConfigManager import config
 ACCESS_LOG_PATH = "logs/app_access.log"
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 def init_log():
     logger = logging.getLogger() 
