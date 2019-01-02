@@ -83,7 +83,14 @@ class DbClient(object):
         table_name = "raw_proxy"
         self.changeTable(table_name)
 
-        result = self.cleanProxy(**kwargs)
+        query = {
+            "health": {
+                "$lt": 1
+            }
+        }
+
+        data = self.client.delete(query)
+        result = data['n']
 
         return result
 
@@ -353,28 +360,12 @@ class DbClient(object):
         data = {'$inc': {'total': 1}}
         self.client.upsert(query, data)
 
-    def tickRawProxyVaildSucc(self, proxy):
-        table_name = 'raw_proxy'
-        self.client.changeTable(table_name)
-
-        query = {"proxy": proxy}
-        data = {'$inc': {'succ': 1}}
-        self.client.upsert(query, data)
-
     def tickRawProxyVaildFail(self, proxy):
         table_name = 'raw_proxy'
         self.client.changeTable(table_name)
 
         query = {"proxy": proxy}
-        data = {'$inc': {'fail': 1}}
-        self.client.upsert(query, data)
-
-    def tickRawProxyVaildTotal(self, proxy):
-        table_name = 'raw_proxy'
-        self.client.changeTable(table_name)
-
-        query = {"proxy": proxy}
-        data = {'$inc': {'total': 1}}
+        data = {'$inc': {'health': -1}}
         self.client.upsert(query, data)
 
 if __name__ == "__main__":

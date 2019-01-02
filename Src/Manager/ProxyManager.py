@@ -112,8 +112,7 @@ class ProxyManager(object):
     def saveRawProxy(self, proxy):
         data = {
             "proxy": proxy,
-            "fail": 0, 
-            "total": 0,
+            "health": config.setting.Hold.init_raw_proxy_health
         }
         self.db.saveRawProxy(proxy, data)
 
@@ -166,14 +165,8 @@ class ProxyManager(object):
     def tickUsefulProxyVaildTotal(self, proxy):
         self.db.tickUsefulProxyVaildTotal(proxy)
 
-    def tickRawProxyVaildSucc(self, proxy):
-        self.db.tickRawProxyVaildSucc(proxy)
-
     def tickRawProxyVaildFail(self, proxy):
         self.db.tickRawProxyVaildFail(proxy)
-
-    def tickRawProxyVaildTotal(self, proxy):
-        self.db.tickRawProxyVaildTotal(proxy)
 
     def getProxyNumber(self):
         total_raw_proxy = self.getRawProxyNumber()

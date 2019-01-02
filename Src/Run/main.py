@@ -12,7 +12,7 @@ from Schedule.ProxyVerifySchedule import ProxyVerifySchedule
 from Schedule.ProxyFetchSchedule import ProxyFetchSchedule
 from Schedule.ProxyCleanSchedule import ProxyCleanSchedule
 
-TASK_HASH = {
+TASK_LIST = {
     "ProxyVerifySchedule": ProxyVerifySchedule,
     "ProxyFetchSchedule": ProxyFetchSchedule,
     "ProxyCleanSchedule": ProxyCleanSchedule
@@ -25,8 +25,8 @@ def show_time():
 
 def start_thread_list():
     task_list = []
-    for name in TASK_HASH.keys():
-        sch = TASK_HASH[name]()
+    for name in TASK_LIST.keys():
+        sch = TASK_LIST[name]()
         t = Thread(target=sch.run, name=name)
         task_list.append(t)
 

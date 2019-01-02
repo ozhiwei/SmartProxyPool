@@ -13,8 +13,8 @@ class MongodbClient(object):
         self.name = name
 
     def get(self, query):
-        data = self.db[self.name].find_one(query)
-        return data
+        result = self.db[self.name].find_one(query)
+        return result
 
     def put(self, query, data):
         if self.db[self.name].find_one(query):
@@ -22,22 +22,13 @@ class MongodbClient(object):
         else:
             self.db[self.name].insert(data)
 
-    # unuseful function
-    # def pop(self):
-    #     data = list(self.db[self.name].aggregate([{'$sample': {'size': 1}}]))
-    #     if data:
-    #         data = data[0]
-    #         value = data['proxy']
-    #         self.delete(value)
-    #         return {'proxy': value, 'value': data['num']}
-    #     return None
-
     def aggregate(self, operation_list):
-        data = list(self.db[self.name].aggregate(operation_list))
-        return data
+        result = list(self.db[self.name].aggregate(operation_list))
+        return result
 
     def delete(self, query):
-        self.db[self.name].remove(query)
+        result = self.db[self.name].remove(query)
+        return result
 
     def getAll(self):
         result = []

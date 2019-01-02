@@ -133,7 +133,7 @@ class ProxyVerify(threading.Thread):
             "http": proxy,
             "https": proxy,
         }
-        verify_url = config.setting.Other.custom_verify_proxy_url
+        verify_url = config.setting.Other.custom_verify_url
 
         try:
             content_result = True
@@ -192,7 +192,7 @@ class ProxyVerifyRaw(ProxyVerify):
                 raw_proxy = raw_proxy.decode('utf8')
 
             if raw_proxy not in self.useful_proxies:
-                if config.setting.Other.custom_verify_proxy_url:
+                if config.setting.Other.custom_verify_url:
                     verify_result = self.customVerifyProxy(raw_proxy)
                 else:
                     verify_result = self.defaultVerifyProxy(raw_proxy)                    
@@ -217,8 +217,6 @@ class ProxyVerifyRaw(ProxyVerify):
                 log.debug("raw_proxy:{raw_proxy} verify repetition".format(raw_proxy=raw_proxy))
 
             self.queue.task_done()
-
-            self.proxy_manager.tickRawProxyVaildTotal(raw_proxy)
             total = total + 1
 
         end_time = time.time()
@@ -260,7 +258,7 @@ class ProxyVerifyUseful(ProxyVerify):
                 proxy_info = self.getProxyInfo(proxy)
                 self.proxy_manager.updateUsefulProxy(proxy_item, proxy_info)
 
-            if config.setting.Other.custom_verify_proxy_url:
+            if config.setting.Other.custom_verify_url:
                 verify_result = self.customVerifyProxy(proxy)
             else:
                 verify_result = self.defaultVerifyProxy(proxy)

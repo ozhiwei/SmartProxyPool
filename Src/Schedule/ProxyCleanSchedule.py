@@ -7,16 +7,8 @@ import time
 import threading
 import datetime
 
-# from apscheduler.schedulers.blocking import BlockingScheduler as Sch
 from Schedule.ProxySchedule import ProxySchedule
 from Manager.ProxyClean import ProxyCleanRaw, ProxyCleanUseful
-from Manager.ProxyFetch import ProxyFetch
-from Notify.NotifyManager import register_notify
-
-try:
-    from Queue import Queue  # py3
-except:
-    from queue import Queue  # py2
 
 from Log.LogManager import log
 from Config.ConfigManager import config

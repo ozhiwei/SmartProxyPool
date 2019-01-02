@@ -8,7 +8,7 @@ from flask import Flask, jsonify, url_for, redirect, render_template, request
 from flask_admin.contrib.mongoengine import ModelView
 from flask_admin import expose
 
-from Notify.NotifyManager import dispatch_notify
+from Notify.NotifyManager import dispatch_event, NOTIFY_EVENT
 
 # project import
 from Config.ConfigManager import config
@@ -50,23 +50,22 @@ def LastSuccTimeFormat(last_time):
 
     return result
 
-def SuccRateFormat(succ, total):
-    result = "%.2f%%" % float(succ / total * 100)
+def SuccFormat(succ, total):
+    result = "%d(%.2f%%)" % (succ, float(succ / total * 100))
 
     return result
 
 class ProxyView(ModelView):
     name = "ProxyPool"
 
-    column_list = ("proxy", "succ", "total", "succ_rate", "proxy_type", "https", "last_status", "last_succ_time", "region_list")
-    column_sortable_list = column_list
+    column_list = ("proxy", "succ", "total", "proxy_type", "https", "last_status", "last_succ_time", "region_list")
     can_set_page_size = True
     can_create = False
     column_formatters = dict(
         proxy_type=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.proxy_type)],
         https=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.https)],
         last_succ_time=lambda v, c, m, p: LastSuccTimeFormat(m.last_succ_time),
-        succ_rate=lambda v, c, m, p: SuccRateFormat(m.succ, m.total),
+        succ=lambda v, c, m, p: SuccFormat(m.succ, m.total),
     )
 
     def is_accessible(self):
@@ -111,8 +110,13 @@ class SettingView(ModelView):
             return redirect(url_for('security.login', next=request.url))
 
     def after_model_change(self, form, model, is_created):
-        dispatch_notify("reload_config_from_db")
-        dispatch_notify(model.setting_name, job_id=model.setting_name)
+        kwargs = dict(
+            event_name=model.setting_name,
+            event_data=dict(
+                job_id=model.setting_name
+            )
+        )
+        dispatch_event(NOTIFY_EVENT["AFTER_SETTING_CHANGE"], **kwargs)
 
 class ProxyPoolAdminIndexView(flask_admin.AdminIndexView):
 

@@ -1,13 +1,26 @@
-NOTIFY_HASH = {}
 
-def register_notify(name, handler):
-    NOTIFY_HASH[name] = handler
+NOTIFY_LIST = [
+    "AFTER_SETTING_CHANGE"
+]
 
-def dispatch_notify(name, **kwargs):
-    if name in NOTIFY_HASH:
+NOTIFY_HANDLER = {}
+
+NOTIFY_EVENT = {}
+for name in NOTIFY_LIST:
+    NOTIFY_EVENT[name] = name
+    NOTIFY_HANDLER[name] = []
+
+def register_event(name, handler):
+    handler_list = NOTIFY_HANDLER[name]
+    handler_list.append(handler)
+
+def dispatch_event(name, **kwargs):
+    if name in NOTIFY_HANDLER:
         try:
-            func = NOTIFY_HASH[name]
-            func(**kwargs)
+            handler_list = NOTIFY_HANDLER[name]
+            for handler in handler_list:
+                handler(**kwargs)
         except Exception as e:
             # tmp handle
-            print("dispatch_notify err: {name}, {e}".format(name=name, e=e.message))
+            # print("dispatch_notify err: {name}, {e}".format(name=name, e=e))
+            pass

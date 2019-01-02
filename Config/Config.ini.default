@@ -14,6 +14,7 @@ clean_useful_proxy_interval = 30
 [Hold]
 ; clean proxy when number is positive
 ; disable clean proxy when number is -1
+init_raw_proxy_health = 3
 hold_raw_proxy_number = -1
 hold_useful_proxy_number = -1
 
@@ -41,7 +42,7 @@ freeProxyTwelve = 1
 ; freeProxyWallThird = 1
 
 [Other]
-custom_verify_proxy_url = http://www.baidu.com/
+custom_verify_url = http://www.baidu.com/
 custom_verify_content = baidu
 ; API config
 bind_ip = 0.0.0.0

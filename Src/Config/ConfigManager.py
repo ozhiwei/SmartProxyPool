@@ -7,8 +7,7 @@ sys.path.append("Src")
 
 from Util.utilClass import ConfigParse
 from pymongo import MongoClient
-from Notify.NotifyManager import register_notify
-
+from Notify.NotifyManager import register_event, NOTIFY_EVENT
 
 def is_number(s):
     result = False
@@ -86,7 +85,10 @@ class ProxyPoolConfig(BaseConfig):
         self.db = client[self.db_name]
 
         self.InitConfigFromDB()
-        register_notify("reload_config_from_db", self.ReloadConfigFromDB)
+        register_event(NOTIFY_EVENT["AFTER_SETTING_CHANGE"], self.dispatch_event)
+
+    def dispatch_event(self, **kwargs):
+        self.ReloadConfigFromDB(**kwargs)
 
     def LoadDefaultConfigToDB(self):
         if self.db[self.collection_name].count() == 0:
@@ -112,7 +114,7 @@ class ProxyPoolConfig(BaseConfig):
         self.LoadDefaultConfigToDB()
         self.ReloadConfigFromDB()
 
-    def ReloadConfigFromDB(self):
+    def ReloadConfigFromDB(self, **kwargs):
         cursor = self.db.setting.find()
         for item in cursor:
             if (item["setting_state"]):
