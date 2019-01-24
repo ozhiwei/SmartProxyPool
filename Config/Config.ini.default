@@ -1,7 +1,7 @@
 [Thread]
-verify_raw_proxy_thread = 2
-verify_useful_proxy_thread = 2
-fetch_new_proxy_thread = 2
+verify_raw_proxy_concurrency = 1000
+verify_useful_proxy_concurrency = 1000
+fetch_new_proxy_concurrency = 100
 
 [Interval]
 fetch_new_proxy_interval = 5

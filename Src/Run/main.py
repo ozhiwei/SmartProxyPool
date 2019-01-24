@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from gevent import monkey
+monkey.patch_all()
+
 import sys
 sys.path.append("Src")
 
@@ -30,7 +33,7 @@ def start_thread_list():
         t = Thread(target=sch.run, name=name)
         task_list.append(t)
 
-    for t in task_list:    
+    for t in task_list:
         t.daemon = True
         t.start()
 

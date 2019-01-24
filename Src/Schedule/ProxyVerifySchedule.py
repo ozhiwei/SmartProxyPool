@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
+from gevent import monkey
+monkey.patch_all()
 
 import sys
 sys.path.append("Src")
 import time
-import threading
 
 from Manager.ProxyVerify import ProxyVerifyRaw, ProxyVerifyUseful
 from Schedule.ProxySchedule import ProxySchedule
@@ -22,28 +23,14 @@ class ProxyVerifySchedule(ProxySchedule):
         }
 
     def verify_raw_proxy(self):
-        thread_list = []
         ProxyVerifyRaw.initQueue()
-        for _ in range(config.setting.Thread.verify_raw_proxy_thread):
-            t = ProxyVerifyRaw()
-            t.daemon = True
-            t.start()
-            thread_list.append(t)
-
-        for t in thread_list:
-            t.join()
+        t = ProxyVerifyRaw()
+        t.start()
 
     def verify_useful_proxy(self):
-        thread_list = []
         ProxyVerifyUseful.initQueue()
-        for _ in range(config.setting.Thread.verify_useful_proxy_thread):
-            t = ProxyVerifyUseful()
-            t.daemon = True
-            t.start()
-            thread_list.append(t)
-
-        for t in thread_list:
-            t.join()
+        t = ProxyVerifyUseful()
+        t.start()
 
 if __name__ == '__main__':
     sch = ProxyVerifySchedule()

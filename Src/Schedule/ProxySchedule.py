@@ -1,6 +1,6 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
 from Config.ConfigManager import config
-from Notify.NotifyManager import register_event, NOTIFY_EVENT
+from Notify import NotifyManager
 from Log.LogManager import log
 
 import datetime
@@ -18,7 +18,7 @@ class ProxySchedule(BlockingScheduler):
         super(ProxySchedule, self).__init__(**kwargs)
         self.task_handler_hash = {}
 
-        register_event(NOTIFY_EVENT["AFTER_SETTING_CHANGE"], self.dispatch_event)
+        NotifyManager.register_event(NotifyManager.NOTIFY_EVENT["AFTER_SETTING_CHANGE"], self.dispatch_event)
 
     def dispatch_event(self, **kwargs):
         event_name = kwargs.get("event_name")

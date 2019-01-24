@@ -147,7 +147,12 @@ class GetFreeProxy(object):
 
     @staticmethod
     def freeProxyTen():
-        urls = ['http://www.ip3366.net/free/']
+        urls = [
+            "http://www.ip3366.net/free/?stype=1",
+            "http://www.ip3366.net/free/?stype=2",
+            "http://www.ip3366.net/free/?stype=3",
+            "http://www.ip3366.net/free/?stype=4",
+        ]
         request = WebRequest()
         for url in urls:
             r = request.get(url)

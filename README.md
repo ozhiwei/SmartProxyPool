@@ -38,8 +38,26 @@
 
 7. [WEB页面的管理](http://proxy.1again.cc:5010/admin) 用户名:admin 密码:admin
 
-8. 实在编不下去了, 你行你来!
+8. 支持`gevent`并发模式, 效果杠杠的, 别看广告, 看疗效!
 
+9. 实在编不下去了, 你行你来!
+
+
+# 疗效
+
+```
+2019-01-23 16:14:38,805 ProxyClean.py[line:42] INFO clean raw_proxy, total_number:1196, clean_number:1195, remain_number:1
+2019-01-23 16:14:38,809 ProxyClean.py[line:33] INFO clean useful, total_number:2539, clean_number:0, hold_number:-1
+2019-01-23 16:14:49,137 ProxyFetch.py[line:84] INFO fetch [freeProxyFifth] proxy finish, total:20, succ:20, fail:0, skip:0, elapsed_time:6s
+2019-01-23 16:14:50,261 ProxyFetch.py[line:84] INFO fetch [freeProxyFirst] proxy finish, total:50, succ:50, fail:0, skip:0, elapsed_time:7s
+2019-01-23 16:14:54,119 ProxyFetch.py[line:84] INFO fetch [freeProxyTwelve] proxy finish, total:32, succ:23, fail:0, skip:9, elapsed_time:10s
+2019-01-23 16:14:57,033 ProxyFetch.py[line:84] INFO fetch [freeProxyTen] proxy finish, total:60, succ:55, fail:0, skip:5, elapsed_time:13s
+2019-01-23 16:14:57,977 ProxyFetch.py[line:84] INFO fetch [freeProxyEleven] proxy finish, total:65, succ:51, fail:0, skip:14, elapsed_time:14s
+2019-01-23 16:14:58,548 ProxyFetch.py[line:84] INFO fetch [freeProxySeventh] proxy finish, total:75, succ:55, fail:0, skip:20, elapsed_time:15s
+2019-01-23 16:15:00,064 ProxyFetch.py[line:84] INFO fetch [freeProxyFourth] proxy finish, total:400, succ:307, fail:0, skip:93, elapsed_time:16s
+2019-01-23 16:15:04,796 ProxyVerify.py[line:242] INFO raw_proxy verify  proxy finish, total:1196, succ:3, fail:1193, skip:0, elapsed_time:26s
+2019-01-23 16:15:14,441 ProxyVerify.py[line:310] INFO useful_proxy verify proxy finish, total:2539, succ:550, fail:1989, elapsed_time:35s
+```
 
 # 目前
 
@@ -50,16 +68,6 @@
 然后Star一下, 养肥了再杀!
 
 目前不支持windows, 大概率以后也不会支持!
-
-# TODO
-
-0. `ProxyFetch`过滤插件
-
-1. `DBClient`接口重构.
-
-2. `ProxyGetter`接口重构
-
-3. `ProxyPool`重新设计
 
 # 使用场景
 
@@ -208,18 +216,10 @@ freeProxyCustom  = 1  # 确保名字和你添加方法名字一致
 
 ```
 
-`ProxyRefreshSchedule`会每隔一段时间抓取一次代理，下次抓取时会自动识别调用你定义的方法。
+`ProxyFetchSchedule` 会每隔一段时间抓取一次代理，下次抓取时会自动识别调用你定义的方法。
 
 # 问题反馈
 
 任何问题欢迎在[Issues](https://github.com/1again/ProxyPool/issues)中反馈.
 
 我们的目标是, 没有蛀牙!
-
-# Contribute
-
-我只想说, 我对代码的质量要求很高(以我目前水平的质量)
-
-所以PR前, 请先想想, 你自己是否可以接受PR的代码质量.
-
-微笑脸.jpg

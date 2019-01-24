@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
 
+from gevent import monkey
+monkey.patch_all()
+
 import sys
 sys.path.append("Src")
 import time
@@ -20,7 +23,7 @@ class ProxyFetchSchedule(ProxySchedule):
         super(ProxyFetchSchedule, self).__init__(**kwargs)
         self.proxy_manager = ProxyManager()
         self.task_handler_hash = {
-            "fetch_new_proxy_interval": self.check_fetch_new_proxy,
+            "fetch_new_proxy_interval": self.fetch_new_proxy,
         }
 
     def check_fetch_new_proxy(self):
@@ -29,21 +32,18 @@ class ProxyFetchSchedule(ProxySchedule):
         hold_number = config.setting.Hold.hold_raw_proxy_number
         if total_number < hold_number or hold_number == -1:
             log.debug("fetch new proxy start, exist raw_proxy total_number:{total_number}, hold_number:{hold_number}".format(total_number=total_number, hold_number=hold_number))
-            self.fetch_new_proxy()
+            result = True
         else:
             log.debug("fetch new proxy skip, exist raw_proxy total_number:{total_number}, hold_number:{hold_number}".format(total_number=total_number, hold_number=hold_number))
+            result = False
+        
+        return result
 
     def fetch_new_proxy(self):
-        thread_list = []
-        ProxyFetch.initQueue()
-        for _ in range(config.setting.Thread.fetch_new_proxy_thread):
+        if self.check_fetch_new_proxy():
+            ProxyFetch.initQueue()
             t = ProxyFetch()
-            t.daemon = True
             t.start()
-            thread_list.append(t)
-
-        for t in thread_list:
-            t.join()
 
 if __name__ == '__main__':
     sch = ProxyFetchSchedule()

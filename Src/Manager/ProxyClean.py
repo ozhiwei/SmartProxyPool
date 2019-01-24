@@ -6,7 +6,7 @@ sys.path.append("Src")
 import time
 import threading
 
-from Manager.ProxyManager import ProxyManager
+from Manager.ProxyManager import proxy_manager
 from Log.LogManager import log
 from Config.ConfigManager import config
 
@@ -20,14 +20,13 @@ except:
 class ProxyClean(threading.Thread):
     def __init__(self, **kwargs):
         super(ProxyClean, self).__init__(**kwargs)
-        self.proxy_manager = ProxyManager()
 
 class ProxyCleanUseful(ProxyClean):
 
     def run(self):
         hold_number = config.setting.Hold.hold_useful_proxy_number
-        total_number = self.proxy_manager.getUsefulProxyNumber()
-        clean_number = self.proxy_manager.cleanUsefulProxy(hold_number=hold_number)
+        total_number = proxy_manager.getUsefulProxyNumber()
+        clean_number = proxy_manager.cleanUsefulProxy(hold_number=hold_number)
 
 
         log.info("clean useful, total_number:{total_number}, clean_number:{clean_number}, hold_number:{hold_number}".format(total_number=total_number, clean_number=clean_number, hold_number=hold_number))
@@ -35,8 +34,8 @@ class ProxyCleanUseful(ProxyClean):
 class ProxyCleanRaw(ProxyClean):
 
     def run(self):
-        total_number = self.proxy_manager.getRawProxyNumber()
-        clean_number = self.proxy_manager.cleanRawProxy()
+        total_number = proxy_manager.getRawProxyNumber()
+        clean_number = proxy_manager.cleanRawProxy()
         remain_number = total_number - clean_number
 
         log.info("clean raw_proxy, total_number:{total_number}, clean_number:{clean_number}, remain_number:{remain_number}".format(total_number=total_number, clean_number=clean_number, remain_number=remain_number))

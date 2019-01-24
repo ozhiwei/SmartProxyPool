@@ -117,18 +117,23 @@ class ProxyPoolConfig(BaseConfig):
     def ReloadConfigFromDB(self, **kwargs):
         cursor = self.db.setting.find()
         for item in cursor:
-            if (item["setting_state"]):
+            if item["setting_state"]:
                 section = getattr(self.setting, item["setting_group"])
                 field = item["setting_name"]
                 value = item["setting_value"] 
                 value = int(value) if is_number(value) else value
                 setattr(section, field, value)
+            else:
+                section = getattr(self.setting, item["setting_group"])
+                field = item["setting_name"]
+                setattr(section, field, None)
 
     def GetConfigGroupList(self, group_name):
         result = []
         cursor = self.db.setting.find({"setting_group": group_name})
         for item in cursor:
-            result.append(item)
+            if item["setting_state"]:
+                result.append(item)
 
         return result
 
