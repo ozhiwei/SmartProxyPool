@@ -336,7 +336,7 @@ class DbClient(object):
         now_time = int(time.time())
         query = {"proxy": proxy}
         data = { 
-            "$inc": {"succ": 1},
+            "$inc": {"succ": 1, "keep_succ": 1},
             "$set": {"last_status": "succ", "last_succ_time": now_time},
         }
         self.client.upsert(query, data)
@@ -348,7 +348,7 @@ class DbClient(object):
         query = {"proxy": proxy}
         data = { 
             "$inc": {"fail": 1},
-            "$set": { "last_status": "fail"},
+            "$set": {"last_status": "fail", "keep_succ": 0},
         }
         self.client.upsert(query, data)
 

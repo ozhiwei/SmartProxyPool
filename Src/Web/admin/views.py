@@ -16,9 +16,9 @@ from Manager.ProxyManager import proxy_manager
 
 CUSTOM_COLUMN_FORMAT = {
     "proxy_type" : {
-        "0": "未知代理",
-        "1": "透明代理",
-        "2": "匿名代理",
+        "0": "未知",
+        "1": "透明",
+        "2": "匿名",
     },
     "https" : {
         "False": "不支持",
@@ -58,7 +58,7 @@ def SuccFormat(succ, total):
 class ProxyView(ModelView):
     name = "ProxyPool"
 
-    column_list = ("proxy", "succ", "total", "proxy_type", "https", "last_status", "last_succ_time", "region_list")
+    column_list = ("proxy", "succ", "total", "keep_succ", "proxy_type", "https", "last_status", "last_succ_time", "region_list")
     can_set_page_size = True
     can_create = False
     column_formatters = dict(
