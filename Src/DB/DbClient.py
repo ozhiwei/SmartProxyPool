@@ -10,38 +10,38 @@ from Util.utilClass import Singleton
 from DB.MongodbClient import MongodbClient
 from Log.LogManager import log
 
-class DbClient(object):
-
-    __metaclass__ = Singleton
+class DocsModel(object):
+    docs_name = "test"
 
     def __init__(self):
-        self.__initDbClient()
-
-    def __initDbClient(self):
         db_name = config.setting.DB.name
         db_host = config.setting.DB.host
         db_port = config.setting.DB.port
         db_username = config.setting.DB.username
         db_password = config.setting.DB.password
 
-        self.client = MongodbClient(name=db_name,
-                                    host=db_host,
-                                    port=db_port,
-                                    username=db_username,
-                                    password=db_password,)
+        self.mc = MongodbClient(
+            host=db_host,
+            port=db_port,
+            db_name=db_name,
+            docs_name=self.docs_name,
+            username=db_username,
+            password=db_password,
+        )
+
+class UsefulProxyDocsModel(DocsModel):
+    docs_name = "useful_proxy"
 
     def getAll(self):
-        return self.client.getAll()
+        result = self.mc.find()
+        return result
 
-    def changeTable(self, name):
-        self.client.changeTable(name)
-
-    def cleanProxy(self, **kwargs):
+    def cleanUsefulProxy(self, **kwargs):
         result = 0
         hold_number = kwargs.get("hold_number")
 
         query = {"total": {"$ne": 0}}
-        total_number = self.client.getCount(query)
+        total_number = self.mc.count(query)
         clean_number = total_number - hold_number
 
         if clean_number > 0 and hold_number != -1:
@@ -61,27 +61,17 @@ class DbClient(object):
             ]
 
 
-            items = self.client.aggregate(operation_list)
+            items = self.mc.aggregate(operation_list)
             result = len(items)
             for item in items:
                 query = {
                     "_id": item["_id"]
                 }
-                self.client.delete(query)
-
-        return result
-
-    def cleanUsefulProxy(self, **kwargs):
-        table_name = "useful_proxy"
-        self.changeTable(table_name)
-
-        result = self.cleanProxy(**kwargs)
+                self.mc.delete(query)
 
         return result
 
     def cleanRawProxy(self, **kwargs):
-        table_name = "raw_proxy"
-        self.changeTable(table_name)
 
         query = {
             "health": {
@@ -89,15 +79,12 @@ class DbClient(object):
             }
         }
 
-        data = self.client.delete(query)
+        data = self.mc.delete(query)
         result = data['n']
 
         return result
 
     def getAllValidUsefulProxy(self, **kwargs):
-        table_name = "useful_proxy"
-        self.changeTable(table_name)
-
         https = kwargs.get("https", None)
         proxy_region = kwargs.get("proxy_region", None)
         proxy_type = kwargs.get("proxy_type", None)
@@ -119,117 +106,21 @@ class DbClient(object):
             operation_list[0]["$match"]["region_list"] = { "$in": [proxy_region] }
 
         log.debug("getAllValidUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
-        result = self.client.aggregate(operation_list)
+        result = self.mc.aggregate(operation_list)
 
         return result
-
-    def getUsefulProxyStat(self, **kwargs):
-        table_name = "useful_proxy"
-        self.changeTable(table_name)
-
-        result = []
-        operation_list = [
-            {
-                "$match": { "total": { "$ne": 0 } },
-            }
-        ]
-
-        opertaion = {
-            "$project": {
-                "https": 1,
-                "proxy_type": 1,
-                "region_list": 1,
-                "last_status": 1,
-                "available_rate": { "$divide": ["$succ", "$total"] }
-            }
-        }
-        operation_list.append(opertaion)
-
-        log.debug("getAllUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
-        result = self.client.aggregate(operation_list)
-
-        return result
-
-    # def getAllProxy(self, **kwargs):
-    #     table_name = "raw_proxy"
-    #     self.changeTable(table_name)
-
-    #     result = self.client.getAll()
-    #     return result
 
     def getAllUsefulProxy(self, **kwargs):
-        table_name = "useful_proxy"
-        self.changeTable(table_name)
-
-        result = self.client.getAll()
-        return result
-
-    def getAllRawProxy(self):
-        table_name = "raw_proxy"
-        self.changeTable(table_name)
-
-        result = self.client.getAll()
+        result = self.getAll()
         return result
 
     def checkProxyExists(self, proxy):
         query = {"proxy": proxy}
-        result = self.client.exists(query)
-        return result
-
-    def checkRawProxyExists(self, proxy):
-        result = self.checkProxyExists(proxy)
+        result = self.mc.exists(query)
         return result
 
     def checkUsefulProxyExists(self, proxy):
         result = self.checkProxyExists(proxy)
-        return result
-
-    def getQualityProxy(self, **kwargs):
-        https = kwargs.get("https", None)
-        token = kwargs.get("token", None)
-        proxy_region = kwargs.get("proxy_region", None)
-        proxy_type = kwargs.get("type", None)
-
-        result = None
-        table_name = "useful_proxy"
-        self.client.changeTable(table_name)
-        operation_list = [
-            {
-                "$match": {
-                    "total": { "$ne": 0},  
-                    "last_status": { "$eq": "succ" },
-                },
-            },
-            {
-                "$project": { "proxy": 1, "available_rate": { "$divide": ["$succ", "$total"] } }
-            },
-            { 
-                "$sort": { "available_rate": -1 }
-            },
-            {
-                "$limit": 1
-            }
-        ]
-
-        if https:
-            operation_list[0]["$match"]["https"] = { "$eq": https }
-
-        if proxy_type:
-            operation_list[0]["$match"]["proxy_type"] = { "$eq": proxy_type }
-
-        if token:
-            operation_list[0]["$match"]["used_token_list"] = { "$nin": [token] }
-
-        if proxy_region:
-            operation_list[0]["$match"]["region_list"] = { "$in": [proxy_region] }
-
-
-
-        log.debug("getQualityProxy, operation_list:{operation_list}".format(operation_list=str(operation_list)))
-        data = self.client.aggregate(operation_list)
-        if data:
-            result = data[0]
-
         return result
 
     # TODO: refine function
@@ -239,8 +130,6 @@ class DbClient(object):
         proxy_type = kwargs.get("proxy_type", None)
 
         result = None
-        table_name = "useful_proxy"
-        self.client.changeTable(table_name)
         operation_list = 	[
             {
                 "$match": {
@@ -259,114 +148,103 @@ class DbClient(object):
         if proxy_type:
             operation_list[0]["$match"]["proxy_type"] = { "$eq": proxy_type }
 
-        if proxy_region:
-            operation_list[0]["$match"]["region_list"] = { "$in": [proxy_region] }
-
-
+        if proxy_region: 
+            operation_list[0]["$match"]["region_list"] = { "$in": [proxy_region] } 
 
         log.debug("getSampleUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
-        data = self.client.aggregate(operation_list)
+        data = self.mc.aggregate(operation_list)
         if data:
             result = data[0]
 
         return result
 
-    def addTokenToProxy(self, proxy, token):
-        query = {"proxy": proxy}
-        update = { "$push": { "used_token_list": token } }
-        self.client.upsert(query, update)
-
-    # TODO: refine function
-    def getSampleRawProxy(self):
-        result = None
-        table_name = "raw_proxy"
-        self.client.changeTable(table_name)
-        operation_list = 	[
-            {
-                "$sample": { "size": 1}
-            },
-        ]
-        data = self.client.aggregate(operation_list)
-        if data:
-            result = data[0]
-
+    def getProxyNum(self):
+        result = self.mc.count()
         return result
 
-    def getProxyNum(self, table_name):
-        self.client.changeTable(table_name)
-        number = self.client.getCount()
-
-        return number
-
-    def saveRawProxy(self, proxy, data):
-        table_name = 'raw_proxy'
-        self.client.changeTable(table_name)
-
-        query = {"proxy": proxy}
-        self.client.put(query, data)
-
-    def saveUsefulProxy(self, proxy, data):
-        table_name = 'useful_proxy'
-        self.client.changeTable(table_name)
-        query = {"proxy": proxy}
-        self.client.put(query, data)
+    def saveUsefulProxy(self, data):
+        self.mc.insert(data)
 
     def updateUsefulProxy(self, proxy, data):
-        table_name = 'useful_proxy'
-        self.client.changeTable(table_name)
         query = {"proxy": proxy}
-        self.client.update(query, data)
+        self.mc.update(query, data)
 
     def deleteUsefulProxy(self, proxy):
-        table_name = 'useful_proxy'
-        self.client.changeTable(table_name)
         query = {"proxy": proxy}
-        self.client.delete(query)
-
-    def deleteRawProxy(self, proxy):
-        table_name = 'raw_proxy'
-        self.client.changeTable(table_name)
-        query = {"proxy": proxy}
-        self.client.delete(query)
+        self.mc.delete(query)
 
     def tickUsefulProxyVaildSucc(self, proxy):
-        table_name = 'useful_proxy'
-        self.client.changeTable(table_name)
-
         now_time = int(time.time())
         query = {"proxy": proxy}
         data = { 
             "$inc": {"succ": 1, "keep_succ": 1},
             "$set": {"last_status": "succ", "last_succ_time": now_time},
         }
-        self.client.upsert(query, data)
+        self.mc.upsert(query, data)
 
     def tickUsefulProxyVaildFail(self, proxy):
-        table_name = 'useful_proxy'
-        self.client.changeTable(table_name)
-
         query = {"proxy": proxy}
         data = { 
             "$inc": {"fail": 1},
             "$set": {"last_status": "fail", "keep_succ": 0},
         }
-        self.client.upsert(query, data)
+        self.mc.upsert(query, data)
 
     def tickUsefulProxyVaildTotal(self, proxy):
-        table_name = 'useful_proxy'
-        self.client.changeTable(table_name)
-
         query = {"proxy": proxy}
         data = {'$inc': {'total': 1}}
-        self.client.upsert(query, data)
+        self.mc.upsert(query, data)
+
+class RawProxyDocsModel(DocsModel):
+    docs_name = "raw_proxy"
+
+    def getAll(self):
+        result = self.mc.find()
+        return result
+
+    def getAllRawProxy(self, **kwargs):
+        result = self.getAll()
+        return result
+
+    def cleanRawProxy(self, **kwargs):
+
+        query = {
+            "health": {
+                "$lt": 1
+            }
+        }
+
+        data = self.mc.delete(query)
+        result = data['n']
+
+        return result
+
+    def checkProxyExists(self, proxy):
+        query = {"proxy": proxy}
+        result = self.mc.exists(query)
+        return result
+
+    def checkRawProxyExists(self, proxy):
+        result = self.checkProxyExists(proxy)
+        return result
+
+    def getProxyNum(self):
+        result = self.mc.count()
+        return result
+
+    def saveRawProxy(self, data):
+        result = self.mc.insert(data)
+        return result
+
+    def deleteRawProxy(self, proxy):
+        query = {"proxy": proxy}
+        result = self.mc.delete(query)
+        return result
 
     def tickRawProxyVaildFail(self, proxy):
-        table_name = 'raw_proxy'
-        self.client.changeTable(table_name)
-
         query = {"proxy": proxy}
         data = {'$inc': {'health': -1}}
-        self.client.upsert(query, data)
+        self.mc.upsert(query, data)
 
 if __name__ == "__main__":
     pass

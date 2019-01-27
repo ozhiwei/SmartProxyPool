@@ -4,67 +4,57 @@ from pymongo import MongoClient
 
 
 class MongodbClient(object):
-    def __init__(self, name, host, port, **kwargs):
-        self.name = name
-        self.client = MongoClient(host, port, **kwargs)
-        self.db = self.client.proxy
+    db_name = "proxy"
 
-    def changeTable(self, name):
-        self.name = name
+    def __init__(self, host, port, db_name, docs_name, **kwargs):
+        self.conn = MongoClient(host, port, **kwargs)
+        self.db = self.conn[db_name]
+        self.docs = self.db[docs_name]
 
-    def get(self, query):
-        result = self.db[self.name].find_one(query)
+    def find_one(self, query):
+        result = self.docs.find_one(query)
         return result
 
-    def put(self, query, data):
-        if self.db[self.name].find_one(query):
-            return None
-        else:
-            self.db[self.name].insert(data)
+    def insert(self, data):
+        result = self.docs.insert(data)
+        return result
 
     def aggregate(self, operation_list):
-        result = list(self.db[self.name].aggregate(operation_list))
+        result = list(self.docs.aggregate(operation_list))
         return result
 
     def delete(self, query):
-        result = self.db[self.name].remove(query)
+        result = self.docs.remove(query)
         return result
 
-    def getAll(self):
-        result = []
-        items = self.db[self.name].find()
-        for item in items:
-            result.append(item)
-
+    def find(self):
+        result = list(self.docs.find())
         return result
-
-    def clean(self):
-        self.client.drop_database('proxy')
-
-    def delete_all(self):
-        self.db[self.name].remove()
 
     def update(self, query, data):
-        self.db[self.name].update(query, data)
+        result = self.docs.update(query, data)
+        return result
 
     def upsert(self, query, data):
-        self.db[self.name].update(query, data, upsert=True)
+        result = self.docs.update(query, data, upsert=True)
+        return result
 
     def exists(self, query):
         result = False
-        data = self.get(query)
+        data = self.find_one(query)
         if data:
             result = True
 
         return result
 
-    def getCount(self, query={}):
-        result = self.db[self.name].count(query)
+    def count(self, query={}):
+        result = self.docs.count(query)
         return result
 
 if __name__ == "__main__":
-    db = MongodbClient('first', 'localhost', 27017)
+    # db = MongodbClient('first', 'localhost', 27017)
     # db.put('127.0.0.1:1')
     # db2 = MongodbClient('second', 'localhost', 27017)
     # db2.put('127.0.0.1:2')
     # print(db.pop())
+    pass

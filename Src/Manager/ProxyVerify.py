@@ -258,8 +258,8 @@ class ProxyVerifyUseful(ProxyVerify):
 
         # 获取代理信息的http请求可能异常
         # 所在每次校验代理时, 如果代理类型未知(proxy_type==0)
-        # 就继续获取代理信息更新.
-        if proxy_item.get("proxy_type") == 0:
+        # 就重新获取代理信息进行更新.
+        if proxy_item.get("proxy_type") == 0 or proxy_item.get("proxy_type") == None:
             proxy_info = self.getProxyInfo(proxy)
             proxy_manager.updateUsefulProxy(proxy_item, proxy_info)
 

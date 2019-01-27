@@ -80,7 +80,7 @@ class Proxy(Resource):
             "proxy_region": self.args.get('region'),
         }
 
-        data = proxy_manager.getSampleProxy(**options)
+        data = proxy_manager.getSampleUsefulProxy(**options)
         
         if data:
             del data["_id"]
