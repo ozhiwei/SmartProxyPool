@@ -3,6 +3,7 @@ from Config.ConfigManager import config
 from Notify import NotifyManager
 from Log.LogManager import log
 
+import logging
 import datetime
 
 DISPATCH_EVENT_LIST = [
@@ -13,9 +14,16 @@ DISPATCH_EVENT_LIST = [
     "clean_useful_proxy_interval",
 ]
 
+SCHEDULE_LOG_PATH = "logs/schedule.log"
+
+logger = logging.getLogger() 
+file_handler = logging.FileHandler(SCHEDULE_LOG_PATH)
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
+
 class ProxySchedule(BlockingScheduler):
     def __init__(self, **kwargs):
-        super(ProxySchedule, self).__init__(**kwargs)
+        super(ProxySchedule, self).__init__(logger=logger, **kwargs)
         self.task_handler_hash = {}
 
         NotifyManager.register_event(NotifyManager.NOTIFY_EVENT["AFTER_SETTING_CHANGE"], self.dispatch_event)

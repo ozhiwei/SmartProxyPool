@@ -26,7 +26,7 @@ def show_time():
     content = "{newline}{symbol} ProxyPool Start, date:{date} {symbol}{newline}".format(newline="\n", symbol="-"*50, date=date)
     print(content)
 
-def start_thread_list():
+def start_task():
     task_list = []
     for name in TASK_LIST.keys():
         sch = TASK_LIST[name]()
@@ -39,8 +39,10 @@ def start_thread_list():
 
 def main(test=False):
     show_time()
-    LogManager.Init()
-    start_thread_list()
+
+    LogManager.init()
+
+    start_task()
 
     proxy_web_run()
 

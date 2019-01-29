@@ -3,7 +3,7 @@ from Log.LogHandler import LogHandler
 
 log = LogHandler()
 
-def Init():
+def init():
     pass
 
 if __name__ == '__main__':

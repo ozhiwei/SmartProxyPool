@@ -2,16 +2,18 @@
 # !/usr/bin/env python
 
 # base import
+from gevent import monkey
+monkey.patch_all()
+
 import time
 import math
 import os
 import sys
 sys.path.append("Src/")
-sys.path.insert(0, "Src/site-packages/")
 
 import logging
 from flask import Flask
-
+from  gevent.pywsgi import WSGIServer
 from Config.ConfigManager import config
 
 ACCESS_LOG_PATH = "logs/app_access.log"
@@ -20,11 +22,14 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
+
+logger = logging.getLogger() 
 def init_log():
-    logger = logging.getLogger() 
     file_handler = logging.FileHandler(ACCESS_LOG_PATH)
     logger.addHandler(file_handler)
     logger.setLevel(logging.INFO)
+
+    return logger
 
 def init_config():
     app.config.from_pyfile('config.py')
@@ -47,7 +52,8 @@ def start_app():
     admin.init_app(app)
     api.init_app(app)
 
-    app.run(host=config.setting.Other.bind_ip, port=config.setting.Other.bind_port, threaded=False)
+    http_server = WSGIServer((config.setting.Other.bind_ip, config.setting.Other.bind_port), app, log=logger, error_log=logger)
+    http_server.serve_forever()
 
 def run():
     init_app()
