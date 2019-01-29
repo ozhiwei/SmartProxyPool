@@ -5,7 +5,7 @@ import os
 import logging
 
 from logging.handlers import TimedRotatingFileHandler
-from Config.ConfigManager import config
+from Config import ConfigManager
 
 LOG_LEVEL = {
     "CRITICAL": 50,
@@ -31,7 +31,7 @@ class LogHandler(logging.Logger):
         if level:
             self.level = level
         else:
-            self.level = LOG_LEVEL.get(config.setting.Log.level, LOG_LEVEL["INFO"]) 
+            self.level = LOG_LEVEL.get(ConfigManager.fconfig.setting.get("log_level"), LOG_LEVEL["INFO"]) 
 
         super(LogHandler, self).__init__(self.name, level=self.level)
         if stream:

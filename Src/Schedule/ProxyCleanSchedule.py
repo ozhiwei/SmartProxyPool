@@ -11,7 +11,7 @@ from Schedule.ProxySchedule import ProxySchedule
 from Manager.ProxyClean import ProxyCleanRaw, ProxyCleanUseful
 
 from Log.LogManager import log
-from Config.ConfigManager import config
+from Config import ConfigManager
 
 class ProxyCleanSchedule(ProxySchedule):
 

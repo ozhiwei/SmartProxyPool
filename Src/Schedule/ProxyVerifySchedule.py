@@ -11,7 +11,7 @@ from Manager.ProxyVerify import ProxyVerifyRaw, ProxyVerifyUseful
 from Schedule.ProxySchedule import ProxySchedule
 
 from Log.LogManager import log
-from Config.ConfigManager import config
+from Config import ConfigManager
 
 class ProxyVerifySchedule(ProxySchedule):
 

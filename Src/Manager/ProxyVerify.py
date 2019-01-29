@@ -15,7 +15,7 @@ import gevent
 
 from Manager.ProxyManager import proxy_manager
 from Log.LogManager import log
-from Config.ConfigManager import config
+from Config import ConfigManager
 
 try:
     from Queue import Queue  # py3
@@ -134,12 +134,12 @@ class ProxyVerify(object):
             "http": proxy,
             "https": proxy,
         }
-        verify_url = config.setting.Other.custom_verify_url
+        verify_url = ConfigManager.dbconfig.setting.get("custom_verify_url")
 
         try:
             content_result = True
             r = requests.get(verify_url, proxies=proxies, timeout=10, verify=False)
-            pattern = config.setting.Other.custom_verify_content
+            pattern = ConfigManager.dbconfig.setting.get("custom_verify_content")
             if pattern:
                 content = r.content.decode('utf-8')
                 search_result = re.search(pattern, content)
@@ -185,7 +185,7 @@ class ProxyVerifyRaw(ProxyVerify):
             raw_proxy = raw_proxy.decode('utf8')
 
         if raw_proxy not in self.useful_proxies:
-            if config.setting.Other.custom_verify_url:
+            if ConfigManager.dbconfig.setting.get("custom_verify_url"):
                 verify_result = self.customVerifyProxy(raw_proxy)
             else:
                 verify_result = self.defaultVerifyProxy(raw_proxy)                    
@@ -224,7 +224,7 @@ class ProxyVerifyRaw(ProxyVerify):
             skip = 0,
         )
 
-        concurrency = config.setting.Thread.verify_raw_proxy_concurrency
+        concurrency = ConfigManager.dbconfig.setting.get("verify_raw_proxy_concurrency")
         queue_size = self.queue.qsize()
         if concurrency > queue_size:
             spawn_num = queue_size
@@ -263,7 +263,7 @@ class ProxyVerifyUseful(ProxyVerify):
             proxy_info = self.getProxyInfo(proxy)
             proxy_manager.updateUsefulProxy(proxy_item, proxy_info)
 
-        if config.setting.Other.custom_verify_url:
+        if ConfigManager.dbconfig.setting.get("custom_verify_url"):
             verify_result = self.customVerifyProxy(proxy)
         else:
             verify_result = self.defaultVerifyProxy(proxy)
@@ -292,7 +292,7 @@ class ProxyVerifyUseful(ProxyVerify):
             fail = 0,
         )
 
-        concurrency = config.setting.Thread.verify_useful_proxy_concurrency
+        concurrency = ConfigManager.dbconfig.setting.get("verify_useful_proxy_concurrency")
         queue_size = self.queue.qsize()
         if concurrency > queue_size:
             spawn_num = queue_size

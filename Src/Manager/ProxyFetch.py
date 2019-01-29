@@ -13,7 +13,7 @@ import gevent
 from Manager.ProxyManager import proxy_manager
 from ProxyGetter.getFreeProxy import GetFreeProxy
 from Log.LogManager import log
-from Config.ConfigManager import config
+from Config import ConfigManager
 from Util.utilFunction import verifyProxyFormat
 
 try:
@@ -33,7 +33,7 @@ class ProxyFetch(object):
             cls.queue.put(item["setting_name"])
 
     def start(self):
-        concurrency = config.setting.Thread.fetch_new_proxy_concurrency
+        concurrency = ConfigManager.dbconfig.setting.get("fetch_new_proxy_concurrency")
         queue_size = self.queue.qsize()
         if concurrency > queue_size:
             spawn_num = queue_size

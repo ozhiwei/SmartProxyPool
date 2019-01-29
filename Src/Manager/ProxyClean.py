@@ -8,7 +8,7 @@ import threading
 
 from Manager.ProxyManager import proxy_manager
 from Log.LogManager import log
-from Config.ConfigManager import config
+from Config import ConfigManager
 
 try:
     from Queue import Queue  # py3
@@ -24,7 +24,7 @@ class ProxyClean(threading.Thread):
 class ProxyCleanUseful(ProxyClean):
 
     def run(self):
-        hold_number = config.setting.Hold.hold_useful_proxy_number
+        hold_number = ConfigManager.dbconfig.setting.get("hold_useful_proxy_number")
         total_number = proxy_manager.getUsefulProxyNumber()
         clean_number = proxy_manager.cleanUsefulProxy(hold_number=hold_number)
 

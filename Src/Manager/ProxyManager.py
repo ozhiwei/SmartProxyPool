@@ -8,7 +8,7 @@ import time
 
 from Util import EnvUtil
 from DB.DbClient import UsefulProxyDocsModel, RawProxyDocsModel
-from Config.ConfigManager import config
+from Config import ConfigManager
 from Util.utilFunction import verifyProxyFormat
 from ProxyGetter.getFreeProxy import GetFreeProxy
 from Log.LogManager import log
@@ -59,7 +59,7 @@ class ProxyManager(object):
     def saveRawProxy(self, proxy):
         data = {
             "proxy": proxy,
-            "health": config.setting.Hold.init_raw_proxy_health
+            "health": ConfigManager.dbconfig.setting.get("init_raw_proxy_health")
         }
         self.raw_proxy.saveRawProxy(data)
 

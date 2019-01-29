@@ -2,11 +2,11 @@ import sys
 sys.path.append("Src")
 
 from pymongo import MongoClient
-from Config.ConfigManager import config
+from Config import ConfigManager
 
 import importlib
 
-mc = MongoClient(config.setting.DB.host, config.setting.DB.port)
+mc = MongoClient(ConfigManager.fconfig.setting.get("db_host"), ConfigManager.fconfig.setting.get("db_port"))
 
 VERSION_FILE_PATH = "version"
 version_list = []

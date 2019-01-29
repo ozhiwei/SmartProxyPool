@@ -14,7 +14,7 @@ sys.path.append("Src/")
 import logging
 from flask import Flask
 from  gevent.pywsgi import WSGIServer
-from Config.ConfigManager import config
+from Config import ConfigManager
 
 ACCESS_LOG_PATH = "logs/app_access.log"
 
@@ -34,11 +34,11 @@ def init_log():
 def init_config():
     app.config.from_pyfile('config.py')
     app.config["MONGODB_SETTINGS"] = {
-        'db': config.setting.DB.name,
-        'host': config.setting.DB.host,
-        'port': config.setting.DB.port,
-        'username': config.setting.DB.username,
-        'password': config.setting.DB.password,
+        'db': ConfigManager.fconfig.setting.get("db_name"),
+        'host': ConfigManager.fconfig.setting.get("db_host"),
+        'port': ConfigManager.fconfig.setting.get("db_port"),
+        'username': ConfigManager.fconfig.setting.get("db_user"),
+        'password': ConfigManager.fconfig.setting.get("db_pass"),
     }
 
 def init_app():
@@ -52,7 +52,7 @@ def start_app():
     admin.init_app(app)
     api.init_app(app)
 
-    http_server = WSGIServer((config.setting.Other.bind_ip, config.setting.Other.bind_port), app, log=logger, error_log=logger)
+    http_server = WSGIServer((ConfigManager.fconfig.setting.get("bind_ip"), ConfigManager.fconfig.setting.get("bind_port")), app, log=logger, error_log=logger)
     http_server.serve_forever()
 
 def run():

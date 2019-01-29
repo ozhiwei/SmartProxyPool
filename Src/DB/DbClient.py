@@ -5,7 +5,7 @@ import os
 import sys
 import time
 
-from Config.ConfigManager import config
+from Config import ConfigManager
 from Util.utilClass import Singleton
 from DB.MongodbClient import MongodbClient
 from Log.LogManager import log
@@ -14,11 +14,11 @@ class DocsModel(object):
     docs_name = "test"
 
     def __init__(self):
-        db_name = config.setting.DB.name
-        db_host = config.setting.DB.host
-        db_port = config.setting.DB.port
-        db_username = config.setting.DB.username
-        db_password = config.setting.DB.password
+        db_name = ConfigManager.fconfig.setting.get("db_name")
+        db_host = ConfigManager.fconfig.setting.get("db_host")
+        db_port = ConfigManager.fconfig.setting.get("db_port")
+        db_username = ConfigManager.fconfig.setting.get("db_user")
+        db_password = ConfigManager.fconfig.setting.get("db_pass")
 
         self.mc = MongodbClient(
             host=db_host,

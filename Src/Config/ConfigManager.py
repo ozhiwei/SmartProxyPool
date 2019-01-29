@@ -27,122 +27,110 @@ def is_number(s):
 
     return result
 
-class SettingObject(object):
-    def __getattr__(self, name):
-        result = SectionObject()
-        setattr(self, name, result)
-        return result
-
-class SectionObject(object):
-    def __getattr__(self, name):
-        return None
-
 class BaseConfig(object):
     config_dir = "../../Config/"
+    config_name = ""
 
     def __init__(self):
         pwd = os.path.dirname(os.path.realpath(__file__))
         relative_path = "{pwd}/{config_dir}".format(pwd=pwd, config_dir=self.config_dir)
         self.config_dir = os.path.realpath(relative_path)
-        self.setting = SettingObject()
+        self.setting = {}
 
-        self.LoadDefaultConfig()
-        self.LoadCurrentConfig()
+        self.load_config()
 
-    def LoadDefaultConfig(self):
-        config_path = os.path.join(self.config_dir, 'Config.ini.default')
-        self.default_config = self.LoadConfigByPath(config_path)
-        # self.InitConfig(self.default_config)
+    def load_config(self):
+        config_path = os.path.join(self.config_dir, self.config_name)
+        self.config = self.load_config_from_path(config_path)
+        self.load_setting()
 
-    def LoadCurrentConfig(self):
-        config_path = os.path.join(self.config_dir, 'Config.ini')
-        self.current_config = self.LoadConfigByPath(config_path)
-        self.InitConfig(self.current_config)
+    def check_config_exists(self, path):
+        if os.path.exists(path):
+            result = True
+        else:
+            result = False
+        
+        return result
 
-    def LoadConfigByPath(self, config_path):
+
+    def load_config_from_path(self, config_path):
         if os.path.exists(config_path):
             config = ConfigParse()
             config.read(config_path)
 
         return config
 
-    def InitConfig(self, config): 
-        for section in config.sections():
-            c = getattr(self.setting, section)
-            for item  in config.items(section): 
+    def load_setting(self): 
+        for section in self.config.sections():
+            for item  in self.config.items(section): 
                 field = item[0] 
                 value = int(item[1]) if is_number(item[1]) else item[1] 
-                setattr(c, field, value) 
+                self.setting[field] = value
 
-class ProxyPoolConfig(BaseConfig):
+class FConfig(BaseConfig):
+    config_name = "Config.ini"
+
+class DBConfig(BaseConfig):
+    config_name = "DBConfig.ini.default"
     db_name = "proxy"
-    collection_name = "setting"
+    docs_name = "setting"
 
     def __init__(self):
-        super(ProxyPoolConfig, self).__init__()
-        client = MongoClient(host=self.setting.DB.host, port=self.setting.DB.port, username=self.setting.DB.username, password=self.setting.DB.password)
+        super(DBConfig, self).__init__()
+        client = MongoClient(host=fconfig.setting.get("db_host"), port=fconfig.setting.get("db_port"), username=fconfig.setting.get("db_user"), password=fconfig.setting.get("db_pass"))
 
         self.db = client[self.db_name]
 
-        self.InitConfigFromDB()
+        if self.check_setting_exists():
+            pass
+        else:
+            self.load_config_to_db()
+
+        self.load_setting_from_db()
         register_event(NOTIFY_EVENT["AFTER_SETTING_CHANGE"], self.dispatch_event)
 
     def dispatch_event(self, **kwargs):
-        self.ReloadConfigFromDB(**kwargs)
+        self.reload_setting_from_db(**kwargs)
 
-    def LoadDefaultConfigToDB(self):
-        if self.db[self.collection_name].count() == 0:
-            for section in self.default_config.sections():
-                for item  in self.default_config.items(section):
-                    field = item[0]
-                    value = item[1]
+    def check_setting_exists(self):
+        result = self.db[self.docs_name].count() != 0
+        return result
 
+    def load_config_to_db(self):
+        for section in self.config.sections():
+            for item  in self.config.items(section):
+                field = item[0]
+                value = item[1]
 
-                    data = { 
-                        "setting_group": section,
-                        "setting_name": field,
-                        "setting_value": value,
-                        "setting_state": True,
-                    }
+                data = {
+                    "setting_name": field,
+                    "setting_value": value,
+                    "setting_state": True,
+                }
 
-                    self.InsertDBSettingConfig(data)
+                self.db[self.docs_name].insert_one(data)
 
-    def InsertDBSettingConfig(self, data):
-        self.db[self.collection_name].insert_one(data)
+    def load_setting_from_db(self):
+        self.reload_setting_from_db()
 
-    def InitConfigFromDB(self):
-        self.LoadDefaultConfigToDB()
-        self.ReloadConfigFromDB()
-
-    def ReloadConfigFromDB(self, **kwargs):
+    def reload_setting_from_db(self, **kwargs):
         cursor = self.db.setting.find()
         for item in cursor:
             if item["setting_state"]:
-                section = getattr(self.setting, item["setting_group"])
                 field = item["setting_name"]
                 value = item["setting_value"] 
                 value = int(value) if is_number(value) else value
-                setattr(section, field, value)
+                self.setting[field] = value
             else:
-                section = getattr(self.setting, item["setting_group"])
                 field = item["setting_name"]
-                setattr(section, field, None)
+                self.setting[field] = None
 
-    def GetConfigGroupList(self, group_name):
-        result = []
-        cursor = self.db.setting.find({"setting_group": group_name})
-        for item in cursor:
-            if item["setting_state"]:
-                result.append(item)
+    def load_setting(self):
+        pass
 
-        return result
-
-
-config = ProxyPoolConfig()
+fconfig = FConfig()
+dbconfig = DBConfig()
 
 if __name__ == '__main__':
-    print(config.setting.DB.host)
-    print(config.setting.DB.username)
-    print(config.setting.Interval.clean_raw_proxy_interval)
-    print(config.setting.Thread.verify_raw_proxy_thread)
-    print(config.GetConfigGroupList("ProxyFetch"))
+    print("Config.ini db_host: ", fconfig.setting.get("db_host"))
+    print("DBConfig.ini.default verify_raw_proxy_concurrency: ", dbconfig.setting.get("verify_raw_proxy_concurrency"))

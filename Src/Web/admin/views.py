@@ -11,7 +11,7 @@ from flask_admin import expose
 from Notify.NotifyManager import dispatch_event, NOTIFY_EVENT
 
 # project import
-from Config.ConfigManager import config
+from Config import ConfigManager
 from Manager.ProxyManager import proxy_manager
 
 CUSTOM_COLUMN_FORMAT = {
