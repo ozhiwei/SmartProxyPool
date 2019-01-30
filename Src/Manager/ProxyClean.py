@@ -24,7 +24,7 @@ class ProxyClean(threading.Thread):
 class ProxyCleanUseful(ProxyClean):
 
     def run(self):
-        hold_number = ConfigManager.dbconfig.setting.get("hold_useful_proxy_number")
+        hold_number = ConfigManager.ppconfig.setting.get("hold_useful_proxy_number")
         total_number = proxy_manager.getUsefulProxyNumber()
         clean_number = proxy_manager.cleanUsefulProxy(hold_number=hold_number)
 

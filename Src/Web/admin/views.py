@@ -50,8 +50,12 @@ def LastSuccTimeFormat(last_time):
 
     return result
 
-def SuccFormat(succ, total):
-    result = "%d(%.2f%%)" % (succ, float(succ / total * 100))
+def PercentFormat(cur, total):
+    if total == 0:
+        percent = 0
+    else:
+        percent = float(cur / total * 100)
+    result = "%d(%.2f%%)" % (cur, percent)
 
     return result
 
@@ -59,13 +63,12 @@ class ProxyView(ModelView):
     name = "ProxyPool"
 
     column_list = ("proxy", "succ", "total", "keep_succ", "proxy_type", "https", "last_status", "last_succ_time", "region_list")
-    can_set_page_size = True
     can_create = False
     column_formatters = dict(
         proxy_type=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.proxy_type)],
         https=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.https)],
         last_succ_time=lambda v, c, m, p: LastSuccTimeFormat(m.last_succ_time),
-        succ=lambda v, c, m, p: SuccFormat(m.succ, m.total),
+        succ=lambda v, c, m, p: PercentFormat(m.succ, m.total),
     )
 
     def is_accessible(self):
@@ -86,7 +89,6 @@ class ProxyView(ModelView):
 class SettingView(ModelView):
     name="Setting"
 
-    can_set_page_size = True
     can_create = False
     can_delete = False
     can_view_details = True
@@ -117,6 +119,37 @@ class SettingView(ModelView):
             )
         )
         dispatch_event(NOTIFY_EVENT["AFTER_SETTING_CHANGE"], **kwargs)
+
+class FetcherView(ModelView):
+    name="Fethers"
+
+    column_list = ("name", "succ", "fail", "skip", "total", "status")
+    can_create = False
+    can_delete = False
+    can_view_details = True
+    column_searchable_list = ['name']
+    column_editable_list = [ "status"]
+    column_formatters = dict(
+        succ=lambda v, c, m, p: PercentFormat(m.succ, m.total),
+        fail=lambda v, c, m, p: PercentFormat(m.fail, m.total),
+        skip=lambda v, c, m, p: PercentFormat(m.skip, m.total),        
+    )
+
+    def is_accessible(self):
+        result = None
+        if not current_user.is_active or not current_user.is_authenticated:
+            result = False
+
+        if current_user.has_role('superuser'):
+            result = True
+
+        return result
+
+    def _handle_view(self, name, **kwargs):
+        if current_user.is_authenticated:
+            pass
+        else:
+            return redirect(url_for('security.login', next=request.url))
 
 class ProxyPoolAdminIndexView(flask_admin.AdminIndexView):
 

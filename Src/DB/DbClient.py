@@ -14,11 +14,11 @@ class DocsModel(object):
     docs_name = "test"
 
     def __init__(self):
-        db_name = ConfigManager.fconfig.setting.get("db_name")
-        db_host = ConfigManager.fconfig.setting.get("db_host")
-        db_port = ConfigManager.fconfig.setting.get("db_port")
-        db_username = ConfigManager.fconfig.setting.get("db_user")
-        db_password = ConfigManager.fconfig.setting.get("db_pass")
+        db_name = ConfigManager.bconfig.setting.get("db_name")
+        db_host = ConfigManager.bconfig.setting.get("db_host")
+        db_port = ConfigManager.bconfig.setting.get("db_port")
+        db_username = ConfigManager.bconfig.setting.get("db_user")
+        db_password = ConfigManager.bconfig.setting.get("db_pass")
 
         self.mc = MongodbClient(
             host=db_host,

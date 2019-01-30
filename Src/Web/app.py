@@ -34,11 +34,11 @@ def init_log():
 def init_config():
     app.config.from_pyfile('config.py')
     app.config["MONGODB_SETTINGS"] = {
-        'db': ConfigManager.fconfig.setting.get("db_name"),
-        'host': ConfigManager.fconfig.setting.get("db_host"),
-        'port': ConfigManager.fconfig.setting.get("db_port"),
-        'username': ConfigManager.fconfig.setting.get("db_user"),
-        'password': ConfigManager.fconfig.setting.get("db_pass"),
+        'db': ConfigManager.bconfig.setting.get("db_name"),
+        'host': ConfigManager.bconfig.setting.get("db_host"),
+        'port': ConfigManager.bconfig.setting.get("db_port"),
+        'username': ConfigManager.bconfig.setting.get("db_user"),
+        'password': ConfigManager.bconfig.setting.get("db_pass"),
     }
 
 def init_app():
@@ -52,7 +52,7 @@ def start_app():
     admin.init_app(app)
     api.init_app(app)
 
-    http_server = WSGIServer((ConfigManager.fconfig.setting.get("bind_ip"), ConfigManager.fconfig.setting.get("bind_port")), app, log=logger, error_log=logger)
+    http_server = WSGIServer((ConfigManager.bconfig.setting.get("bind_ip"), ConfigManager.bconfig.setting.get("bind_port")), app, log=logger, error_log=logger)
     http_server.serve_forever()
 
 def run():

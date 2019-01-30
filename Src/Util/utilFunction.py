@@ -72,7 +72,7 @@ def getHtmlTree(url, **kwargs):
     try:
         result = etree.HTML(html)
     except Exception as e:
-        print("getHtmlTree error: ", url, e)
+        # print("getHtmlTree error: ", url, e)
         result = etree.HTML("<html></html>")
 
     return result

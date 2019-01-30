@@ -22,10 +22,30 @@ class ProxyModel(Document):
 class SettingModel(Document):
     meta = {'collection': 'setting'}
 
-    setting_group = mongoengine.StringField(required=True, max_length=40)    
     setting_name = mongoengine.StringField(required=True, unique=True, max_length=40)
     setting_value = mongoengine.StringField(required=True, max_length=40)
     setting_state = mongoengine.BooleanField(default=True)
+
+class FetcherModel(Document):
+    meta = {'collection': 'fetchers'}
+
+    name = mongoengine.StringField(required=True, unique=True, max_length=40)
+    total = mongoengine.IntField(default=0)
+    succ = mongoengine.IntField(default=0)
+    fail = mongoengine.IntField(default=0)
+    skip = mongoengine.IntField(default=0)
+    # fetch_time = mongoengine.DateTimeField()
+    status = mongoengine.BooleanField(default=True)
+    # fetch_desc = mongoengine.StringField(max_length=40)
+
+
+class ProxyPoolModel(Document):
+    meta = {'collection': 'proxy_pool'}
+
+    token = mongoengine.StringField(required=True, max_length=40)    
+    filter_name = mongoengine.StringField(required=True, max_length=40)
+    verifier_name = mongoengine.StringField(required=True, max_length=40)
+
 
 class Role(Document, RoleMixin):
     name = mongoengine.StringField(max_length=80, unique=True)

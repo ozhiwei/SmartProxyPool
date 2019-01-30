@@ -59,7 +59,7 @@ class ProxyManager(object):
     def saveRawProxy(self, proxy):
         data = {
             "proxy": proxy,
-            "health": ConfigManager.dbconfig.setting.get("init_raw_proxy_health")
+            "health": ConfigManager.ppconfig.setting.get("init_raw_proxy_health")
         }
         self.raw_proxy.saveRawProxy(data)
 
@@ -79,10 +79,10 @@ class ProxyManager(object):
 
         data = {
             "proxy": proxy_info.address, 
-            "succ": 1,
-            "keep_succ": 1,
+            "succ": 0,
+            "keep_succ": 0,
             "fail": 0,
-            "total": 1,
+            "total": 0,
             "https": proxy_info.https,
             "proxy_type": proxy_info.type,
             "region_list": region_list,

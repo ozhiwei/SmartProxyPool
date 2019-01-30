@@ -39,10 +39,9 @@ class WebRequest(object):
                 'Connection': 'keep-alive',
                 'Accept-Language': 'zh-CN,zh;q=0.8'}
 
-    def get(self, url, header=None, retry_time=1, timeout=30,
+    def get(self, url, header=None, retry_time=1, timeout=10,
             *args, **kwargs):
 
-        resp = Response()
         headers = self.header
         if header and isinstance(header, dict):
             headers.update(header)
@@ -51,6 +50,7 @@ class WebRequest(object):
             resp = requests.get(url, headers=headers, timeout=timeout, **kwargs)
         except Exception as e:
             # print("request url error", url, e)
-            pass
+            resp = Response()
+            resp.status_code = 504
 
         return resp

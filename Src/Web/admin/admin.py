@@ -1,5 +1,5 @@
-from .views import ProxyView, SettingView, ProxyPoolAdminIndexView
-from .model import ProxyModel, SettingModel
+from .views import ProxyView, SettingView, FetcherView, ProxyPoolAdminIndexView
+from .model import ProxyModel, SettingModel, FetcherModel
 
 from flask_mongoengine import MongoEngine
 
@@ -54,6 +54,8 @@ def init_app(app):
     admin = flask_admin.Admin(app=app, name='ProxyPool Admin', base_template="admin/master_base.html", index_view=ProxyPoolAdminIndexView(), template_mode='bootstrap3')
     admin.add_view(ProxyView(ProxyModel))
     admin.add_view(SettingView(SettingModel))
+    # admin.add_view(ProxyPoolView(ProxyPoolModel))
+    admin.add_view(FetcherView(FetcherModel))
 
     db = MongoEngine()
     db.init_app(app)

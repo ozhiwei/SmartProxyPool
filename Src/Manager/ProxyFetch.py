@@ -11,7 +11,8 @@ import threading
 import gevent
 
 from Manager.ProxyManager import proxy_manager
-from ProxyGetter.getFreeProxy import GetFreeProxy
+# from ProxyGetter.getFreeProxy import GetFreeProxy
+from Fetcher import FetcherManager
 from Log.LogManager import log
 from Config import ConfigManager
 from Util.utilFunction import verifyProxyFormat
@@ -28,12 +29,12 @@ class ProxyFetch(object):
 
     @classmethod 
     def initQueue(cls):
-        items = config.GetConfigGroupList("ProxyFetch")
+        items = ConfigManager.fconfig.get_fetchers()
         for item in items:
-            cls.queue.put(item["setting_name"])
+            cls.queue.put(item)
 
     def start(self):
-        concurrency = ConfigManager.dbconfig.setting.get("fetch_new_proxy_concurrency")
+        concurrency = ConfigManager.ppconfig.setting.get("fetch_new_proxy_concurrency")
         queue_size = self.queue.qsize()
         if concurrency > queue_size:
             spawn_num = queue_size
@@ -53,10 +54,12 @@ class ProxyFetch(object):
         fail = 0
         skip = 0
 
-        func_name = self.queue.get()
-        log.debug("fetch [{func_name}] proxy start".format(func_name=func_name))
+        fetcher_name = self.queue.get()
+        fetcher_class = FetcherManager.get_class(fetcher_name)
+        log.debug("fetch [{fetcher_name}] proxy start".format(fetcher_name=fetcher_name))
         try:
-            for proxy in getattr(GetFreeProxy, func_name.strip())():
+            f = fetcher_class()
+            for proxy in f.run():
                 proxy = proxy.strip()
                 if proxy and verifyProxyFormat(proxy) and \
                 not proxy_manager.checkRawProxyExists(proxy) and \
@@ -64,20 +67,30 @@ class ProxyFetch(object):
 
                     proxy_manager.saveRawProxy(proxy)
                     succ = succ + 1
-                    log.debug("fetch [{func_name}] proxy {proxy} succ".format(func_name=func_name, proxy=proxy))
+                    log.debug("fetch [{fetcher_name}] proxy {proxy} succ".format(fetcher_name=fetcher_name, proxy=proxy))
                 else:
                     skip = skip + 1
-                    log.debug("fetch [{func_name}] proxy {proxy} skip".format(func_name=func_name, proxy=proxy))
+                    log.debug("fetch [{fetcher_name}] proxy {proxy} skip".format(fetcher_name=fetcher_name, proxy=proxy))
 
                 total = total + 1
         except Exception as e:
-            log.debug("fetch [{func_name}] proxy {proxy} fail: {error}".format(func_name=func_name, proxy=proxy, error=e))
+            log.error("fetch [{fetcher_name}] proxy fail: {error}".format(fetcher_name=fetcher_name, error=e))
             fail = fail + 1
 
         end_time = time.time()
         elapsed_time = int(end_time - start_time)
 
-        log.info("fetch [{func_name}] proxy finish, total:{total}, succ:{succ}, fail:{fail}, skip:{skip}, elapsed_time:{elapsed_time}s".format(func_name=func_name, total=total, succ=succ, fail=fail, skip=skip, elapsed_time=elapsed_time))
+        self.queue.task_done()
+
+        stat = dict(
+            total=total,
+            succ=succ,
+            fail=fail,
+            skip=skip,
+        )
+        ConfigManager.fconfig.update_fetcher_stat(fetcher_name, stat)
+
+        log.info("fetch [{fetcher_name}] proxy finish, total:{total}, succ:{succ}, fail:{fail}, skip:{skip}, elapsed_time:{elapsed_time}s".format(fetcher_name=fetcher_name, total=total, succ=succ, fail=fail, skip=skip, elapsed_time=elapsed_time))
 
     def run(self):
         while self.queue.qsize():
