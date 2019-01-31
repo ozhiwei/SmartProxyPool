@@ -7,7 +7,7 @@ class ProxyModel(Document):
 
     proxy = mongoengine.StringField(required=True, max_length=40)
     last_status = mongoengine.StringField(max_length=40)
-    last_succ_time = mongoengine.DateTimeField()
+    last_succ_time = mongoengine.IntField(default=0)
     succ = mongoengine.IntField(default=0)
     fail = mongoengine.IntField(default=0)
     total = mongoengine.IntField(default=0)

@@ -55,7 +55,6 @@ def run():
     else:
         last_version = get_last_version()
         data = {
-            "setting_group": "Default",
             "setting_name": "version",
             "setting_value": last_version,
             "setting_value": True,
