@@ -122,11 +122,6 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
 API_LIST = {
     "/api/v1/proxy/": {
         "args": {
-            "token": {
-                "value": "random string + random number",
-                "desc": "Avoid Get Repetition Proxy",
-                "required": False,
-            },
             "https": {
                 "value": [1],
                 "desc": "need https proxy? 1 == true",
@@ -181,39 +176,29 @@ API_LIST = {
 
 添加一个新的代理获取方法如下:
 
-首先在`ProxyGetter/getFreeProxy.py:32`类中添加你的获取代理的静态方法,
+首先在`Src/Fetcher/fetchers/`目录中添加你的代理类.
 
-该方法需要以生成器(yield)形式返回`host:ip`格式的代理，例如:
+该类需要有一个`run`方法, 以生成器(yield)形式返回`host:ip`格式的代理，例如:
 
 ```python
 
-class GetFreeProxy(object):
-    # ....
+# 文件名和class名要保持一致
+class Fetcher1():
+    # 用来识别的, 会映射到数据库里面
+    fetcher_name = "Fetcher1"
 
-    # 你自己的方法
-    @staticmethod
-    def freeProxyCustom():  # 命名不和已有重复即可
-
-        # 通过某网站或者某接口或某数据库获取代理 任意你喜欢的姿势都行
-        # 假设你拿到了一个代理列表
-        proxies = ["139.129.166.68:3128", "139.129.166.61:3128", ...]
-        for proxy in proxies:
-            yield proxy
-        # 确保每个proxy都是 host:ip正确的格式就行
-```
-
-添加好方法后，修改Config.ini文件中的`[ProxyGetter]`项：
-
-在`Config.ini`的`[ProxyGetter]`下添加自定义的方法的名字:
-
-```shell
-
-[ProxyGetter]
-;register the proxy getter function
-freeProxyFirst  = 0  # 如果要取消某个方法，将其删除或赋为0即可
-....
-freeProxyCustom  = 1  # 确保名字和你添加方法名字一致
-
+    def run(self):
+        url_list = [
+            'http://www.xxx.com/',
+        ]
+        for url in url_list:
+            html_tree = getHtmlTree(url)
+            ul_list = html_tree.xpath('//ul[@class="l2"]')
+            for ul in ul_list:
+                try:
+                    yield ':'.join(ul.xpath('.//li/text()')[0:2])
+                except Exception as e:
+                    print(e)
 ```
 
 `ProxyFetchSchedule` 会每隔一段时间抓取一次代理，下次抓取时会自动识别调用你定义的方法。
