@@ -29,12 +29,12 @@ class ProxyFetch(object):
 
     @classmethod 
     def initQueue(cls):
-        items = ConfigManager.fconfig.get_fetchers()
+        items = ConfigManager.fetcher_config.get_fetcher_list()
         for item in items:
             cls.queue.put(item)
 
     def start(self):
-        concurrency = ConfigManager.ppconfig.setting.get("fetch_new_proxy_concurrency")
+        concurrency = ConfigManager.setting_config.setting.get("fetch_new_proxy_concurrency")
         queue_size = self.queue.qsize()
         if concurrency > queue_size:
             spawn_num = queue_size
@@ -88,7 +88,7 @@ class ProxyFetch(object):
             fail=fail,
             skip=skip,
         )
-        ConfigManager.fconfig.update_fetcher_stat(fetcher_name, stat)
+        ConfigManager.fetcher_config.update_stat(fetcher_name, stat)
 
         log.info("fetch [{fetcher_name}] proxy finish, total:{total}, succ:{succ}, fail:{fail}, skip:{skip}, elapsed_time:{elapsed_time}s".format(fetcher_name=fetcher_name, total=total, succ=succ, fail=fail, skip=skip, elapsed_time=elapsed_time))
 

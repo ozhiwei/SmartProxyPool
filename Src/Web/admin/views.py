@@ -15,7 +15,7 @@ from Config import ConfigManager
 from Manager.ProxyManager import proxy_manager
 
 CUSTOM_COLUMN_FORMAT = {
-    "proxy_type" : {
+    "type" : {
         "0": "未知",
         "1": "透明",
         "2": "匿名",
@@ -62,10 +62,10 @@ def PercentFormat(cur, total):
 class ProxyView(ModelView):
     name = "ProxyPool"
 
-    column_list = ("proxy", "succ", "total", "keep_succ", "proxy_type", "https", "last_status", "last_succ_time", "region_list")
+    column_list = ("proxy", "succ", "total", "keep_succ", "type", "https", "last_status", "last_succ_time", "region_list")
     can_create = False
     column_formatters = dict(
-        proxy_type=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.proxy_type)],
+        type=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.type)],
         https=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][str(m.https)],
         last_succ_time=lambda v, c, m, p: LastSuccTimeFormat(m.last_succ_time),
         succ=lambda v, c, m, p: PercentFormat(m.succ, m.total),

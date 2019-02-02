@@ -3,6 +3,8 @@ sys.path.append("Src")
 import os
 import importlib
 
+from Config import ConfigManager
+
 SKIP_FILE_LIST = [
     "__init__.py",
     "__pycache__",
@@ -20,11 +22,10 @@ def init():
             fetcher_class = get_class(name)
             fetcher_name = fetcher_class.fetcher_name
             fetcher_list.append(fetcher_name)
+    
+    ConfigManager.fetcher_config.update_fetcher_list(fetcher_list)
 
     return True
-
-def get_fetchers():
-    return fetcher_list
 
 def get_class(name):
     module_name = "Fetcher.fetchers.%s" % (name)
@@ -35,7 +36,7 @@ def get_class(name):
 init()
 
 if __name__ == '__main__':
-    print("get_fetchers: ", bool(fetcher_list))
+    print("fetcher_list: ", bool(fetcher_list))
 
     class_name = "Fetcher1"
     print("get_class: ", get_class(class_name).fetcher_name == class_name)

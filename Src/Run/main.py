@@ -10,7 +10,9 @@ import time
 from threading import Thread
 
 from Log import LogManager
-from Web.app import run as proxy_web_run
+from Web import WebManager
+from Forward.ForwardManager import ForwardHttp
+
 from Schedule.ProxyVerifySchedule import ProxyVerifySchedule
 from Schedule.ProxyFetchSchedule import ProxyFetchSchedule
 from Schedule.ProxyCleanSchedule import ProxyCleanSchedule
@@ -18,7 +20,8 @@ from Schedule.ProxyCleanSchedule import ProxyCleanSchedule
 TASK_LIST = {
     "ProxyVerifySchedule": ProxyVerifySchedule,
     "ProxyFetchSchedule": ProxyFetchSchedule,
-    "ProxyCleanSchedule": ProxyCleanSchedule
+    "ProxyCleanSchedule": ProxyCleanSchedule,
+    "ForwardHttp": ForwardHttp,
 }
 
 def show_time():
@@ -29,8 +32,8 @@ def show_time():
 def start_task():
     task_list = []
     for name in TASK_LIST.keys():
-        sch = TASK_LIST[name]()
-        t = Thread(target=sch.run, name=name)
+        task = TASK_LIST[name]()
+        t = Thread(target=task.run, name=name)
         task_list.append(t)
 
     for t in task_list:
@@ -44,7 +47,7 @@ def main(test=False):
 
     start_task()
 
-    proxy_web_run()
+    WebManager.run()
 
 if __name__ == '__main__':
     main()

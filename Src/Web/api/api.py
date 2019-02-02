@@ -72,23 +72,18 @@ class Proxy(Resource):
         result = {
             "data": {}
         }
-        data = {}
 
         options = {
             "https": bool(self.args.get('https')),
-            "proxy_type": self.args.get('type'),
-            "proxy_region": self.args.get('region'),
+            "type": self.args.get('type'),
+            "region": self.args.get('region'),
         }
 
-        data = proxy_manager.getSampleUsefulProxy(**options)
-        
-        if data:
-            del data["_id"]
+        item = proxy_manager.getSampleUsefulProxy(**options)
+        if item:
+            del item["_id"]
 
-        if "used_token_list" in data:
-            del data["used_token_list"]
-
-        result["data"] = data
+        result["data"] = item
 
         return result
 
@@ -110,8 +105,8 @@ class Proxies(Resource):
 
         options = {
             "https": bool(self.args.get('https')),
-            "proxy_type": self.args.get('type'),
-            "proxy_region": self.args.get('region'),
+            "type": self.args.get('type'),
+            "region": self.args.get('region'),
         }
 
         data = proxy_manager.getAllUsefulProxy(**options)

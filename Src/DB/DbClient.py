@@ -14,11 +14,11 @@ class DocsModel(object):
     docs_name = "test"
 
     def __init__(self):
-        db_name = ConfigManager.bconfig.setting.get("db_name")
-        db_host = ConfigManager.bconfig.setting.get("db_host")
-        db_port = ConfigManager.bconfig.setting.get("db_port")
-        db_username = ConfigManager.bconfig.setting.get("db_user")
-        db_password = ConfigManager.bconfig.setting.get("db_pass")
+        db_name = ConfigManager.base_config.setting.get("db_name")
+        db_host = ConfigManager.base_config.setting.get("db_host")
+        db_port = ConfigManager.base_config.setting.get("db_port")
+        db_username = ConfigManager.base_config.setting.get("db_user")
+        db_password = ConfigManager.base_config.setting.get("db_pass")
 
         self.mc = MongodbClient(
             host=db_host,
@@ -86,8 +86,8 @@ class UsefulProxyDocsModel(DocsModel):
 
     def getAllValidUsefulProxy(self, **kwargs):
         https = kwargs.get("https", None)
-        proxy_region = kwargs.get("proxy_region", None)
-        proxy_type = kwargs.get("proxy_type", None)
+        region = kwargs.get("region", None)
+        type_ = kwargs.get("type", None)
 
         result = []
         operation_list = [
@@ -99,11 +99,11 @@ class UsefulProxyDocsModel(DocsModel):
         if https:
             operation_list[0]["$match"]["https"] = { "$eq": https }
 
-        if proxy_type:
-            operation_list[0]["$match"]["proxy_type"] = { "$eq": proxy_type }
+        if type_:
+            operation_list[0]["$match"]["type"] = { "$eq": type_ }
 
-        if proxy_region:
-            operation_list[0]["$match"]["region_list"] = { "$in": [proxy_region] }
+        if region:
+            operation_list[0]["$match"]["region_list"] = { "$in": [region] }
 
         log.debug("getAllValidUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
         result = self.mc.aggregate(operation_list)
@@ -126,8 +126,8 @@ class UsefulProxyDocsModel(DocsModel):
     # TODO: refine function
     def getSampleUsefulProxy(self, **kwargs):
         https = kwargs.get("https", None)
-        proxy_region = kwargs.get("proxy_region", None)
-        proxy_type = kwargs.get("proxy_type", None)
+        region = kwargs.get("region", None)
+        type_ = kwargs.get("type", None)
 
         result = None
         operation_list = 	[
@@ -145,11 +145,11 @@ class UsefulProxyDocsModel(DocsModel):
         if https:
             operation_list[0]["$match"]["https"] = { "$eq": https }
 
-        if proxy_type:
-            operation_list[0]["$match"]["proxy_type"] = { "$eq": proxy_type }
+        if type_:
+            operation_list[0]["$match"]["type"] = { "$eq": type_ }
 
-        if proxy_region: 
-            operation_list[0]["$match"]["region_list"] = { "$in": [proxy_region] } 
+        if region: 
+            operation_list[0]["$match"]["region_list"] = { "$in": [region] } 
 
         log.debug("getSampleUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
         data = self.mc.aggregate(operation_list)

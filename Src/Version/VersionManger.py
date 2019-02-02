@@ -6,7 +6,7 @@ from Config import ConfigManager
 
 import importlib
 
-mc = MongoClient(ConfigManager.bconfig.setting.get("db_host"), ConfigManager.bconfig.setting.get("db_port"))
+mc = MongoClient(ConfigManager.base_config.setting.get("db_host"), ConfigManager.base_config.setting.get("db_port"))
 
 VERSION_FILE_PATH = "version"
 version_list = []

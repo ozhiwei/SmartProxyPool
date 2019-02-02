@@ -50,7 +50,6 @@ class ProxyManager(object):
 
     def getSampleUsefulProxy(self, **kwargs):
         result = self.useful_proxy.getSampleUsefulProxy(**kwargs)
-
         return result
 
     def deleteRawProxy(self, proxy):
@@ -59,7 +58,7 @@ class ProxyManager(object):
     def saveRawProxy(self, proxy):
         data = {
             "proxy": proxy,
-            "health": ConfigManager.ppconfig.setting.get("init_raw_proxy_health")
+            "health": ConfigManager.setting_config.setting.get("init_raw_proxy_health")
         }
         self.raw_proxy.saveRawProxy(data)
 
@@ -84,7 +83,7 @@ class ProxyManager(object):
             "fail": 0,
             "total": 0,
             "https": proxy_info.https,
-            "proxy_type": proxy_info.type,
+            "type": proxy_info.type,
             "region_list": region_list,
             "last_status": "succ",
             "last_succ_time": now_time,
@@ -96,7 +95,7 @@ class ProxyManager(object):
     def updateUsefulProxy(self, proxy_item, proxy_info):
         data = {
             "$set": {
-                "proxy_type": proxy_info.type,
+                "type": proxy_info.type,
             }
         }
 

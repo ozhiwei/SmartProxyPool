@@ -31,7 +31,7 @@ class LogHandler(logging.Logger):
         if level:
             self.level = level
         else:
-            self.level = LOG_LEVEL.get(ConfigManager.bconfig.setting.get("log_level"), LOG_LEVEL["INFO"]) 
+            self.level = LOG_LEVEL.get(ConfigManager.base_config.setting.get("log_level"), LOG_LEVEL["INFO"]) 
 
         super(LogHandler, self).__init__(self.name, level=self.level)
         if stream:

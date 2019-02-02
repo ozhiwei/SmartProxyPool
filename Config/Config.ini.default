@@ -1,7 +1,7 @@
 [DB]
 ; Configure the database information
 db_type = MONGODB
-db_host = localhost
+db_host = proxy_pool_db
 db_port = 27017
 db_name = proxy
 ; user = your_username (Only Mongodb)
@@ -11,5 +11,8 @@ db_name = proxy
 log_level = INFO
 
 [BIND]
-bind_ip = 0.0.0.0
-bind_port = 5010
+web_bind_host = 0.0.0.0
+web_bind_port = 35050
+
+forward_bind_host = 0.0.0.0
+forward_bind_port = 36050

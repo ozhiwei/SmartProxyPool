@@ -1,22 +1,9 @@
 
-高质量, 高灵活的开放代理池服务 [ProxyPool Demo](http://proxy.1again.cc:5010/api/v1/proxy/)
+高质量, 高灵活的开放代理池服务 
+
+[ProxyPool Demo](http://proxy.1again.cc:35050/api/v1/proxy/) (我就是个栗子, 别指望我能有多稳定!)
+
 ---
-
-# 目标
-
-本项目fork于 `jhao104/proxy_pool`, 致敬!
-
-`jhao104/proxy_pool` 的目标是`通用代理池的框架`, 会做很多兼容性的开发.
-
-而我们的目标是构建一个`高质量`, `高灵活`的开放代理池服务, 会做很多体验上的开发.
-
-讲的太抽象了, 简单点来说.
-
-`jhao104/proxy_pool` 是提供给开发人员的定制化使用, 面向的是开发人员!
-
-`1again/ProxyPool`  是提供给一般人员的标准化使用, 面向的是人民群众! 
-
-`ProxyPool` 另外我觉得首字母大写会庄重严肃很多!
 
 # 功能/特点
 
@@ -26,24 +13,33 @@
 
 1. 所有代理都有验证计数, 验证成功的次数 / 总计验证的次数 == 代理可用率
 
-2. ~~通过token参数, 可以获取到`不重复`, `高可用率`的代理~~
-
-3. 获取代理时可以根据是否支持`https`, 透明还是匿名(普匿)`type`, 代理的所在的区域`region`进行过滤
-
-4. 可以通过配置文件(`Config.ini`)控制`获取新代理的间隔`, `验证代理的间隔`, `清除代理的间隔`
-
-5. 可以通过配置文件(`Config.ini`)控制`自定义的代理验证url`
-
-6. 在清理代理时会根据`代理可用率`进行排序, 清理低可用率的代理, 这个数量可以在配置文件(`Config.ini`)中设置
-
-7. [WEB页面的管理](http://proxy.1again.cc:5010/admin) 用户名:admin 密码:admin
-
-8. 支持`gevent`并发模式, 效果杠杠的, 别看广告, 看疗效!
-
-9. 实在编不下去了, 你行你来!
+![Proxy Pool](Docs/images/1.PNG)
 
 
-# 疗效
+2. 获取代理时可以根据是否支持`https`, 透明还是匿名(普匿)`type`, 代理的所在的区域`region`进行过滤, 举栗子
+
+```
+http://proxy.1again.cc:35050/api/v1/proxy/?https=1
+http://proxy.1again.cc:35050/api/v1/proxy/?type=2
+http://proxy.1again.cc:35050/api/v1/proxy/?region=中国
+
+http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
+```
+
+3. 可以通过配置控制`获取新代理的间隔`, `验证代理的间隔`, `保留代理数量`, `自定义的代理验证url`等等...
+
+![Proxy Pool](Docs/images/2.PNG)
+
+4. [WEB页面的管理](http://proxy.1again.cc:35050/admin) 用户名:admin 密码:admin (尔敢乱动, 打洗雷啊!)
+
+![Proxy Pool](Docs/images/3.PNG)
+
+5. 统计获取代理网站的数据
+
+![Proxy Pool](Docs/images/4.PNG)
+
+
+6. 支持`gevent`并发模式, 效果杠杠的, 别看广告, 看疗效!
 
 ```
 2019-01-23 16:14:38,805 ProxyClean.py[line:42] INFO clean raw_proxy, total_number:1196, clean_number:1195, remain_number:1
@@ -59,11 +55,38 @@
 2019-01-23 16:15:14,441 ProxyVerify.py[line:310] INFO useful_proxy verify proxy finish, total:2539, succ:550, fail:1989, elapsed_time:35s
 ```
 
+6. 支持动态代理(手动加粗)
+
+```
+root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
+{
+  "origin": "183.82.32.56"
+}
+root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
+{
+  "origin": "200.149.19.170"
+}
+root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
+{
+  "origin": "125.21.43.82"
+}
+root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
+{
+  "origin": "110.52.235.124"
+}
+root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
+{
+  "origin": "176.74.134.6"
+}
+```
+
+7. 实在编不下去了, 你行你来!
+
 # 目前
 
 目前还在重构阶段, 所以不保证安全稳定哦!
 
-先体验一下 [ProxyPool Demo](http://proxy.1again.cc:5010/api/v1/proxy/)
+先体验一下 [ProxyPool Demo](http://proxy.1again.cc:35050/api/v1/proxy/)
 
 然后Star一下, 养肥了再杀!
 
@@ -82,7 +105,12 @@
 ## 生产环境 Docker/docker-compose
 
 ```shell
-# In WORKDIR ProxyPool
+# Clone Repo
+git clone https://github.com/1again/ProxyPool
+
+# Entry Dir
+cd ProxyPool
+
 # Install Docker
 curl -sSL https://get.docker.com | sh
 
@@ -106,14 +134,14 @@ curl -sSL https://get.docker.com | sh
 # 记得先创建一个mongodb数据库
 # !!! Remember modify your database in Config.ini file
 # !!! 记住修改你的数据库配置文件 Config.ini
-docker run -it --rm -v $(pwd):/usr/src/app -p 5010:5010 1again/proxy_pool
+docker run -it --rm -v $(pwd):/usr/src/app -p 35050:35050 1again/proxy_pool
 ```
 
 # 使用
 
 启动过几分钟后就能看到抓取到的代理IP, 你可以直接到数据库中查看
 
-也可以通过api访问http://server_ip:5010 查看。
+也可以通过api访问http://server_ip:35050 查看。
 
 ## RESTFUL API
 
@@ -160,10 +188,6 @@ API_LIST = {
         },
         "desc": "Get All Proxy",
     },
-    "/api/v1/proxies/stat/": {
-        "args": {},
-        "desc": "Statistics All Vaild Proxies",
-    }
 }
 
 ```

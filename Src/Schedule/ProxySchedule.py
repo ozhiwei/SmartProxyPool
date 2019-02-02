@@ -39,7 +39,7 @@ class ProxySchedule(BlockingScheduler):
     def update_job_interval(self, **kwargs):
         job_id = kwargs.get("job_id")
 
-        value = ConfigManager.ppconfig.setting.get(job_id)
+        value = ConfigManager.setting_config.setting.get(job_id)
         trigger_args = { "minutes": value }
         trigger='interval'
         job = self._update_job(job_id, trigger, **trigger_args)
@@ -52,7 +52,7 @@ class ProxySchedule(BlockingScheduler):
     def run(self):
         now = datetime.datetime.now()
         for name, handler in self.task_handler_hash.items():
-            value = ConfigManager.ppconfig.setting.get(name)
+            value = ConfigManager.setting_config.setting.get(name)
             self.add_job(handler, "interval", id=name, minutes=value, next_run_time=now)
 
         self.start()

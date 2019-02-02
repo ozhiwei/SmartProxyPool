@@ -4,7 +4,8 @@ services:
     volumes:
      - ..:/usr/src/app
     ports:
-     - "5010:5010"
+     - "35050:35050"
+     - "36050:36050"
     image: "1again/proxy_pool"
   proxy_pool_db:
     ports:

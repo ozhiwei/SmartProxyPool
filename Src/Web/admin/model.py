@@ -12,7 +12,7 @@ class ProxyModel(Document):
     fail = mongoengine.IntField(default=0)
     total = mongoengine.IntField(default=0)
     keep_succ = mongoengine.IntField(default=0)
-    proxy_type = mongoengine.IntField(default=0)
+    type = mongoengine.IntField(default=0)
     https = mongoengine.BooleanField(default=False)
     region_list = mongoengine.ListField(mongoengine.StringField(max_length=20))
 

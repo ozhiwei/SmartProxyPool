@@ -134,12 +134,12 @@ class ProxyVerify(object):
             "http": proxy,
             "https": proxy,
         }
-        verify_url = ConfigManager.ppconfig.setting.get("custom_verify_url")
+        verify_url = ConfigManager.setting_config.setting.get("custom_verify_url")
 
         try:
             content_result = True
             r = requests.get(verify_url, proxies=proxies, timeout=10, verify=False)
-            pattern = ConfigManager.ppconfig.setting.get("custom_verify_content")
+            pattern = ConfigManager.setting_config.setting.get("custom_verify_content")
             if pattern:
                 content = r.content.decode('utf-8')
                 search_result = re.search(pattern, content)
@@ -185,7 +185,7 @@ class ProxyVerifyRaw(ProxyVerify):
             raw_proxy = raw_proxy.decode('utf8')
 
         if raw_proxy not in self.useful_proxies:
-            if ConfigManager.ppconfig.setting.get("custom_verify_url"):
+            if ConfigManager.setting_config.setting.get("custom_verify_url"):
                 verify_result = self.customVerifyProxy(raw_proxy)
             else:
                 verify_result = self.defaultVerifyProxy(raw_proxy)                    
@@ -224,7 +224,7 @@ class ProxyVerifyRaw(ProxyVerify):
             skip = 0,
         )
 
-        concurrency = ConfigManager.ppconfig.setting.get("verify_raw_proxy_concurrency")
+        concurrency = ConfigManager.setting_config.setting.get("verify_raw_proxy_concurrency")
         queue_size = self.queue.qsize()
         if concurrency > queue_size:
             spawn_num = queue_size
@@ -257,13 +257,13 @@ class ProxyVerifyUseful(ProxyVerify):
         proxy = proxy_item.get("proxy")
 
         # 获取代理信息的http请求可能异常
-        # 所在每次校验代理时, 如果代理类型未知(proxy_type==0)
+        # 所在每次校验代理时, 如果代理类型未知(type==0)
         # 就重新获取代理信息进行更新.
-        if proxy_item.get("proxy_type") == 0 or proxy_item.get("proxy_type") == None:
+        if proxy_item.get("type") == 0 or proxy_item.get("type") == None:
             proxy_info = self.getProxyInfo(proxy)
             proxy_manager.updateUsefulProxy(proxy_item, proxy_info)
 
-        if ConfigManager.ppconfig.setting.get("custom_verify_url"):
+        if ConfigManager.setting_config.setting.get("custom_verify_url"):
             verify_result = self.customVerifyProxy(proxy)
         else:
             verify_result = self.defaultVerifyProxy(proxy)
@@ -292,7 +292,7 @@ class ProxyVerifyUseful(ProxyVerify):
             fail = 0,
         )
 
-        concurrency = ConfigManager.ppconfig.setting.get("verify_useful_proxy_concurrency")
+        concurrency = ConfigManager.setting_config.setting.get("verify_useful_proxy_concurrency")
         queue_size = self.queue.qsize()
         if concurrency > queue_size:
             spawn_num = queue_size
