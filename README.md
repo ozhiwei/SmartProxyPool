@@ -54,7 +54,7 @@ http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
 2019-01-23 16:15:14,441 ProxyVerify.py[line:310] INFO useful_proxy verify proxy finish, total:2539, succ:550, fail:1989, elapsed_time:35s
 ```
 
-6. 支持动态代理(手动加粗)
+7. 支持动态代理(手动加粗)
 
 ```
 root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
@@ -79,7 +79,7 @@ root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
 }
 ```
 
-7. 实在编不下去了, 你行你来!
+8. 实在编不下去了, 你行你来!
 
 # 目前
 
