@@ -13,12 +13,33 @@ from Util.utilFunction import verifyProxyFormat
 from ProxyGetter.getFreeProxy import GetFreeProxy
 from Log.LogManager import log
 
+PROXY_LAST_STATUS = {
+    "UNKNOWN": 0,
+    "SUCC": 1,
+    "FAIL": 2,
+}
+
+PROXY_TYPE = {
+    "UNKNOWN": 0,
+    "CLEAR": 1,
+    "ANONYMOUS": 2,
+    "DYNAMIC": 3,
+}
+
+PROXY_HTTPS = {
+    "UNKNOWN": 0,
+    "ENABLE": 1,
+    "DISABLE": 2,
+}
+
+IP_DATA_PATH = "Data/17monipdb.datx"
+
 class ProxyManager(object):
 
     def __init__(self):
         self.useful_proxy = UsefulProxyDocsModel()
         self.raw_proxy = RawProxyDocsModel()
-        self.datx = datx.City("Data/17monipdb.datx")
+        self.datx = datx.City(IP_DATA_PATH)
 
     def cleanUsefulProxy(self, **kwargs):
         result = self.useful_proxy.cleanUsefulProxy(**kwargs)
@@ -72,38 +93,39 @@ class ProxyManager(object):
 
         return result
 
-    def saveUsefulProxy(self, proxy_info):
-        region_list = self.getProxyRegion(proxy_info.ip)
-        now_time = int(time.time())
+    def saveUsefulProxy(self, proxy):
+        ip = proxy.split(":")[0]
+        region_list = self.getProxyRegion(ip)
 
         data = {
-            "proxy": proxy_info.address, 
+            "proxy": proxy, 
             "succ": 0,
             "keep_succ": 0,
             "fail": 0,
             "total": 0,
-            "https": proxy_info.https,
-            "type": proxy_info.type,
+            "https": PROXY_HTTPS["UNKNOWN"],
+            "type": PROXY_TYPE["UNKNOWN"],
             "region_list": region_list,
-            "last_status": "succ",
-            "last_succ_time": now_time,
+            "last_status": PROXY_LAST_STATUS["UNKNOWN"],
+            "last_succ_time": 0,
             
         }
 
         self.useful_proxy.saveUsefulProxy(data)
 
-    def updateUsefulProxy(self, proxy_item, proxy_info):
+    def updateUsefulProxy(self, item, info):
         data = {
-            "$set": {
-                "type": proxy_info.type,
-            }
+            "$set": {}
         }
 
-        # https 的请求可能会失败, 所以这里不直接用新的 proxy_info.https 覆盖旧的字段.
-        if proxy_item.get("https") == False and proxy_info.https != False:
-            data["$set"]["https"] = proxy_info.https
+        if item.get("type") == PROXY_TYPE["UNKNOWN"]:
+            data["$set"]["type"]: info.type
 
-        self.useful_proxy.updateUsefulProxy(proxy_info.address, data)
+        if item.get("https") == PROXY_HTTPS["UNKNOWN"]:
+            data["$set"]["https"] = info.https
+
+        if len(data["$set"]) > 0:
+            self.useful_proxy.updateUsefulProxy(info.address, data)
 
     def deleteUsefulProxy(self, proxy):
         self.useful_proxy.deleteUsefulProxy(proxy)

@@ -11,24 +11,24 @@ import threading
 import datetime
 
 from Manager.ProxyFetch import ProxyFetch
-from Manager.ProxyManager import ProxyManager
+from Manager import ProxyManager
 from Schedule.ProxySchedule import ProxySchedule
 
 from Log.LogManager import log
 from Config import ConfigManager
 
 class ProxyFetchSchedule(ProxySchedule):
+    rightnow = False
 
     def __init__(self, **kwargs):
         super(ProxyFetchSchedule, self).__init__(**kwargs)
-        self.proxy_manager = ProxyManager()
         self.task_handler_hash = {
             "fetch_new_proxy_interval": self.fetch_new_proxy,
         }
 
     def check_fetch_new_proxy(self):
 
-        total_number = self.proxy_manager.getRawProxyNumber()
+        total_number = ProxyManager.proxy_manager.getRawProxyNumber()
         hold_number = ConfigManager.setting_config.setting.get("hold_raw_proxy_number")
         if total_number < hold_number or hold_number == -1:
             log.debug("fetch new proxy start, exist raw_proxy total_number:{total_number}, hold_number:{hold_number}".format(total_number=total_number, hold_number=hold_number))

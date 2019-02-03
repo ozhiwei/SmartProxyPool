@@ -138,9 +138,16 @@ docker run -it --rm -v $(pwd):/usr/src/app -p 35050:35050 1again/proxy_pool
 
 # 使用
 
-启动过几分钟后就能看到抓取到的代理IP, 你可以直接到数据库中查看
+启动过几分钟后就能看到抓取到的代理IP, 你可以直接在WEB管理界面中中查看
 
-也可以通过api访问http://server_ip:35050 查看。
+## DYNAMIC PROXY
+
+```shell
+curl -x 'your_server_ip:36050' your_access_url
+
+like this:
+curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
+```
 
 ## RESTFUL API
 

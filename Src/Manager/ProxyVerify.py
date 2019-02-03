@@ -13,7 +13,7 @@ import re
 import time
 import gevent
 
-from Manager.ProxyManager import proxy_manager
+from Manager import ProxyManager
 from Log.LogManager import log
 from Config import ConfigManager
 
@@ -22,26 +22,14 @@ try:
 except:
     from queue import Queue  # py2
 
-
-PROXY_TYPE = {
-    "UNKNOWN": 0,
-    "CLEAR": 1,
-    "COMMON_ANONYMOUS": 2,
-    "HIGH_ANONYMOUS": 3,
-}
-
-class ProxyInfo(object):
+class Info(object):
     pass
 
 class ProxyVerify(object):
 
-    # TODO: 逻辑应该有问题, 但不确定
-    # http是可用的才会检查https, 会不会有只开通https的代理呢?
+    # http可用才会检查https, 会不会有只开通https的代理呢?
     def getProxyInfo(self, proxy):
-        info = ProxyInfo()
-
-        if isinstance(proxy, bytes):
-            proxy = proxy.decode('utf8')
+        info = Info()
 
         data = proxy.split(':')
         info.ip = data[0]
@@ -55,10 +43,10 @@ class ProxyVerify(object):
         http_url = "http://httpbin.org/ip"
         https_url = "https://httpbin.org/ip"
 
-        info.http = False
-        info.https = False
+        result = False
 
-        info.type = PROXY_TYPE["UNKNOWN"]
+        info.https = ProxyManager.PROXY_HTTPS["UNKNOWN"]
+        info.type = ProxyManager.PROXY_TYPE["UNKNOWN"]
         # http verify
         try:
             r = requests.get(http_url, proxies=proxies, timeout=10, verify=False)
@@ -69,32 +57,30 @@ class ProxyVerify(object):
             status_result = r.status_code == 200
             content_result = "origin" in data
             if status_result and content_result:
-                info.http = True
+                result = True
 
             if len(ip_list) > 1:
-                info.type = PROXY_TYPE["CLEAR"]
+                info.type = ProxyManager.PROXY_TYPE["CLEAR"]
             else:
-                info.type = PROXY_TYPE["COMMON_ANONYMOUS"]
+                info.type = ProxyManager.PROXY_TYPE["ANONYMOUS"]
 
         except Exception as e:
             log.debug("proxy:{proxy} http verify proxy fail, error:{error}".format(proxy=proxy, error=e))
-            info.http = False
+            result = False
 
-        if info.http:
+        if result:
 
             # https verify
             try:
                 r = requests.get(https_url, proxies=proxies, timeout=10, verify=False)
-                data = r.json()
-
                 status_result = r.status_code == 200
                 content_result = "origin" in data
                 if status_result and content_result:
-                    info.https = True
+                    info.https = ProxyManager.PROXY_HTTPS["ENABLE"]
 
             except Exception as e:
-                log.debug("proxy:{proxy} https verify proxy fail, error:{error}".format(proxy=proxy, error=e))
-                info.https = False
+                log.debug("proxy [{proxy}] https verify fail, error:{error}".format(proxy=proxy, error=e))
+                info.https = ProxyManager.PROXY_HTTPS["DISABLE"]
 
         return info
 
@@ -170,11 +156,11 @@ class ProxyVerifyRaw(ProxyVerify):
 
     @classmethod
     def initQueue(cls):
-        items = proxy_manager.getAllRawProxy()
+        items = ProxyManager.proxy_manager.getAllRawProxy()
         for item in items:
             cls.queue.put(item)
 
-        items = proxy_manager.getAllUsefulProxy()
+        items = ProxyManager.proxy_manager.getAllUsefulProxy()
         data = { item["proxy"]: 1 for item in items }
         cls.useful_proxies = data
 
@@ -191,20 +177,19 @@ class ProxyVerifyRaw(ProxyVerify):
                 verify_result = self.defaultVerifyProxy(raw_proxy)                    
             
             if verify_result:
-                proxy_info = self.getProxyInfo(raw_proxy)
-                proxy_manager.saveUsefulProxy(proxy_info)
-                proxy_manager.deleteRawProxy(raw_proxy)
+                ProxyManager.proxy_manager.saveUsefulProxy(raw_proxy)
+                ProxyManager.proxy_manager.deleteRawProxy(raw_proxy)
                 self.useful_proxies[raw_proxy] = True
 
                 self.stat["succ"] = self.stat["succ"] + 1
                 log.debug("raw_proxy:{raw_proxy} verify succ".format(raw_proxy=raw_proxy))
             else:
-                proxy_manager.tickRawProxyVaildFail(raw_proxy)
+                ProxyManager.proxy_manager.tickRawProxyVaildFail(raw_proxy)
 
                 self.stat["fail"] = self.stat["fail"] + 1
                 log.debug("raw_proxy:{raw_proxy} verify fail".format(raw_proxy=raw_proxy))
         else:
-            proxy_manager.deleteRawProxy(raw_proxy)
+            ProxyManager.proxy_manager.deleteRawProxy(raw_proxy)
 
             self.stat["skip"] = self.stat["skip"] + 1
             log.debug("raw_proxy:{raw_proxy} verify repetition".format(raw_proxy=raw_proxy))
@@ -248,20 +233,28 @@ class ProxyVerifyUseful(ProxyVerify):
 
     @classmethod
     def initQueue(cls):
-        proxies = proxy_manager.getAllUsefulProxy()
+        proxies = ProxyManager.proxy_manager.getAllUsefulProxy()
         for proxy in proxies:
             cls.queue.put(proxy)
 
-    def verify(self):
-        proxy_item = self.queue.get()
-        proxy = proxy_item.get("proxy")
+    def checkProxyInfo(self, item):
+        result = False
+        if item.get("type") == ProxyManager.PROXY_TYPE["UNKNOWN"] or item.get("type") == None:
+            result = True
 
-        # 获取代理信息的http请求可能异常
-        # 所在每次校验代理时, 如果代理类型未知(type==0)
-        # 就重新获取代理信息进行更新.
-        if proxy_item.get("type") == 0 or proxy_item.get("type") == None:
-            proxy_info = self.getProxyInfo(proxy)
-            proxy_manager.updateUsefulProxy(proxy_item, proxy_info)
+        if item.get("https") == ProxyManager.PROXY_HTTPS["UNKNOWN"] or item.get("https") == None:
+            result = True
+
+        return result
+
+    def updateUsefulProxy(self, item):
+        proxy = item.get("proxy")
+        info = self.getProxyInfo(proxy)
+        ProxyManager.proxy_manager.updateUsefulProxy(item, info)
+
+    def verify(self):
+        item = self.queue.get()
+        proxy = item.get("proxy")
 
         if ConfigManager.setting_config.setting.get("custom_verify_url"):
             verify_result = self.customVerifyProxy(proxy)
@@ -269,16 +262,19 @@ class ProxyVerifyUseful(ProxyVerify):
             verify_result = self.defaultVerifyProxy(proxy)
 
         if verify_result:
-            proxy_manager.tickUsefulProxyVaildSucc(proxy)
+            if self.checkProxyInfo(item):
+                self.updateUsefulProxy(item)
+
+            ProxyManager.proxy_manager.tickUsefulProxyVaildSucc(proxy)
             self.stat["succ"] = self.stat["succ"] + 1
             log.debug("useful_proxy:{proxy} verify succ".format(proxy=proxy))
         else:
-            proxy_manager.tickUsefulProxyVaildFail(proxy)
+            ProxyManager.proxy_manager.tickUsefulProxyVaildFail(proxy)
             self.stat["fail"] = self.stat["fail"] + 1
             log.debug("useful_proxy:{proxy} verify fail".format(proxy=proxy))
 
         self.queue.task_done()
-        proxy_manager.tickUsefulProxyVaildTotal(proxy)
+        ProxyManager.proxy_manager.tickUsefulProxyVaildTotal(proxy)
         self.stat["total"] = self.stat["total"] + 1
 
     def start(self):

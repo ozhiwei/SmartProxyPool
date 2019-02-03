@@ -9,6 +9,7 @@ from Config import ConfigManager
 from Util.utilClass import Singleton
 from DB.MongodbClient import MongodbClient
 from Log.LogManager import log
+from Manager import ProxyManager
 
 class DocsModel(object):
     docs_name = "test"
@@ -134,7 +135,7 @@ class UsefulProxyDocsModel(DocsModel):
             {
                 "$match": {
                     "total": { "$ne": 0},  
-                    "last_status": { "$eq": "succ" },
+                    "last_status": { "$eq": ProxyManager.PROXY_LAST_STATUS["SUCC"] },
                 }
             },
             {
@@ -177,8 +178,14 @@ class UsefulProxyDocsModel(DocsModel):
         now_time = int(time.time())
         query = {"proxy": proxy}
         data = { 
-            "$inc": {"succ": 1, "keep_succ": 1},
-            "$set": {"last_status": "succ", "last_succ_time": now_time},
+            "$inc": {
+                "succ": 1, 
+                "keep_succ": 1
+            },
+            "$set": {
+                "last_status": ProxyManager.PROXY_LAST_STATUS["SUCC"], 
+                "last_succ_time": now_time
+            },
         }
         self.mc.upsert(query, data)
 
@@ -186,7 +193,10 @@ class UsefulProxyDocsModel(DocsModel):
         query = {"proxy": proxy}
         data = { 
             "$inc": {"fail": 1},
-            "$set": {"last_status": "fail", "keep_succ": 0},
+            "$set": {
+                "last_status": ProxyManager.PROXY_LAST_STATUS["FAIL"], 
+                "keep_succ": 0
+            },
         }
         self.mc.upsert(query, data)
 

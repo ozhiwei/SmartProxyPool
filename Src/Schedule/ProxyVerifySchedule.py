@@ -14,6 +14,7 @@ from Log.LogManager import log
 from Config import ConfigManager
 
 class ProxyVerifySchedule(ProxySchedule):
+    rightnow = True
 
     def __init__(self, **kwargs):
         super(ProxyVerifySchedule, self).__init__(**kwargs)

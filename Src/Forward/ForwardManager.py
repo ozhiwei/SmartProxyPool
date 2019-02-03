@@ -10,9 +10,7 @@ class ForwardProxy(Proxy):
 
     def get_address(self, request):
         if request.method == b'CONNECT':
-            https=True
-        else:
-            https=False
+            https=ProxyManager.PROXY_HTTPS["ENABLE"]
 
         item = ProxyManager.proxy_manager.getSampleUsefulProxy(https=https)
         proxy = item.get("proxy")

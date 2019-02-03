@@ -74,7 +74,7 @@ class Proxy(Resource):
         }
 
         options = {
-            "https": bool(self.args.get('https')),
+            "https": self.args.get('https'),
             "type": self.args.get('type'),
             "region": self.args.get('region'),
         }
