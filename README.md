@@ -11,10 +11,9 @@
 
 所有功能都是围绕这两点开发的:
 
-1. 所有代理都有验证计数, 验证成功的次数 / 总计验证的次数 == 代理可用率
+1. 所有代理都有验证计数, 验证成功的次数 / 总计验证的次数 == 代理可用率 (数据库界面)
 
-![Proxy Pool](Docs/images/1.PNG)
-
+![Proxy Pool](Docs/images/2.PNG)
 
 2. 获取代理时可以根据是否支持`https`, 透明还是匿名(普匿)`type`, 代理的所在的区域`region`进行过滤, 举栗子
 
@@ -28,11 +27,11 @@ http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
 
 3. 可以通过配置控制`获取新代理的间隔`, `验证代理的间隔`, `保留代理数量`, `自定义的代理验证url`等等...
 
-![Proxy Pool](Docs/images/2.PNG)
+![Proxy Pool](Docs/images/3.PNG)
 
 4. [WEB页面的管理](http://proxy.1again.cc:35050/admin) 用户名:admin 密码:admin (尔敢乱动, 打洗雷啊!)
 
-![Proxy Pool](Docs/images/3.PNG)
+![Proxy Pool](Docs/images/1.PNG)
 
 5. 统计获取代理网站的数据
 
