@@ -18,10 +18,19 @@
 2. 获取代理时可以根据是否支持`https`, 透明还是匿名(普匿)`type`, 代理的所在的区域`region`进行过滤, 举栗子
 
 ```
+# 获取支持https的proxy
 http://proxy.1again.cc:35050/api/v1/proxy/?https=1
+
+# 获取匿名的proxy
 http://proxy.1again.cc:35050/api/v1/proxy/?type=2
+
+# 获取所在区域为中国的proxy
 http://proxy.1again.cc:35050/api/v1/proxy/?region=中国
 
+# 获取所在区域不为中国的proxy
+http://proxy.1again.cc:35050/api/v1/proxy/?region=!中国
+
+# 获取支持https, 匿名, 所在区域为中国的rpoxy
 http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
 ```
 
@@ -232,6 +241,23 @@ class Fetcher1():
 ```
 
 `ProxyFetchSchedule` 会每隔一段时间抓取一次代理，下次抓取时会自动识别调用你定义的方法。
+
+# Contributing
+
+感谢你的支持, 让我们变得更好!
+
+为了规范和清晰, 我们需要一起做些简单约定.
+
+两个主要的分支
+develop  为下个版本的内容
+master   为当前稳定版本的内容
+
+1. 小修小改, 不影响原版本的修改, 可以在develop上进行, 然后pull requests
+2. 大动干戈, 影响之前版本的修改, 需要新建一个分支eg: feature_random_proxy, 然后进行pull requests.
+
+我会将新分支合并到develop上, 并在演示的机器上运行一段时间后合并至master.
+
+以上, 感谢!
 
 # 问题反馈
 
