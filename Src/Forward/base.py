@@ -492,15 +492,15 @@ class Proxy(threading.Thread):
             # for http connect methods (https requests)
             # queue appropriate response for client
             # notifying about established connection
-            if self.request.method == b'CONNECT':
-                self.server.queue(data)
+            # if self.request.method == b'CONNECT':
+            self.server.queue(data)
             # for usual http requests, re-build request packet
             # and queue for the server with appropriate headers
-            else:
-                self.server.queue(self.request.build(
-                    del_headers=[b'proxy-authorization', b'proxy-connection', b'connection', b'keep-alive'],
-                    add_headers=[(b'Via', b'1.1 proxy.py v%s' % version), (b'Connection', b'Close')]
-                ))
+            # else:
+            #     self.server.queue(self.request.build(
+            #         del_headers=[b'proxy-authorization', b'proxy-connection', b'connection', b'keep-alive'],
+            #         # add_headers=[(b'Via', b'1.1 proxy.py v%s' % version), (b'Connection', b'Close')]
+            #     ))
 
     def _process_response(self, data):
         # parse incoming response packet
