@@ -1,5 +1,9 @@
 
-高质量, 高灵活的开放代理池服务 
+高质量, 高灵活的开放代理池服务
+
+可能是`全球第一个`带有`智能动态代理`的代理池服务.
+
+这下牛皮吹大了, 不好下来.
 
 [ProxyPool Demo](http://proxy.1again.cc:35050/api/v1/proxy/) (我就是个栗子, 别指望我能有多稳定!)
 
@@ -92,13 +96,7 @@ root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
 
 # 目前
 
-目前还在重构阶段, 所以不保证安全稳定哦!
-
-先体验一下 [ProxyPool Demo](http://proxy.1again.cc:35050/api/v1/proxy/)
-
-然后Star一下, 养肥了再杀!
-
-目前不支持windows, 大概率以后也不会支持!
+基本上满足了当初的设想, 准备开始写文档和代码优化.
 
 # 使用场景
 
