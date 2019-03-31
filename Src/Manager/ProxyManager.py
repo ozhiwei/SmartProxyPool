@@ -7,7 +7,7 @@ import datx
 import time
 
 from Util import EnvUtil
-from DB.DbClient import UsefulProxyDocsModel, RawProxyDocsModel
+from DB.DbClient import UsefulProxyDocsModel, RawProxyDocsModel, DomainCounterDocsModel
 from Config import ConfigManager
 from Util.utilFunction import verifyProxyFormat
 from ProxyGetter.getFreeProxy import GetFreeProxy
@@ -39,7 +39,11 @@ class ProxyManager(object):
     def __init__(self):
         self.useful_proxy = UsefulProxyDocsModel()
         self.raw_proxy = RawProxyDocsModel()
+        self.domain_counter = DomainCounterDocsModel()
         self.datx = datx.City(IP_DATA_PATH)
+
+        self.quality_useful_proxy_list = []
+        self.quality_domain_index = {}
 
     def cleanUsefulProxy(self, **kwargs):
         result = self.useful_proxy.cleanUsefulProxy(**kwargs)
@@ -71,6 +75,21 @@ class ProxyManager(object):
 
     def getSampleUsefulProxy(self, **kwargs):
         result = self.useful_proxy.getSampleUsefulProxy(**kwargs)
+        return result
+
+    def getQualityUsefulProxy(self, **kwargs):
+        count = kwargs.get("count", 1)
+        domain = kwargs.get("domain", None)
+
+        index = self.quality_domain_index.get(domain, 0)
+
+        if index == 0:
+            self.quality_useful_proxy_list = self.useful_proxy.getQualityUsefulProxy(**kwargs)
+
+        index = (count-1) % len(self.quality_useful_proxy_list)
+        self.quality_domain_index[domain] = index+1
+
+        result = self.quality_useful_proxy_list[index]
         return result
 
     def deleteRawProxy(self, proxy):
@@ -154,6 +173,13 @@ class ProxyManager(object):
 
     def getUsefulProxyNumber(self):
         result = self.useful_proxy.getProxyNum()
+        return result
+
+    def tickDomainRequestState(self, domain, code):
+        self.domain_counter.tickDomainRequestState(domain, code)
+
+    def getDomainCounter(self, domain):
+        result = self.domain_counter.getDomainCounter(domain)
         return result
 
 proxy_manager = ProxyManager()

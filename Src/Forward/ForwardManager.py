@@ -8,14 +8,34 @@ from Config import ConfigManager
 
 class ForwardProxy(Proxy):
 
-    def get_address(self, request):
-        if request.method == b'CONNECT':
-            https=ProxyManager.PROXY_HTTPS["ENABLE"]
+    def _get_host_and_port(self):
+        https = None
+        if self.request.method == b'CONNECT':
+            https = ProxyManager.PROXY_HTTPS["ENABLE"]
 
-        item = ProxyManager.proxy_manager.getSampleUsefulProxy(https=https)
+        domain = self.request.url.netloc
+        if isinstance(domain, bytes):
+            domain = domain.decode("utf8")
+
+        ProxyManager.proxy_manager.tickDomainRequestState(domain, "total")
+        counter = ProxyManager.proxy_manager.getDomainCounter(domain)
+        count = counter.get("total")
+        item = ProxyManager.proxy_manager.getQualityUsefulProxy(https=https, count=count, domain=domain)
         proxy = item.get("proxy")
         address = proxy.split(":")
         return address
+
+    def before_process_response(self):
+        domain = self.request.url.netloc
+        if isinstance(domain, bytes):
+            domain = domain.decode("utf8")
+
+        if isinstance(self.response.code, bytes):
+            status_code = "status_code_%s" % self.response.code.decode()
+        else:
+            status_code = "status_code_%s" % self.response.code
+
+        ProxyManager.proxy_manager.tickDomainRequestState(domain, status_code)
 
 class ForwardHttp(HTTP):
 

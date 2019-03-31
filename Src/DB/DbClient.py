@@ -165,6 +165,42 @@ class UsefulProxyDocsModel(DocsModel):
 
         return result
 
+    def getQualityUsefulProxy(self, **kwargs):
+        https = kwargs.get("https", None)
+        region = kwargs.get("region", None)
+        type_ = kwargs.get("type", None)
+
+        result = None
+        operation_list = 	[
+            {
+                "$match": {
+                    "total": { "$ne": 0},  
+                    "last_status": { "$eq": ProxyManager.PROXY_LAST_STATUS["SUCC"] },
+                }
+            },
+            {
+                "$project": { "proxy": 1, "total": 1, "succ_rate": { "$divide": ["$succ", "$total"] } },
+            },
+            {
+                "$sort": { "succ_rate": -1, "total": -1 },
+            },
+
+        ]
+
+        if https:
+            operation_list[0]["$match"]["https"] = { "$eq": https }
+
+        if type_:
+            operation_list[0]["$match"]["type"] = { "$eq": type_ }
+
+        if region: 
+            operation_list[0]["$match"]["region_list"] = parse_regin_to_mongo(region)
+
+        log.debug("getSampleUsefulProxy, operation_list:{operation_list}, ".format(operation_list=str(operation_list)))
+        result = self.mc.aggregate(operation_list)
+
+        return result
+
     def getProxyNum(self):
         result = self.mc.count()
         return result
@@ -261,6 +297,19 @@ class RawProxyDocsModel(DocsModel):
         query = {"proxy": proxy}
         data = {'$inc': {'health': -1}}
         self.mc.upsert(query, data)
+
+class DomainCounterDocsModel(DocsModel):
+    docs_name = "domain_counter"
+
+    def tickDomainRequestState(self, domain, code):
+        query = {"domain": domain}
+        data = {'$inc': {code: 1}}
+        self.mc.upsert(query, data)
+
+    def getDomainCounter(self, domain):
+        query = {"domain": domain}
+        result = self.mc.find_one(query)
+        return result
 
 if __name__ == "__main__":
     pass

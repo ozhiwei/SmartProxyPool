@@ -448,6 +448,16 @@ class Proxy(threading.Thread):
     def _is_inactive(self):
         return self._inactive_for() > 30
 
+    def _get_host_and_port(self):
+        if self.request.method == b'CONNECT':
+            host, port = self.request.url.path.split(COLON)
+        elif self.request.url:
+            host, port = self.request.url.hostname, self.request.url.port if self.request.url.port else 80
+        else:
+            raise Exception('Invalid request\n%s' % self.request.raw)
+
+        return host, port
+
     def _process_request(self, data):
         # once we have connection to the server
         # we don't parse the http request packets
@@ -470,15 +480,7 @@ class Proxy(threading.Thread):
                         self.request.headers[b'proxy-authorization'][1] != self.auth_code:
                     raise ProxyAuthenticationFailed()
 
-            if self.get_address:
-                host, port = self.get_address(self.request)
-            else:
-                if self.request.method == b'CONNECT':
-                    host, port = self.request.url.path.split(COLON)
-                elif self.request.url:
-                    host, port = self.request.url.hostname, self.request.url.port if self.request.url.port else 80
-                else:
-                    raise Exception('Invalid request\n%s' % self.request.raw)
+            host, port = self._get_host_and_port()
 
             self.server = Server(host, port)
             try:
@@ -507,6 +509,8 @@ class Proxy(threading.Thread):
         # only for non-https requests
         if not self.request.method == b'CONNECT':
             self.response.parse(data)
+
+        self.before_process_response()
 
         # queue data for client
         self.client.queue(data)
@@ -615,6 +619,8 @@ class Proxy(threading.Thread):
             self._access_log()
             logger.debug('Closing proxy for connection %r at address %r' % (self.client.conn, self.client.addr))
 
+    def before_process_response(self):
+        pass
 
 class TCP(object):
     """TCP server implementation.
