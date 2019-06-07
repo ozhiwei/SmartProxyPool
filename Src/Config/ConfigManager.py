@@ -163,6 +163,7 @@ class FetcherConfig(DBConfig):
                     total=0,
                 )
                 self.db[self.docs_name].insert_one(data)
+                self.fetcher_list.append(item)
 
     def get_fetcher_list(self):
         result = self.fetcher_list
