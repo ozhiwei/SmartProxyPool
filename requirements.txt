@@ -2,7 +2,7 @@ APScheduler==3.2.0
 Werkzeug==0.14.1
 Flask==1.0.2
 requests==2.20.0
-lxml==3.7.2
+lxml==4.3.3
 gevent==1.4.0
 Flask-RESTful==0.3.6
 

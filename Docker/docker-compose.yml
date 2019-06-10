@@ -1,13 +1,13 @@
 version: '2'
 services:
   proxy_pool:
-    volumes:
-     - ..:/usr/src/app
     ports:
      - "35050:35050"
      - "36050:36050"
     image: "1again/proxy_pool"
   proxy_pool_db:
+    volumes:
+     - /data/mongodb/:/data/
     ports:
      - "27017:27017"
     image: "mongo"
