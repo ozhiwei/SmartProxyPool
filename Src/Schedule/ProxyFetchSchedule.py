@@ -28,8 +28,8 @@ class ProxyFetchSchedule(ProxySchedule):
 
     def checkFetchNewProxy(self):
 
-        total_number = ProxyManager.proxy_manager.getRawProxyNumber()
-        hold_number = ConfigManager.setting_config.setting.get("hold_raw_proxy_number")
+        total_number = ProxyManager.proxy_manager.getUsefulProxyNumber()
+        hold_number = ConfigManager.setting_config.setting.get("hold_useful_proxy_number")
         if total_number < hold_number or hold_number == -1:
             log.debug("fetch new proxy start, exist raw_proxy total_number:{total_number}, hold_number:{hold_number}".format(total_number=total_number, hold_number=hold_number))
             result = True

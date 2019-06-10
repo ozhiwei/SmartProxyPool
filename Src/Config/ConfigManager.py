@@ -75,21 +75,14 @@ class SettingConfig(DBConfig):
     db_name = "proxy"
     docs_name = "setting"
     default_config = dict(
-        verify_raw_proxy_concurrency = 100,
         verify_useful_proxy_concurrency = 100,
-
-        verify_raw_proxy_interval = 30,
         verify_useful_proxy_interval = 30, 
 
         fetch_new_proxy_concurrency = 100,
         fetch_new_proxy_interval = 30,
-        
-        clean_raw_proxy_interval = 30, 
-        clean_useful_proxy_interval = 30, 
 
         # clean proxy when number is positive
         # disable clean proxy when number is -1
-        init_raw_proxy_health = 3,
         hold_raw_proxy_number = -1,
         hold_useful_proxy_number = -1,
     )
