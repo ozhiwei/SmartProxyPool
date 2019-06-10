@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
 
-from gevent import monkey
+from gevent import monkey, pool
 monkey.patch_all()
 
 import sys
@@ -289,21 +289,19 @@ class ProxyVerifyUseful(ProxyVerify):
         )
 
         concurrency = ConfigManager.setting_config.setting.get("verify_useful_proxy_concurrency")
-        queue_size = self.queue.qsize()
-        if concurrency > queue_size:
-            spawn_num = queue_size
-        else:
-            spawn_num = concurrency
+        task_pool = pool.Pool(concurrency)
 
+        queue_size = self.queue.qsize()
         greenlet_list = []
-        for _ in range(spawn_num):
-            greenlet_list.append(gevent.spawn(self.run))
+        for _ in range(queue_size):
+            greenlet_list.append(task_pool.spawn(self.verify))
 
         gevent.joinall(greenlet_list)
 
         end_time = time.time()
         elapsed_time = int(end_time - start_time)
-        log.info('useful_proxy verify proxy finish, total:{total}, succ:{succ}, fail:{fail}, elapsed_time:{elapsed_time}s'.format(total=self.stat["total"], succ=self.stat["succ"], fail=self.stat["fail"], elapsed_time=elapsed_time))
+        log.info('useful_proxy verify proxy finish, total:{total}, succ:{succ}, fail:{fail}, elapsed_time:{elapsed_time}s'
+        .format(total=self.stat["total"], succ=self.stat["succ"], fail=self.stat["fail"], elapsed_time=elapsed_time))
 
 if __name__ == "__main__":
     ProxyVerifyRaw.initQueue()

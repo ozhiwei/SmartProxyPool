@@ -37,17 +37,17 @@ class ProxySchedule(BlockingScheduler):
 
 
     def update_job_interval(self, **kwargs):
-        job_id = kwargs.get("job_id")
+        job_name = kwargs.get("job_name")
 
-        value = ConfigManager.setting_config.setting.get(job_id)
+        value = ConfigManager.setting_config.setting.get(job_name)
         trigger_args = { "minutes": value }
         trigger='interval'
-        job = self._update_job(job_id, trigger, **trigger_args)
-        log.info("update_job_interval: {job_id}, {job}".format(job_id=job_id, job=job))
+        job = self._update_job(job_name, trigger, **trigger_args)
+        log.info("update_job_interval: {job_name}, {job}".format(job_name=job_name, job=job))
         return job
 
-    def _update_job(self, job_id, trigger, **trigger_args):
-        return self.reschedule_job(job_id, trigger=trigger, **trigger_args)
+    def _update_job(self, job_name, trigger, **trigger_args):
+        return self.reschedule_job(job_name, trigger=trigger, **trigger_args)
 
     def run(self):
         now = datetime.datetime.now()

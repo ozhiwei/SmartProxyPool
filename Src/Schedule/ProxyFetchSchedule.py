@@ -23,10 +23,10 @@ class ProxyFetchSchedule(ProxySchedule):
     def __init__(self, **kwargs):
         super(ProxyFetchSchedule, self).__init__(**kwargs)
         self.task_handler_hash = {
-            "fetch_new_proxy_interval": self.fetch_new_proxy,
+            "fetch_new_proxy_interval": self.fetchNewProxy,
         }
 
-    def check_fetch_new_proxy(self):
+    def checkFetchNewProxy(self):
 
         total_number = ProxyManager.proxy_manager.getRawProxyNumber()
         hold_number = ConfigManager.setting_config.setting.get("hold_raw_proxy_number")
@@ -39,8 +39,8 @@ class ProxyFetchSchedule(ProxySchedule):
         
         return result
 
-    def fetch_new_proxy(self):
-        if self.check_fetch_new_proxy():
+    def fetchNewProxy(self):
+        if self.checkFetchNewProxy():
             ProxyFetch.initQueue()
             t = ProxyFetch()
             t.start()
