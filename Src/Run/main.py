@@ -7,6 +7,7 @@ import sys
 sys.path.append("Src")
 
 import time
+import signal
 from threading import Thread
 
 from Log import LogManager
@@ -16,12 +17,10 @@ from Manager.ProxyFetch import ProxyFetch
 
 from Schedule.ProxyVerifySchedule import ProxyVerifySchedule
 from Schedule.ProxyFetchSchedule import ProxyFetchSchedule
-from Schedule.ProxyCleanSchedule import ProxyCleanSchedule
 
 TASK_LIST = {
     "ProxyVerifySchedule": ProxyVerifySchedule,
     "ProxyFetchSchedule": ProxyFetchSchedule,
-    "ProxyCleanSchedule": ProxyCleanSchedule,
     "ForwardHttp": ForwardHttp,
 }
 
@@ -48,8 +47,17 @@ def start_task():
         t.daemon = True
         t.start()
 
+def stop_handler(signum, frame):
+    print('Received Signal [%s], Stop Program' % signum)
+    sys.exit()
+
+def register_signal():
+    signal.signal(signal.SIGINT, stop_handler)
+
+
 def main(test=False):
     show_time()
+    register_signal()
 
     LogManager.init()
 
