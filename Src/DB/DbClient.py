@@ -117,6 +117,16 @@ class UsefulProxyDocsModel(DocsModel):
 
         return result
 
+    def getHighQualityUsefulProxy(self, **kwargs):
+        query = { "quality": { "$gt": -1 } }
+        result= self.mc.find(query)
+        return result
+
+    def getLowQualityUsefulProxy(self, **kwargs):
+        query = { "quality": { "$lt": 0 } }
+        result= self.mc.find(query)
+        return result
+
     def getAllUsefulProxy(self, **kwargs):
         result = self.getAll()
         return result
@@ -165,26 +175,31 @@ class UsefulProxyDocsModel(DocsModel):
 
         return result
 
+    def getVerifyUsefulProxy(self, **kwargs):
+        now = int(time.time())
+        query = {
+            "next_verify_time": {
+                "$lt": now
+            }
+        }
+        result = self.mc.find(query)
+        return result
+
     def getQualityUsefulProxy(self, **kwargs):
         https = kwargs.get("https", None)
         region = kwargs.get("region", None)
         type_ = kwargs.get("type", None)
 
         result = None
-        operation_list = 	[
+        operation_list = [
             {
                 "$match": {
-                    "total": { "$ne": 0},  
-                    "last_status": { "$eq": ProxyManager.PROXY_LAST_STATUS["SUCC"] },
+                    "total": { "$ne": 0 },
                 }
             },
             {
-                "$project": { "proxy": 1, "total": 1, "succ_rate": { "$divide": ["$succ", "$total"] } },
+                "$sort": { "quality": -1, "total": -1 },
             },
-            {
-                "$sort": { "succ_rate": -1, "total": -1 },
-            },
-
         ]
 
         if https:
@@ -210,7 +225,7 @@ class UsefulProxyDocsModel(DocsModel):
 
     def updateUsefulProxy(self, proxy, data):
         query = {"proxy": proxy}
-        self.mc.update(query, data)
+        self.updateProxy(query, data)
 
     def deleteUsefulProxy(self, proxy):
         query = {"proxy": proxy}
@@ -219,33 +234,52 @@ class UsefulProxyDocsModel(DocsModel):
     def tickUsefulProxyVaildSucc(self, proxy):
         now_time = int(time.time())
         query = {"proxy": proxy}
+
         data = { 
             "$inc": {
                 "succ": 1, 
-                "keep_succ": 1
+                "keep_succ": 1,
             },
             "$set": {
                 "last_status": ProxyManager.PROXY_LAST_STATUS["SUCC"], 
                 "last_succ_time": now_time
             },
         }
+
+        item = self.mc.find_one(query)
+        if item["quality"] < 0:
+            data["$set"]["quality"] = 1
+        else:
+            data["$inc"]["quality"] = 1 
+
+        self.updateProxy(query, data)
+    
+    def getProxy(self, proxy):
+        query = {"proxy": proxy}
+        result = self.mc.find_one(query)
+        return result
+
+    def updateProxy(self, query, data):
         self.mc.upsert(query, data)
 
     def tickUsefulProxyVaildFail(self, proxy):
         query = {"proxy": proxy}
         data = { 
-            "$inc": {"fail": 1},
+            "$inc": {
+                "fail": 1,
+                "quality": -1
+            },
             "$set": {
                 "last_status": ProxyManager.PROXY_LAST_STATUS["FAIL"], 
                 "keep_succ": 0
             },
         }
-        self.mc.upsert(query, data)
+        self.updateProxy(query, data)
 
     def tickUsefulProxyVaildTotal(self, proxy):
         query = {"proxy": proxy}
         data = {'$inc': {'total': 1}}
-        self.mc.upsert(query, data)
+        self.updateProxy(query, data)
 
 class RawProxyDocsModel(DocsModel):
     docs_name = "raw_proxy"
@@ -296,7 +330,7 @@ class RawProxyDocsModel(DocsModel):
     def tickRawProxyVaildFail(self, proxy):
         query = {"proxy": proxy}
         data = {'$inc': {'health': -1}}
-        self.mc.upsert(query, data)
+        self.updateProxy(query, data)
 
 class DomainCounterDocsModel(DocsModel):
     docs_name = "domain_counter"
@@ -310,6 +344,23 @@ class DomainCounterDocsModel(DocsModel):
         query = {"domain": domain}
         result = self.mc.find_one(query)
         return result
+
+class FetchersDocsModel(DocsModel):
+    docs_name = "fetchers"
+
+    def getAllFetcher(self):
+        query = {}
+        result = self.mc.find(query)
+        return result
+
+    def getFetcher(self, name):
+        query = { "name": name }
+        result = self.mc.find(query)
+        return result
+
+    def updateFetcher(self, name, data):
+        query = {"name": name}
+        self.mc.upsert(query, data)
 
 if __name__ == "__main__":
     pass

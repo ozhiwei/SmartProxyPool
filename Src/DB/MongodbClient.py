@@ -27,8 +27,8 @@ class MongodbClient(object):
         result = self.docs.remove(query)
         return result
 
-    def find(self):
-        result = list(self.docs.find())
+    def find(self, query):
+        result = list(self.docs.find(query))
         return result
 
     def update(self, query, data):

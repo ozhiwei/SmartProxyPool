@@ -62,6 +62,18 @@ class ProxyManager(object):
         result = self.useful_proxy.getAllUsefulProxy(**kwargs)
         return result
 
+    def getVerifyUsefulProxy(self, **kwargs):
+        result = self.useful_proxy.getVerifyUsefulProxy(**kwargs)
+        return result
+
+    def getLowQualityUsefulProxy(self, **kwagrs):
+        result = self.useful_proxy.getLowQualityUsefulProxy(**kwagrs)
+        return result
+
+    def getHighQualityUsefulProxy(self, **kwagrs):
+        result = self.useful_proxy.getHighQualityUsefulProxy(**kwagrs)
+        return result
+
     def getAllRawProxy(self):
         result = self.raw_proxy.getAllRawProxy()
         return result
@@ -123,11 +135,13 @@ class ProxyManager(object):
             "keep_succ": 0,
             "fail": 0,
             "total": 0,
+            "quality": 0,
             "https": PROXY_HTTPS["UNKNOWN"],
             "type": PROXY_TYPE["UNKNOWN"],
             "region_list": region_list,
             "last_status": PROXY_LAST_STATUS["UNKNOWN"],
             "last_succ_time": 0,
+            "next_verify_time": 0,
             
         }
 
@@ -159,8 +173,28 @@ class ProxyManager(object):
     def tickUsefulProxyVaildTotal(self, proxy):
         self.useful_proxy.tickUsefulProxyVaildTotal(proxy)
 
+        item = self.getProxy(proxy)
+        multiple = abs(item["quality"])
+        now = int(time.time())
+        interval = ConfigManager.setting_config.setting.get("verify_useful_proxy_interval")
+        next_verify_time = now + (multiple * interval * 60)
+
+        query = {
+            "proxy": proxy
+        }
+        data = {
+            "$set": {
+                "next_verify_time": next_verify_time
+            }
+        }
+        self.useful_proxy.updateProxy(query, data)
+
     def tickRawProxyVaildFail(self, proxy):
         self.raw_proxy.tickRawProxyVaildFail(proxy)
+
+    def getProxy(self, proxy):
+        result = self.useful_proxy.getProxy(proxy)
+        return result
 
     def getProxyNumber(self):
         total_raw_proxy = self.getRawProxyNumber()
@@ -177,6 +211,7 @@ class ProxyManager(object):
         return result
 
     def tickDomainRequestState(self, domain, code):
+
         self.domain_counter.tickDomainRequestState(domain, code)
 
     def getDomainCounter(self, domain):
