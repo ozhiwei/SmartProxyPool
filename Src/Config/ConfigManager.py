@@ -187,9 +187,7 @@ class FetcherConfig(DBConfig):
 
 base_config = BaseConfig()
 setting_config = SettingConfig()
-fetcher_config = FetcherConfig()
+# fetcher_config = FetcherConfig()
 
 if __name__ == '__main__':
-    print("BaseConig db_host: ", base_config.setting.get("db_host"))
-    print("SettingConfig verify_raw_proxy_concurrency: ", setting_config.setting.get("verify_raw_proxy_concurrency"))
-    print("FetcherConfig fetchers: ", fetcher_config.get_fetcher_list())
+    pass
