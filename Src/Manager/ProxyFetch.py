@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python
 
-from gevent import monkey
+from gevent import monkey, pool
 monkey.patch_all()
 
 import sys
@@ -10,7 +10,7 @@ import time
 import threading
 import gevent
 
-from Manager.ProxyManager import proxy_manager
+from Manager import ProxyManager
 # from ProxyGetter.getFreeProxy import GetFreeProxy
 from Fetcher import FetcherManager
 from Log.LogManager import log
@@ -29,21 +29,18 @@ class ProxyFetch(object):
 
     @classmethod 
     def initQueue(cls):
-        items = ConfigManager.fetcher_config.get_fetcher_list()
-        for item in items:
-            cls.queue.put(item)
+        fetchers = ProxyManager.proxy_manager.getAllFetcher()
+        for fetcher in fetchers:
+            cls.queue.put(fetcher)
 
     def start(self):
         concurrency = ConfigManager.setting_config.setting.get("fetch_new_proxy_concurrency")
-        queue_size = self.queue.qsize()
-        if concurrency > queue_size:
-            spawn_num = queue_size
-        else:
-            spawn_num = concurrency
+        task_pool = pool.Pool(concurrency)
 
+        queue_size = self.queue.qsize()
         greenlet_list = []
-        for _ in range(spawn_num):
-            greenlet_list.append(gevent.spawn(self.run))
+        for _ in range(queue_size):
+            greenlet_list.append(task_pool.spawn(self.fetch))
 
         gevent.joinall(greenlet_list)
 
@@ -54,50 +51,60 @@ class ProxyFetch(object):
         fail = 0
         skip = 0
 
-        fetcher_name = self.queue.get()
-        fetcher_class = FetcherManager.get_class(fetcher_name)
-        log.debug("fetch [{fetcher_name}] proxy start".format(fetcher_name=fetcher_name))
+        fetcher = self.queue.get()
+        name = fetcher["name"]
+
+        fetcher_class = FetcherManager.getFetcherClass(name)
+        log.debug("fetch [{name}] proxy start".format(name=name))
         try:
             f = fetcher_class()
             for proxy in f.run():
                 proxy = proxy.strip()
                 if proxy and verifyProxyFormat(proxy) and \
-                not proxy_manager.checkRawProxyExists(proxy) and \
-                not proxy_manager.checkUsefulProxyExists(proxy):
+                not ProxyManager.proxy_manager.checkUsefulProxyExists(proxy):
 
-                    proxy_manager.saveRawProxy(proxy)
+                    ProxyManager.proxy_manager.saveUsefulProxy(proxy)
                     succ = succ + 1
-                    log.debug("fetch [{fetcher_name}] proxy {proxy} succ".format(fetcher_name=fetcher_name, proxy=proxy))
+                    log.debug("fetch [{name}] proxy {proxy} succ".format(name=name, proxy=proxy))
                 else:
                     skip = skip + 1
-                    log.debug("fetch [{fetcher_name}] proxy {proxy} skip".format(fetcher_name=fetcher_name, proxy=proxy))
+                    log.debug("fetch [{name}] proxy {proxy} skip".format(name=name, proxy=proxy))
 
                 total = total + 1
         except Exception as e:
-            log.error("fetch [{fetcher_name}] proxy fail: {error}".format(fetcher_name=fetcher_name, error=e))
+            log.error("fetch [{name}] proxy fail: {error}".format(name=name, error=e))
             fail = fail + 1
-
-        end_time = time.time()
-        elapsed_time = int(end_time - start_time)
 
         self.queue.task_done()
 
-        stat = dict(
-            total=total,
-            succ=succ,
-            fail=fail,
-            skip=skip,
-        )
-        ConfigManager.fetcher_config.update_stat(fetcher_name, stat)
+        now = int(time.time())
+        elapsed_time = int(now - start_time)
 
-        log.info("fetch [{fetcher_name}] proxy finish, total:{total}, succ:{succ}, fail:{fail}, skip:{skip}, elapsed_time:{elapsed_time}s".format(fetcher_name=fetcher_name, total=total, succ=succ, fail=fail, skip=skip, elapsed_time=elapsed_time))
+        next_fetch_time = now + (fetcher["interval"] * 60)
+
+        data = {
+            "$inc": {
+                "succ": succ,
+                "fail": fail,
+                "skip": skip,
+                "total": total,
+            },
+            "$set": {
+                "next_fetch_time": next_fetch_time,
+            }
+        }
+
+        ProxyManager.proxy_manager.updateFetcher(name, data)
+        log.info("fetch [{name:^15}] proxy finish, \
+            total:{total}, succ:{succ}, fail:{fail}, skip:{skip}, elapsed_time:{elapsed_time}s". \
+            format(name=name, total=total, succ=succ, fail=fail, skip=skip, elapsed_time=elapsed_time))
 
     def run(self):
         while self.queue.qsize():
             self.fetch()
 
 
-            
+    
 if __name__ == "__main__":
     ProxyFetch.initQueue()
     t = ProxyFetch()

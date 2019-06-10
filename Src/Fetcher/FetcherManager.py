@@ -4,13 +4,12 @@ import os
 import importlib
 
 from Config import ConfigManager
+from Manager import ProxyManager
 
 SKIP_FILE_LIST = [
     "__init__.py",
     "__pycache__",
 ]
-
-fetcher_list = []
 
 def init():
     file_names = os.listdir("Src/Fetcher/fetchers")
@@ -18,25 +17,39 @@ def init():
         if file_name in SKIP_FILE_LIST:
             pass
         else:
-            name = os.path.splitext(file_name)[0]
-            fetcher_class = get_class(name)
-            fetcher_name = fetcher_class.fetcher_name
-            fetcher_list.append(fetcher_name)
-    
-    ConfigManager.fetcher_config.update_fetcher_list(fetcher_list)
+            fetcher_name = os.path.splitext(file_name)[0]
+            fetcher_class = getFetcherClass(fetcher_name)
+            fetcher_host = fetcher_class.fetcher_host
+
+            item = ProxyManager.proxy_manager.getFetcher(fetcher_name)
+            if item:
+                pass
+            else:
+                saveDefaultFetcher(fetcher_name, fetcher_host)
 
     return True
 
-def get_class(name):
+def saveDefaultFetcher(name, host):
+    data = dict(
+        name = name,
+        host = host,
+        status = True,
+        succ=0,
+        fail=0,
+        skip=0,
+        total=0,
+        interval=30,
+        next_fetch_time=0,
+    )
+    ProxyManager.proxy_manager.updateFetcher(name, data)
+
+def getFetcherClass(name):
     module_name = "Fetcher.fetchers.%s" % (name)
     module = importlib.import_module(module_name)
-    result = getattr(module, name)
+    result = getattr(module, "CustomFetcher")
     return result
 
 init()
 
 if __name__ == '__main__':
-    print("fetcher_list: ", bool(fetcher_list))
-
-    class_name = "Fetcher1"
-    print("get_class: ", get_class(class_name).fetcher_name == class_name)
+    pass

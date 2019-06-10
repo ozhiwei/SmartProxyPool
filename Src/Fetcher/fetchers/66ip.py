@@ -6,10 +6,12 @@ import re
 
 from Util.WebRequest import WebRequest
 from Util.utilFunction import getHtmlTree
+from Fetcher import Fetcher
 
 
-class Fetcher3():
-    fetcher_name = "Fetcher3"
+class CustomFetcher(Fetcher):
+
+    fetcher_host = "www.66ip.cn"
 
     def run(self):
         area = 33

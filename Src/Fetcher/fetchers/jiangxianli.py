@@ -8,8 +8,9 @@ from Util.WebRequest import WebRequest
 from Util.utilFunction import getHtmlTree
 
 
-class Fetcher13():
-    fetcher_name = "Fetcher13"
+class CustomFetcher():
+
+    fetcher_host = "ip.jiangxianli.com"
 
     def run(self):
         page_count = 8

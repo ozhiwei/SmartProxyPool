@@ -8,15 +8,16 @@ from Util.WebRequest import WebRequest
 from Util.utilFunction import getHtmlTree
 
 
-class Fetcher10():
-    fetcher_name = "Fetcher10"
+class CustomFetcher():
+
+    fetcher_host = "www.ip3366.net"
 
     def run(self):
 
-        urls = ['https://proxy.coderbusy.com/classical/country/cn.aspx?page=1']
+        urls = ['http://www.ip3366.net/free/']
         request = WebRequest()
         for url in urls:
             r = request.get(url)
-            proxies = re.findall('data-ip="(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})".+?>(\d+)</td>', r.text)
+            proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\s\S]*?<td>(\d+)</td>', r.text)
             for proxy in proxies:
-                yield ':'.join(proxy)
+                yield ":".join(proxy)

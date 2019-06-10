@@ -7,7 +7,7 @@ import datx
 import time
 
 from Util import EnvUtil
-from DB.DbClient import UsefulProxyDocsModel, RawProxyDocsModel, DomainCounterDocsModel
+from DB.DbClient import UsefulProxyDocsModel, RawProxyDocsModel, DomainCounterDocsModel, FetchersDocsModel
 from Config import ConfigManager
 from Util.utilFunction import verifyProxyFormat
 from ProxyGetter.getFreeProxy import GetFreeProxy
@@ -40,6 +40,7 @@ class ProxyManager(object):
         self.useful_proxy = UsefulProxyDocsModel()
         self.raw_proxy = RawProxyDocsModel()
         self.domain_counter = DomainCounterDocsModel()
+        self.fetchers = FetchersDocsModel()
         self.datx = datx.City(IP_DATA_PATH)
 
         self.quality_useful_proxy_list = []
@@ -181,6 +182,19 @@ class ProxyManager(object):
     def getDomainCounter(self, domain):
         result = self.domain_counter.getDomainCounter(domain)
         return result
+
+
+    def getAllFetcher(self):
+        result = self.fetchers.getAllFetcher()
+        return result
+
+    def getFetcher(self, name):
+        result = self.fetchers.getFetcher(name)
+        return result
+
+
+    def updateFetcher(self, name, data):
+        self.fetchers.updateFetcher(name, data)
 
 proxy_manager = ProxyManager()
 

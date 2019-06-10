@@ -8,8 +8,9 @@ from Util.WebRequest import WebRequest
 from Util.utilFunction import getHtmlTree
 
 
-class Fetcher15():
-    fetcher_name = "Fetcher15"
+class CustomFetcher():
+
+    fetcher_host = "proxy-list.org"
 
     def run(self):
 

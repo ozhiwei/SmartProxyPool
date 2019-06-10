@@ -30,10 +30,13 @@ class FetcherModel(Document):
     meta = {'collection': 'fetchers'}
 
     name = mongoengine.StringField(required=True, unique=True, max_length=40)
+    host = mongoengine.StringField(required=True, unique=True, max_length=40)
     total = mongoengine.IntField(default=0)
     succ = mongoengine.IntField(default=0)
     fail = mongoengine.IntField(default=0)
     skip = mongoengine.IntField(default=0)
+    interval = mongoengine.IntField(default=0)
+    next_fetch_time = mongoengine.IntField(default=0)
     # fetch_time = mongoengine.DateTimeField()
     status = mongoengine.BooleanField(default=True)
     # fetch_desc = mongoengine.StringField(max_length=40)

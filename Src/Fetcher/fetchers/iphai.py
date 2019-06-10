@@ -8,8 +8,9 @@ from Util.WebRequest import WebRequest
 from Util.utilFunction import getHtmlTree
 
 
-class Fetcher12():
-    fetcher_name = "Fetcher12"
+class CustomFetcher():
+
+    fetcher_host = "www.iphai.com"
 
     def run(self):
 

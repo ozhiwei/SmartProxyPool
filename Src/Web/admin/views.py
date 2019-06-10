@@ -56,6 +56,11 @@ def LastSuccTimeFormat(last_time):
 
     return result
 
+def TimeStampFormat(timeStamp):
+    time_object = time.localtime(timeStamp)
+    result = time.strftime("%Y-%m-%d %H:%M:%S", time_object)
+    return result
+
 def PercentFormat(cur, total):
     if total == 0:
         percent = 0
@@ -130,16 +135,17 @@ class SettingView(ModelView):
 class FetcherView(ModelView):
     name="Fethers"
 
-    column_list = ("name", "succ", "fail", "skip", "total", "status")
+    column_list = ("name", "host", "succ", "fail", "skip", "total", "status", "interval", "next_fetch_time")
     can_create = False
     can_delete = False
     can_view_details = True
     column_searchable_list = ['name']
-    column_editable_list = [ "status"]
+    column_editable_list = [ "status", "interval"]
     column_formatters = dict(
         succ=lambda v, c, m, p: PercentFormat(m.succ, m.total),
         fail=lambda v, c, m, p: PercentFormat(m.fail, m.total),
-        skip=lambda v, c, m, p: PercentFormat(m.skip, m.total),        
+        skip=lambda v, c, m, p: PercentFormat(m.skip, m.total),
+        next_fetch_time=lambda v, c, m, p: TimeStampFormat(m.next_fetch_time),
     )
 
     def is_accessible(self):
