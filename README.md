@@ -94,6 +94,10 @@ root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
 
 8. 实在编不下去了, 你行你来!
 
+# 文档
+
+[设计文档](docs/Design.md)
+
 # 目前
 
 基本上满足了当初的设想, 准备开始写文档和代码优化.
@@ -108,7 +112,20 @@ root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
 
 # 安装/部署
 
-## 生产环境 Docker/docker-compose
+## 生产环境
+
+```shell
+# Install Docker
+curl -sSL https://get.docker.com | sh
+
+# start mongo database
+docker run -d --name mongo -v /data/mongodb:/data -p 27017:27017 mongo
+
+# Start proxy_pool container
+docker run -d --name proxy_pool --link mongo:proxy_pool_db -p 35050:35050 1again/proxy_pool
+```
+
+## 开发环境
 
 ```shell
 # Clone Repo
@@ -120,27 +137,11 @@ cd ProxyPool
 # Install Docker
 curl -sSL https://get.docker.com | sh
 
-# Install docker-compose
-pip install docker-compose
-
-# Start proxy_pool service
-docker-compose -f Docker/docker-compose.yml up -d
-```
-
-## 开发环境 Docker
-
-```shell
-# In WORKDIR ProxyPool
-# Install Docker
-curl -sSL https://get.docker.com | sh
+# start mongo database
+docker run -d --name mongo -v /data/mongodb:/data -p 27017:27017 mongo
 
 # Start proxy_pool container
-# I think you are great developer
-# So you should how to create a mongodb with Docker or Other, Right?
-# 记得先创建一个mongodb数据库
-# !!! Remember modify your database in Config.ini file
-# !!! 记住修改你的数据库配置文件 Config.ini
-docker run -it --rm -v $(pwd):/usr/src/app -p 35050:35050 1again/proxy_pool
+docker run -it --rm --link mongo:proxy_pool_db -v $(pwd):/usr/src/app -p 35050:35050 1again/proxy_pool
 ```
 
 # 使用
