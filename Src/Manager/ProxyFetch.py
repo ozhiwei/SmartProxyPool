@@ -29,7 +29,7 @@ class ProxyFetch(object):
 
     @classmethod 
     def initQueue(cls):
-        fetchers = ProxyManager.proxy_manager.getAllFetcher()
+        fetchers = ProxyManager.proxy_manager.getExecFetcher()
         for fetcher in fetchers:
             cls.queue.put(fetcher)
 
@@ -38,11 +38,14 @@ class ProxyFetch(object):
         task_pool = pool.Pool(concurrency)
 
         queue_size = self.queue.qsize()
-        greenlet_list = []
-        for _ in range(queue_size):
-            greenlet_list.append(task_pool.spawn(self.fetch))
+        if queue_size > 0:
+            greenlet_list = []
+            for _ in range(queue_size):
+                greenlet_list.append(task_pool.spawn(self.fetch))
 
-        gevent.joinall(greenlet_list)
+            gevent.joinall(greenlet_list)
+        else:
+            log.info("Not Have Fetcher Of Now, skip!")
 
     def fetch(self):
         start_time = time.time()

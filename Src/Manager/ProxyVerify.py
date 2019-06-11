@@ -22,19 +22,16 @@ try:
 except:
     from queue import Queue  # py2
 
-class Info(object):
-    pass
-
 class ProxyVerify(object):
 
     # http可用才会检查https, 会不会有只开通https的代理呢?
     def getProxyInfo(self, proxy):
-        info = Info()
+        info = {}
 
         data = proxy.split(':')
-        info.ip = data[0]
-        info.port = data[1]
-        info.address = proxy
+        info["ip"] = data[0]
+        info["port"] = data[1]
+        info["address"] = proxy
 
         proxies = {
             "http": proxy,
@@ -45,8 +42,8 @@ class ProxyVerify(object):
 
         result = False
 
-        info.https = ProxyManager.PROXY_HTTPS["UNKNOWN"]
-        info.type = ProxyManager.PROXY_TYPE["UNKNOWN"]
+        info["https"] = ProxyManager.PROXY_HTTPS["UNKNOWN"]
+        info["type"] = ProxyManager.PROXY_TYPE["UNKNOWN"]
         # http verify
         try:
             r = requests.get(http_url, proxies=proxies, timeout=10, verify=False)
@@ -60,12 +57,12 @@ class ProxyVerify(object):
                 result = True
 
             if len(ip_list) > 1:
-                info.type = ProxyManager.PROXY_TYPE["CLEAR"]
+                info["type"] = ProxyManager.PROXY_TYPE["CLEAR"]
             else:
-                info.type = ProxyManager.PROXY_TYPE["ANONYMOUS"]
+                info["type"] = ProxyManager.PROXY_TYPE["ANONYMOUS"]
 
         except Exception as e:
-            log.debug("proxy:{proxy} http verify proxy fail, error:{error}".format(proxy=proxy, error=e))
+            log.debug("proxy:[{proxy}] http verify fail, error:{error}".format(proxy=proxy, error=e))
             result = False
 
         if result:
@@ -76,13 +73,13 @@ class ProxyVerify(object):
                 status_result = r.status_code == 200
                 content_result = "origin" in data
                 if status_result and content_result:
-                    info.https = ProxyManager.PROXY_HTTPS["ENABLE"]
+                    info["https"] = ProxyManager.PROXY_HTTPS["ENABLE"]
 
             except Exception as e:
                 log.debug("proxy [{proxy}] https verify fail, error:{error}".format(proxy=proxy, error=e))
-                info.https = ProxyManager.PROXY_HTTPS["DISABLE"]
+                info["https"] = ProxyManager.PROXY_HTTPS["DISABLE"]
 
-        return info
+        return info 
 
     def defaultVerifyProxy(self, proxy):
         result = None
@@ -233,7 +230,7 @@ class ProxyVerifyUseful(ProxyVerify):
 
     @classmethod
     def initQueue(cls):
-        proxies = ProxyManager.proxy_manager.getAllUsefulProxy()
+        proxies = ProxyManager.proxy_manager.getVerifyUsefulProxy()
         for proxy in proxies:
             cls.queue.put(proxy)
 

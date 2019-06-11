@@ -39,10 +39,6 @@ def parse_regin_to_mongo(region_str):
 class UsefulProxyDocsModel(DocsModel):
     docs_name = "useful_proxy"
 
-    def getAll(self):
-        result = self.mc.find()
-        return result
-
     def cleanUsefulProxy(self, **kwargs):
         result = 0
         hold_number = kwargs.get("hold_number")
@@ -128,7 +124,8 @@ class UsefulProxyDocsModel(DocsModel):
         return result
 
     def getAllUsefulProxy(self, **kwargs):
-        result = self.getAll()
+        query = {}
+        result = self.mc.find(query)
         return result
 
     def checkProxyExists(self, proxy):
@@ -175,8 +172,7 @@ class UsefulProxyDocsModel(DocsModel):
 
         return result
 
-    def getVerifyUsefulProxy(self, **kwargs):
-        now = int(time.time())
+    def getVerifyUsefulProxy(self, now):
         query = {
             "next_verify_time": {
                 "$lt": now
@@ -350,6 +346,11 @@ class FetchersDocsModel(DocsModel):
 
     def getAllFetcher(self):
         query = {}
+        result = self.mc.find(query)
+        return result
+
+    def getExecFetcher(self, now):
+        query = {"next_fetch_time": {"$lt": now}}
         result = self.mc.find(query)
         return result
 

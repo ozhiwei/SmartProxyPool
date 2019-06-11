@@ -62,8 +62,9 @@ class ProxyManager(object):
         result = self.useful_proxy.getAllUsefulProxy(**kwargs)
         return result
 
-    def getVerifyUsefulProxy(self, **kwargs):
-        result = self.useful_proxy.getVerifyUsefulProxy(**kwargs)
+    def getVerifyUsefulProxy(self):
+        now = int(time.time())
+        result = self.useful_proxy.getVerifyUsefulProxy(now)
         return result
 
     def getLowQualityUsefulProxy(self, **kwagrs):
@@ -153,13 +154,13 @@ class ProxyManager(object):
         }
 
         if item.get("type") == PROXY_TYPE["UNKNOWN"]:
-            data["$set"]["type"]: info.type
+            data["$set"]["type"] = info["type"]
 
         if item.get("https") == PROXY_HTTPS["UNKNOWN"]:
-            data["$set"]["https"] = info.https
+            data["$set"]["https"] = info["https"]
 
         if len(data["$set"]) > 0:
-            self.useful_proxy.updateUsefulProxy(info.address, data)
+            self.useful_proxy.updateUsefulProxy(item["proxy"], data)
 
     def deleteUsefulProxy(self, proxy):
         self.useful_proxy.deleteUsefulProxy(proxy)
@@ -221,6 +222,11 @@ class ProxyManager(object):
 
     def getAllFetcher(self):
         result = self.fetchers.getAllFetcher()
+        return result
+
+    def getExecFetcher(self):
+        now = int(time.time())
+        result = self.fetchers.getExecFetcher(now)
         return result
 
     def getFetcher(self, name):

@@ -73,13 +73,15 @@ def PercentFormat(cur, total):
 class ProxyView(ModelView):
     name = "ProxyPool"
 
-    column_list = ("proxy", "succ", "total", "keep_succ", "type", "https", "last_status", "last_succ_time", "region_list")
+    column_list = ("proxy", "succ", "total", "keep_succ", "quality", "type", "https", 
+    "last_status", "last_succ_time", "next_verify_time", "region_list")
     can_create = False
     column_formatters = dict(
         type=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][m.type],
         https=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][m.https],
         last_status=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][m.last_status],
         last_succ_time=lambda v, c, m, p: LastSuccTimeFormat(m.last_succ_time),
+        next_verify_time=lambda v, c, m, p: TimeStampFormat(m.next_verify_time),
         succ=lambda v, c, m, p: PercentFormat(m.succ, m.total),
     )
 
