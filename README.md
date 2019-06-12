@@ -15,59 +15,11 @@
 
 所有功能都是围绕这两点开发的:
 
-1. 所有代理都有验证计数, 验证成功的次数 / 总计验证的次数 == 代理可用率 (数据库界面)
+1. 所有代理都有验证的`计数`和`评分`, 验证成功的次数 / 总计验证的次数 == 代理可用率 (数据库界面)
 
-![Proxy Pool](Docs/images/2.PNG)
+![](Docs/images/2019-06-12-22-11-21.png)
 
-2. 获取代理时可以根据是否支持`https`, 透明还是匿名(普匿)`type`, 代理的所在的区域`region`进行过滤, 举栗子
-
-```
-# 获取支持https的proxy
-http://proxy.1again.cc:35050/api/v1/proxy/?https=1
-
-# 获取匿名的proxy
-http://proxy.1again.cc:35050/api/v1/proxy/?type=2
-
-# 获取所在区域为中国的proxy
-http://proxy.1again.cc:35050/api/v1/proxy/?region=中国
-
-# 获取所在区域不为中国的proxy
-http://proxy.1again.cc:35050/api/v1/proxy/?region=!中国
-
-# 获取支持https, 匿名, 所在区域为中国的rpoxy
-http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
-```
-
-3. 可以通过配置控制`获取新代理的间隔`, `验证代理的间隔`, `保留代理数量`, `自定义的代理验证url`等等...
-
-![Proxy Pool](Docs/images/3.PNG)
-
-4. [WEB页面的管理](http://proxy.1again.cc:35050/admin) 用户名:admin 密码:admin (尔敢乱动, 打洗雷啊!)
-
-![Proxy Pool](Docs/images/1.PNG)
-
-5. 统计获取代理网站的数据
-
-![Proxy Pool](Docs/images/4.PNG)
-
-
-6. 支持`gevent`并发模式, 效果杠杠的, 别看广告, 看疗效!
-
-```
-2019-01-23 16:14:38,805 ProxyClean.py[line:42] INFO clean raw_proxy, total_number:1196, clean_number:1195, remain_number:1
-2019-01-23 16:14:38,809 ProxyClean.py[line:33] INFO clean useful, total_number:2539, clean_number:0, hold_number:-1
-2019-01-23 16:14:49,137 ProxyFetch.py[line:84] INFO fetch [freeProxyFifth] proxy finish, total:20, succ:20, fail:0, skip:0, elapsed_time:6s
-2019-01-23 16:14:50,261 ProxyFetch.py[line:84] INFO fetch [freeProxyFirst] proxy finish, total:50, succ:50, fail:0, skip:0, elapsed_time:7s
-2019-01-23 16:14:54,119 ProxyFetch.py[line:84] INFO fetch [freeProxyTwelve] proxy finish, total:32, succ:23, fail:0, skip:9, elapsed_time:10s
-2019-01-23 16:14:57,033 ProxyFetch.py[line:84] INFO fetch [freeProxyTen] proxy finish, total:60, succ:55, fail:0, skip:5, elapsed_time:13s
-2019-01-23 16:14:57,977 ProxyFetch.py[line:84] INFO fetch [freeProxyEleven] proxy finish, total:65, succ:51, fail:0, skip:14, elapsed_time:14s
-2019-01-23 16:14:58,548 ProxyFetch.py[line:84] INFO fetch [freeProxySeventh] proxy finish, total:75, succ:55, fail:0, skip:20, elapsed_time:15s
-2019-01-23 16:15:00,064 ProxyFetch.py[line:84] INFO fetch [freeProxyFourth] proxy finish, total:400, succ:307, fail:0, skip:93, elapsed_time:16s
-2019-01-23 16:15:04,796 ProxyVerify.py[line:242] INFO raw_proxy verify  proxy finish, total:1196, succ:3, fail:1193, skip:0, elapsed_time:26s
-2019-01-23 16:15:14,441 ProxyVerify.py[line:310] INFO useful_proxy verify proxy finish, total:2539, succ:550, fail:1989, elapsed_time:35s
-```
-
-7. 支持动态代理(手动加粗)
+2. 支持动态代理(手动加粗)
 
 ```
 root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
@@ -92,11 +44,58 @@ root@1again:~# curl -x "proxy.1again.cc:36050" https://httpbin.org/ip
 }
 ```
 
+3. 获取代理时可以根据是否支持`https`, 透明还是匿名(普匿)`type`, 代理的所在的区域`region`进行过滤, 举栗子
+
+```
+# 获取支持https的proxy
+http://proxy.1again.cc:35050/api/v1/proxy/?https=1
+
+# 获取匿名的proxy
+http://proxy.1again.cc:35050/api/v1/proxy/?type=2
+
+# 获取所在区域为中国的proxy
+http://proxy.1again.cc:35050/api/v1/proxy/?region=中国
+
+# 获取所在区域不为中国的proxy
+http://proxy.1again.cc:35050/api/v1/proxy/?region=!中国
+
+# 获取支持https, 匿名, 所在区域为中国的rpoxy
+http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
+```
+
+4. 可以通过WEB界面配置参数.
+
+![](Docs/images/2019-06-12-22-17-34.png)
+
+5. [WEB页面的管理](http://proxy.1again.cc:35050/admin) 用户名:admin 密码:admin (尔敢乱动, 打洗雷啊!)
+
+![](Docs/images/2019-06-12-22-23-33.png)
+
+6. WEB管理`抓取代理的站点`
+
+![](Docs/images/2019-06-12-22-22-46.png)
+
+7. 支持`gevent`并发模式, 效果杠杠的, 别看广告, 看疗效!
+
+```
+2019-01-23 16:14:38,805 ProxyClean.py[line:42] INFO clean raw_proxy, total_number:1196, clean_number:1195, remain_number:1
+2019-01-23 16:14:38,809 ProxyClean.py[line:33] INFO clean useful, total_number:2539, clean_number:0, hold_number:-1
+2019-01-23 16:14:49,137 ProxyFetch.py[line:84] INFO fetch [freeProxyFifth] proxy finish, total:20, succ:20, fail:0, skip:0, elapsed_time:6s
+2019-01-23 16:14:50,261 ProxyFetch.py[line:84] INFO fetch [freeProxyFirst] proxy finish, total:50, succ:50, fail:0, skip:0, elapsed_time:7s
+2019-01-23 16:14:54,119 ProxyFetch.py[line:84] INFO fetch [freeProxyTwelve] proxy finish, total:32, succ:23, fail:0, skip:9, elapsed_time:10s
+2019-01-23 16:14:57,033 ProxyFetch.py[line:84] INFO fetch [freeProxyTen] proxy finish, total:60, succ:55, fail:0, skip:5, elapsed_time:13s
+2019-01-23 16:14:57,977 ProxyFetch.py[line:84] INFO fetch [freeProxyEleven] proxy finish, total:65, succ:51, fail:0, skip:14, elapsed_time:14s
+2019-01-23 16:14:58,548 ProxyFetch.py[line:84] INFO fetch [freeProxySeventh] proxy finish, total:75, succ:55, fail:0, skip:20, elapsed_time:15s
+2019-01-23 16:15:00,064 ProxyFetch.py[line:84] INFO fetch [freeProxyFourth] proxy finish, total:400, succ:307, fail:0, skip:93, elapsed_time:16s
+2019-01-23 16:15:04,796 ProxyVerify.py[line:242] INFO raw_proxy verify  proxy finish, total:1196, succ:3, fail:1193, skip:0, elapsed_time:26s
+2019-01-23 16:15:14,441 ProxyVerify.py[line:310] INFO useful_proxy verify proxy finish, total:2539, succ:550, fail:1989, elapsed_time:35s
+```
+
 8. 实在编不下去了, 你行你来!
 
 # 文档
 
-[设计文档](docs/Design.md)
+[设计文档](Docs/Design.md)
 
 # 目前
 
