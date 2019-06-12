@@ -1,10 +1,23 @@
-language: python
-python:
-  - 3.6
-  # - nightly
 os:
   - linux
-install:
-  - pip install -r requirements.txt
 
-script: python test.py
+services:
+  - docker
+
+before_install: 
+  - openssl aes-256-cbc -K $encrypted_42099b4af021_key -iv $encrypted_42099b4af021_iv -in CICD/id_rsa.enc -out ~/.ssh/id_rsa -d
+  - chmod 600 ~/.ssh/id_rsa
+  - cp CICD/ssh_config ~/.ssh/
+
+script:
+  - docker build -t 1again/proxy_pool -f Docker/Dockerfile .
+  
+after_success:
+  - echo $DOCKER_1AGAIN_PASSWORD | docker login -u 1again --password-stdin
+  - docker push 1again/proxy_pool
+
+deploy:
+  provider: script
+  script: bash CICD/Scripts/deploy.sh
+  on:
+    branch: develop
