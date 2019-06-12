@@ -76,6 +76,7 @@ class ProxyView(ModelView):
     column_list = ("proxy", "succ", "total", "keep_succ", "quality", "type", "https", 
     "last_status", "last_succ_time", "next_verify_time", "region_list")
     can_create = False
+    column_default_sort = ("quality", True)
     column_formatters = dict(
         type=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][m.type],
         https=lambda v, c, m, p: CUSTOM_COLUMN_FORMAT[p][m.https],
@@ -141,6 +142,7 @@ class FetcherView(ModelView):
     can_create = False
     can_delete = False
     can_view_details = True
+    column_default_sort = ("succ", True)
     column_searchable_list = ['name']
     column_editable_list = [ "status", "interval"]
     column_formatters = dict(
