@@ -176,6 +176,9 @@ class ProxyManager(object):
 
         item = self.getProxy(proxy)
         multiple = abs(item["quality"])
+        if item["quality"] > 0:
+            multiple = 0
+
         now = int(time.time())
         interval = ConfigManager.setting_config.setting.get("verify_useful_proxy_interval")
         next_verify_time = now + (multiple * interval * 60)
