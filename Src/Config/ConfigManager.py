@@ -83,7 +83,6 @@ class SettingConfig(DBConfig):
 
         # clean proxy when number is positive
         # disable clean proxy when number is -1
-        hold_raw_proxy_number = -1,
         hold_useful_proxy_number = -1,
     )
 
