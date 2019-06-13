@@ -40,13 +40,13 @@ def ElapseTimeFormat(all_time):
         return  "%d sec"%math.ceil(all_time)
     elif  all_time > day:
         days = divmod(all_time,day) 
-        return "%d days, %s"%(int(days[0]),ElapseTimeFormat(days[1]))
+        return "%d days"%(int(days[0]))
     elif all_time > hour:
         hours = divmod(all_time,hour)
-        return '%d hours, %s'%(int(hours[0]),ElapseTimeFormat(hours[1]))
+        return '%d hours'%(int(hours[0]))
     else:
         mins = divmod(all_time,min)
-        return "%d mins, %d sec"%(int(mins[0]),math.ceil(mins[1]))
+        return "%d mins"%(int(mins[0]))
 
 def LastSuccTimeFormat(last_time):
     if last_time:
@@ -58,7 +58,7 @@ def LastSuccTimeFormat(last_time):
 
 def TimeStampFormat(timeStamp):
     time_object = time.localtime(timeStamp)
-    result = time.strftime("%Y-%m-%d %H:%M:%S", time_object)
+    result = time.strftime("%m-%d %H:%M", time_object)
     return result
 
 def PercentFormat(cur, total):
