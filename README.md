@@ -65,11 +65,11 @@ http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
 
 4. [WEB页面的管理](http://proxy.1again.cc:35050/admin) 用户名:admin 密码:admin (尔敢乱动, 打洗雷啊!)
 
-![](Docs/images/2019-06-12-22-23-33.png)
+![](Docs/images/2019-06-15-08-18-36.png)
 
 5. 可以通过WEB界面配置参数.
 
-![](Docs/images/2019-06-15-08-18-36.png)
+![](Docs/images/2019-06-15-13-18-47.png)
 
 6. WEB管理`抓取代理的站点`
 
