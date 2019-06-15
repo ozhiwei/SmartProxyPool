@@ -63,13 +63,13 @@ http://proxy.1again.cc:35050/api/v1/proxy/?region=!中国
 http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
 ```
 
-4. 可以通过WEB界面配置参数.
-
-![](Docs/images/2019-06-12-22-17-34.png)
-
-5. [WEB页面的管理](http://proxy.1again.cc:35050/admin) 用户名:admin 密码:admin (尔敢乱动, 打洗雷啊!)
+4. [WEB页面的管理](http://proxy.1again.cc:35050/admin) 用户名:admin 密码:admin (尔敢乱动, 打洗雷啊!)
 
 ![](Docs/images/2019-06-12-22-23-33.png)
+
+5. 可以通过WEB界面配置参数.
+
+![](Docs/images/2019-06-15-08-18-36.png)
 
 6. WEB管理`抓取代理的站点`
 
@@ -78,17 +78,19 @@ http://proxy.1again.cc:35050/api/v1/proxy/?https=1&type=2&region=中国
 7. 支持`gevent`并发模式, 效果杠杠的, 别看广告, 看疗效!
 
 ```
-2019-01-23 16:14:38,805 ProxyClean.py[line:42] INFO clean raw_proxy, total_number:1196, clean_number:1195, remain_number:1
-2019-01-23 16:14:38,809 ProxyClean.py[line:33] INFO clean useful, total_number:2539, clean_number:0, hold_number:-1
-2019-01-23 16:14:49,137 ProxyFetch.py[line:84] INFO fetch [freeProxyFifth] proxy finish, total:20, succ:20, fail:0, skip:0, elapsed_time:6s
-2019-01-23 16:14:50,261 ProxyFetch.py[line:84] INFO fetch [freeProxyFirst] proxy finish, total:50, succ:50, fail:0, skip:0, elapsed_time:7s
-2019-01-23 16:14:54,119 ProxyFetch.py[line:84] INFO fetch [freeProxyTwelve] proxy finish, total:32, succ:23, fail:0, skip:9, elapsed_time:10s
-2019-01-23 16:14:57,033 ProxyFetch.py[line:84] INFO fetch [freeProxyTen] proxy finish, total:60, succ:55, fail:0, skip:5, elapsed_time:13s
-2019-01-23 16:14:57,977 ProxyFetch.py[line:84] INFO fetch [freeProxyEleven] proxy finish, total:65, succ:51, fail:0, skip:14, elapsed_time:14s
-2019-01-23 16:14:58,548 ProxyFetch.py[line:84] INFO fetch [freeProxySeventh] proxy finish, total:75, succ:55, fail:0, skip:20, elapsed_time:15s
-2019-01-23 16:15:00,064 ProxyFetch.py[line:84] INFO fetch [freeProxyFourth] proxy finish, total:400, succ:307, fail:0, skip:93, elapsed_time:16s
-2019-01-23 16:15:04,796 ProxyVerify.py[line:242] INFO raw_proxy verify  proxy finish, total:1196, succ:3, fail:1193, skip:0, elapsed_time:26s
-2019-01-23 16:15:14,441 ProxyVerify.py[line:310] INFO useful_proxy verify proxy finish, total:2539, succ:550, fail:1989, elapsed_time:35s
+2019-06-13 10:00:26,656 ProxyFetch.py[line:103] INFO fetch [   xicidaili   ] proxy finish,             total:400, succ:65, fail:0, skip:335, elapsed_time:1s
+2019-06-13 10:00:26,662 ProxyFetch.py[line:103] INFO fetch [ proxylistplus ] proxy finish,             total:0, succ:0, fail:0, skip:0, elapsed_time:1s
+2019-06-13 10:00:27,179 ProxyFetch.py[line:103] INFO fetch [     iphai     ] proxy finish,             total:83, succ:17, fail:0, skip:66, elapsed_time:2s
+2019-06-13 10:00:27,374 ProxyFetch.py[line:103] INFO fetch [     66ip      ] proxy finish,             total:0, succ:0, fail:0, skip:0, elapsed_time:2s
+2019-06-13 10:00:32,276 ProxyFetch.py[line:103] INFO fetch [    ip3366     ] proxy finish,             total:15, succ:0, fail:0, skip:15, elapsed_time:7s
+2019-06-13 10:00:33,888 ProxyFetch.py[line:103] INFO fetch [     ip181     ] proxy finish,             total:0, succ:0, fail:0, skip:0, elapsed_time:8s
+2019-06-13 10:00:34,978 ProxyFetch.py[line:103] INFO fetch [    mimiip     ] proxy finish,             total:0, succ:0, fail:0, skip:0, elapsed_time:9s
+2019-06-13 10:00:38,182 ProxyFetch.py[line:103] INFO fetch [  proxy-list   ] proxy finish,             total:28, succ:28, fail:0, skip:0, elapsed_time:13s
+2019-06-13 10:01:36,432 ProxyVerify.py[line:301] INFO useful_proxy verify proxy finish, total:636, succ:327, fail:309, elapsed_time:58s
+2019-06-13 10:31:15,800 ProxyVerify.py[line:301] INFO useful_proxy verify proxy finish, total:481, succ:299, fail:182, elapsed_time:37s
+2019-06-13 11:01:37,569 ProxyVerify.py[line:301] INFO useful_proxy verify proxy finish, total:639, succ:315, fail:324, elapsed_time:59s
+2019-06-13 11:31:54,798 ProxyVerify.py[line:301] INFO useful_proxy verify proxy finish, total:977, succ:342, fail:635, elapsed_time:76s
+2019-06-13 12:01:21,659 ProxyVerify.py[line:301] INFO useful_proxy verify proxy finish, total:608, succ:314, fail:294, elapsed_time:43s
 ```
 
 8. 实在编不下去了, 你行你来!
@@ -219,10 +221,11 @@ API_LIST = {
 
 ```python
 
-# 文件名和class名要保持一致
-class Fetcher1():
-    # 用来识别的, 会映射到数据库里面
-    fetcher_name = "Fetcher1"
+# 文件名任意, 一般建议与`fetcher_host`的中间部分保持一致方便识别
+# Class名, 固定为`CustomFetcher`
+class CustomFetcher():
+    # 只用来识别的, 会映射到数据库里面
+    fetcher_host = "www.66ip.cn"
 
     def run(self):
         url_list = [
