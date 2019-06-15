@@ -272,11 +272,14 @@ class ProxyVerifyUseful(ProxyVerify):
 
         self.queue.task_done()
         ProxyManager.proxy_manager.tickUsefulProxyVaildTotal(proxy)
+        ProxyManager.proxy_manager.updateUsefulProxyNextVerifyTime(proxy, self.start_time)
         self.stat["total"] = self.stat["total"] + 1
 
     def start(self):
 
         start_time = time.time()
+        self.start_time = int(start_time)
+
         log.debug("useful_proxy proxy verify start")
 
         self.stat = dict(

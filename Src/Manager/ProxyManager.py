@@ -174,14 +174,16 @@ class ProxyManager(object):
     def tickUsefulProxyVaildTotal(self, proxy):
         self.useful_proxy.tickUsefulProxyVaildTotal(proxy)
 
+    def updateUsefulProxyNextVerifyTime(self, proxy, start_time=None):
+
         item = self.getProxy(proxy)
         multiple = abs(item["quality"])
         if item["quality"] > 0:
             multiple = 0
 
-        now = int(time.time())
+        start_time = start_time if start_time else int(time.time())
         interval = ConfigManager.setting_config.setting.get("verify_useful_proxy_interval")
-        next_verify_time = now + (multiple * interval * 60)
+        next_verify_time = start_time + (multiple * interval * 60)
 
         query = {
             "proxy": proxy
