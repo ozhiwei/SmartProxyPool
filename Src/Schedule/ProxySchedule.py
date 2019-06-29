@@ -53,11 +53,6 @@ class ProxySchedule(BlockingScheduler):
         now = datetime.datetime.now()
         for name, handler in self.task_handler_hash.items():
             value = ConfigManager.setting_config.setting.get(name)
-            if self.rightnow:
-                next_run_time=now
-            else:
-                next_run_time=None
-
-            self.add_job(handler, "interval", id=name, minutes=value, next_run_time=next_run_time)
+            self.add_job(handler, "interval", id=name, minutes=value, next_run_time=now)
 
         self.start()

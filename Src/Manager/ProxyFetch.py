@@ -34,6 +34,7 @@ class ProxyFetch(object):
             cls.queue.put(fetcher)
 
     def start(self):
+        self.start_time = int(time.time())
         concurrency = ConfigManager.setting_config.setting.get("fetch_new_proxy_concurrency")
         task_pool = pool.Pool(concurrency)
 
@@ -83,7 +84,7 @@ class ProxyFetch(object):
         now = int(time.time())
         elapsed_time = int(now - start_time)
 
-        next_fetch_time = now + (fetcher["interval"] * 60)
+        next_fetch_time = self.start_time + (fetcher["interval"] * 60)
 
         data = {
             "$inc": {
