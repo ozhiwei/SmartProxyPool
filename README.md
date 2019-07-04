@@ -123,7 +123,7 @@ curl -sSL https://get.docker.com | sh
 docker run -d --name mongo -v /data/mongodb:/data -p 27017:27017 mongo
 
 # Start proxy_pool container
-docker run -d --name proxy_pool --link mongo:proxy_pool_db -p 35050:35050 1again/proxy_pool
+docker run -d --name proxy_pool --link mongo:proxy_pool_db -p 35050:35050 -p 36050:36050 1again/proxy_pool
 ```
 
 ## 开发环境
@@ -142,7 +142,7 @@ curl -sSL https://get.docker.com | sh
 docker run -d --name mongo -v /data/mongodb:/data -p 27017:27017 mongo
 
 # Start proxy_pool container
-docker run -it --rm --link mongo:proxy_pool_db -v $(pwd):/usr/src/app -p 35050:35050 1again/proxy_pool
+docker run -it --rm --link mongo:proxy_pool_db -v $(pwd):/usr/src/app -p 35050:35050 -p 36050:36050 1again/proxy_pool
 ```
 
 # 使用
